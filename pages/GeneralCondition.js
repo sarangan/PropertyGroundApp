@@ -2,10 +2,12 @@
  * Sanppar React Native App
  * https://sph.com.sg
  * @sara
- * Inspections page
+ * General condition page
  */
 import React, {Component} from 'react';
 import {
+  NativeModules,
+  LayoutAnimation,
   StyleSheet,
   View,
   Text,
@@ -25,12 +27,19 @@ import config from '../keys/config';
 import auth from '../keys/auth';
 
 import helper from '../helper/helper';
+import FilterPicker from "../components/FilterPicker";
+import GenCommentBlock from "../components/GenCommentBlock";
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
+
+const { UIManager } = NativeModules;
+
+UIManager.setLayoutAnimationEnabledExperimental &&
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 
 export default class GeneralCondition extends Component{
 
@@ -39,6 +48,10 @@ export default class GeneralCondition extends Component{
      {
        title: 'Save',
        id: 'save'
+     },
+     {
+       title: 'Sort',
+       id: 'sort'
      }
    ],
 
@@ -53,6 +66,10 @@ export default class GeneralCondition extends Component{
       loading: false,
       refreshing: false,
       property_id: this.props.property_id,
+      open_modal: false,
+      optionsData: [],
+      current_gen_id : '',
+      current_user_input : '',
     };
 
   }
@@ -63,7 +80,19 @@ export default class GeneralCondition extends Component{
 
       if (event.id == 'save') {
 
-        this.hanldeSave();
+        this.hanldeSave(true);
+
+      }
+      else if(event.id == 'sort'){
+
+        this.props.navigator.push({
+          screen: 'PropertyGround.SortGeneralCondition',
+          title: 'Sort general condition',
+          animated: true,
+          //animationType: 'fade',
+          backButtonTitle: "Back",
+          passProps: {property_id: this.state.property_id}
+        });
 
       }
 
@@ -71,20 +100,81 @@ export default class GeneralCondition extends Component{
   }
 
   componentDidMount(){
+
     MessageBarManager.registerMessageBar(this.refs.alert);
 
     if(this.state.property_id){
       this.getConditionsList();
     }
+
   }
 
   componentWillUnmount () {
+    this.hanldeSave(false);
     // Remove the alert located on this master page from te manager
     MessageBarManager.unregisterMessageBar();
   }
 
   //save data
-  hanldeSave=()=>{
+  hanldeSave=(showMsg = false)=>{
+    console.log('log save ');
+
+    this.setState({
+      loading: true
+    });
+
+    AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
+      let property_general_condition_link = JSON.parse(result) || [];
+
+        if(property_general_condition_link.hasOwnProperty(this.state.property_id) ){
+
+          let gen_list = property_general_condition_link[this.state.property_id];
+
+          for(let i=0, l = gen_list.length; i < l ; i++){
+
+            for(let m=0, n = this.state.conditionsList.length; m < n ; m++ ){
+
+              if( gen_list[i].prop_general_id == this.state.conditionsList[m].prop_general_id){
+
+                gen_list[i].user_input = this.state.conditionsList[m].user_input;
+                gen_list[i].comment = this.state.conditionsList[m].comment;
+                break;
+              }
+            }
+
+          }
+
+          property_general_condition_link[this.state.property_id] = gen_list;
+
+          AsyncStorage.setItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, JSON.stringify(property_general_condition_link), () => {
+            console.log('property general table stored');
+
+            this.setState({
+              loading: false,
+            });
+
+            if(showMsg == true){
+              MessageBarManager.showAlert({
+                message: 'Successfully saved!',
+                alertType: 'success',
+                animationType: 'SlideFromTop',
+                position: 'top',
+                shouldHideOnTap: true,
+                stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
+                messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
+                duration: 700,
+                durationToShow: 0,
+                durationToHide: 300,
+
+              });
+            }
+
+          });
+
+        }
+
+    });
+
 
   }
 
@@ -95,17 +185,117 @@ export default class GeneralCondition extends Component{
     });
 
     AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
-      let company_general_condition_link = JSON.parse(result) || [];
+      let property_general_condition_link = JSON.parse(result) || [];
 
-        if(company_general_condition_link.hasOwnProperty(this.state.property_id) ){
+        if(property_general_condition_link.hasOwnProperty(this.state.property_id) ){
+
+          let gen_list = property_general_condition_link[this.state.property_id];
+          gen_list.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
 
           this.setState({
             loading: false,
-            conditionsList: company_general_condition_link[this.state.property_id]
+            conditionsList: gen_list,
+            refreshing: false,
           });
 
         }
 
+    });
+
+  }
+
+  // add comment
+  addComment = (text, item) =>{
+    console.log(text);
+    console.log(item);
+
+    let gen_list = this.state.conditionsList;
+    for(let i = 0, l = gen_list.length; i < l; i++){
+
+      if(item.prop_general_id == gen_list[i].prop_general_id){
+        // same general data
+        gen_list[i].comment =  text;
+
+        this.setState({
+          conditionsList: gen_list,
+        });
+        break;
+
+      }
+
+    }
+
+
+  }
+
+  //open filter modal
+  openFilterModal = (item) =>{
+    console.log(item)
+
+    let options = item.options.split(';');
+    if(Array.isArray(options)){
+
+      this.setState({
+        optionsData: options,
+        current_gen_id: item.prop_general_id,
+        current_user_input: item.user_input
+      }, ()=>{
+        this.setState({open_modal: true});
+      });
+
+    }
+
+  }
+
+  //change spinner
+  changeReportType = (item, index) =>{
+    console.log('change item');
+    console.log(item);
+    if(item){
+      this.setState({
+          current_user_input: item,
+      }, ()=>{
+
+      }
+
+    );
+    }
+
+  }
+
+  //close tag modal
+  closeReportTypeModal = () =>{
+    console.log('clsoing modal');
+
+    this.setState({ open_modal: false }, ()=>{
+
+      let gen_list = this.state.conditionsList;
+      for(let i = 0, l = gen_list.length; i < l; i++){
+
+        if(this.state.current_gen_id == gen_list[i].prop_general_id){
+          // same general data
+          gen_list[i].user_input =  this.state.current_user_input;
+
+          this.setState({
+            conditionsList: gen_list,
+            current_user_input: '',
+            current_gen_id: ''
+          });
+          break;
+
+        }
+
+      }
+
+    });
+
+  }
+
+  //cancel tag modal
+  cancelReportTypeModal = () =>{
+
+    this.setState({
+      open_modal: false,
     });
 
   }
@@ -167,33 +357,15 @@ export default class GeneralCondition extends Component{
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight underlayColor='transparent' aspectRatio={1} >
-
-          <View style={styles.rowWrapper}>
-            <View  style={styles.listContainer} >
-              <View>
-              <Text style={styles.title}>{item.item_name}</Text>
-
-              <View style={styles.dropdownWrapper}>
-                <Text style={styles.optionTxt}>opetions</Text>
-                <Image source={require('../images/dropdown.png')} style={styles.dropdown_img}/>
-              </View>
-
-              </View>
-              <Image style={{width: 30, resizeMode: 'contain', height: 30 }} source={require('../images/no_comment.png')} />
-            </View>
-
-          </View>
-
-    </TouchableHighlight>
+    <View>
+        <GenCommentBlock item={item} handleOpenFilterModal={this.openFilterModal} handleAddComment={this.addComment} />
+    </View>
   );
 
-  render(){
+  renderList=()=>{
     let _keyExtractor = (item, index) => index;
-
     return(
-      <View style={styles.fill}>
-
+      <View>
         <FlatList
           contentContainerStyle={styles.list}
           data={this.state.conditionsList}
@@ -203,8 +375,32 @@ export default class GeneralCondition extends Component{
           ItemSeparatorComponent={this.renderSeparator}
           extraData={this.state}
           ListEmptyComponent={this.renderEmptyData}
+          refreshing={this.state.refreshing}
+          onRefresh={this.handleRefresh}
         />
 
+        { this.state.open_modal &&
+          <View style={styles.modalWrapper}>
+            <FilterPicker
+              closeModal={this.closeReportTypeModal}
+              cancelModal={this.cancelReportTypeModal}
+              changeValue={this.changeReportType}
+              current_value={this.state.current_user_input}
+              data ={this.state.optionsData}
+            />
+          </View>
+        }
+      </View>
+    );
+  }
+
+  render(){
+
+    return(
+      <View style={styles.fill}>
+        {
+          this.renderList()
+        }
         <MessageBarAlert ref='alert' />
 
       </View>
@@ -226,45 +422,17 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     width: SCREENWIDTH
   },
-  rowWrapper:{
-    padding: 10,
-    paddingTop: 12,
-    paddingBottom: 12,
+  modalWrapper:{
+    flex: 1,
+    flexDirection: 'row',
     width: SCREENWIDTH,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FCFCFD',
+    padding: 0,
+    margin: 0,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
   },
-  listContainer:{
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  title:{
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#475566"
-  },
-  optionTxt:{
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#A9ACBC",
-  },
-  dropdown_img:{
-    width: 20,
-    resizeMode: 'contain',
-    height: 20
-  },
-  dropdownWrapper:{
-    flex: 1,
-    width: SCREENWIDTH - 85,
-    borderTopColor: '#F8F8FA',
-    borderTopWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    marginTop: 15,
-    paddingTop: 5
-  }
+
 
 });

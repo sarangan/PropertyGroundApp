@@ -62,7 +62,7 @@ export default class FilterPicker extends Component {
     return (
 
       <Animated.View style={{ transform: [{translateY: this.state.offSet}],
-        backgroundColor:'#F5F5F5', flex: 1 }}
+        backgroundColor:'#FCFCFD', flex: 1 }}
       >
           <View style={styles.closeButtonContainer}>
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopColor: '#BDBDBD',
+    borderTopColor: '#F4F4F6',
     borderTopWidth: 1,
     paddingRight:3,
     paddingLeft: 3,

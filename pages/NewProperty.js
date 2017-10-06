@@ -42,12 +42,12 @@ export default class NewProperty extends Component{
          id: 'save'
        }
      ],
-     leftButtons:[
-       {
-         title: 'Cancel',
-         id: 'cancel'
-       }
-     ]
+    //  leftButtons:[
+    //    {
+    //      title: 'Cancel',
+    //      id: 'cancel'
+    //    }
+    //  ]
 
    };
 
@@ -308,7 +308,7 @@ export default class NewProperty extends Component{
                             property_general_condition_link[this.state.property_id] = property_general_condition_link_list;
 
                             AsyncStorage.setItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, JSON.stringify(property_general_condition_link), () => {
-                              console.log('property meter table stored');
+                              console.log('property general table stored');
 
                               //----------------masteritem_link-----------------------------
                               AsyncStorage.getItem(TableKeys.COMPANY_MASTERITEM_LINK, (err, result) => {
@@ -361,8 +361,13 @@ export default class NewProperty extends Component{
                                         AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(this.property_subitem_link), () => {
                                           console.log('property sub table stored');
 
+
                                           this.setState({
                                             isSending: false,
+
+                                            open_modal: false,
+                                            changeColor: false,
+                                            default_report_type: 'Report type',
 
                                             //property_id: '',
                                             //company_id: '',
@@ -395,6 +400,13 @@ export default class NewProperty extends Component{
                                               durationToHide: 300,
                                               onHide: ()=>{
 
+                                                this.description.setNativeProps({text: ''});
+                                                this.address_1.setNativeProps({text: ''});
+                                                this.address_2.setNativeProps({text: ''});
+                                                this.city.setNativeProps({text: ''});
+                                                this.postalcode.setNativeProps({text: ''});
+                                                this.report_date.setNativeProps({text: ''});
+
                                                 this.props.navigator.showModal({
                                                     screen: "PropertyGround.AddRoomList",
                                                     title: 'Add room list',
@@ -413,9 +425,7 @@ export default class NewProperty extends Component{
                                                     },
                                                 });
 
-                                                this.props.navigator.dismissModal({
-                                                  animationType: 'slide-down'
-                                                });
+
 
                                               },
 
@@ -605,6 +615,7 @@ export default class NewProperty extends Component{
             onChangeText={(text) => this.setState({address_1:text})}
             placeholder="Address"
             placeholderTextColor="#A9ACBC"
+            ref={component => this.address_1 = component}
           />
           <View style={styles.divider}></View>
 
@@ -613,7 +624,7 @@ export default class NewProperty extends Component{
             onChangeText={(text) => this.setState({address_2:text})}
             placeholder="Address 2"
             placeholderTextColor="#A9ACBC"
-            clearButtonMode="while-editing"
+            ref={component => this.address_2 = component}
           />
           <View style={styles.divider}></View>
 
@@ -622,6 +633,7 @@ export default class NewProperty extends Component{
             onChangeText={(text) => this.setState({city:text})}
             placeholder="City"
             placeholderTextColor="#A9ACBC"
+            ref={component => this.city = component}
           />
           <View style={styles.divider}></View>
 
@@ -630,6 +642,7 @@ export default class NewProperty extends Component{
             onChangeText={(text) => this.setState({postalcode:text})}
             placeholder="Postal code"
             placeholderTextColor="#A9ACBC"
+            ref={component => this.postalcode = component}
           />
 
 
@@ -651,6 +664,7 @@ export default class NewProperty extends Component{
             onChangeText={(text) => this.setState({report_date:text})}
             placeholder="Report date (dd/mm/yyyy)"
             placeholderTextColor="#A9ACBC"
+            ref={component => this.report_date = component}
           />
 
           <Text style={styles.divTxt}>Additional info</Text>
@@ -662,6 +676,7 @@ export default class NewProperty extends Component{
             placeholderTextColor="#A9ACBC"
             multiline = {true}
             numberOfLines = {5}
+            ref={component => this.description = component}
           />
 
           <Text style={styles.divTxt}>Report image</Text>
@@ -739,7 +754,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     width: SCREENWIDTH,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#FCFCFD',
     padding: 0,
     margin: 0,
     position: 'absolute',

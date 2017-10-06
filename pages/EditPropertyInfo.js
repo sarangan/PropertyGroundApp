@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     width: SCREENWIDTH,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#FCFCFD',
     padding: 0,
     margin: 0,
     position: 'absolute',

@@ -14,6 +14,10 @@ import RoomList from './pages/RoomList';
 import SortRoomList from './pages/SortRoomList';
 import EditPropertyInfo from './pages/EditPropertyInfo';
 import GeneralCondition from './pages/GeneralCondition';
+import SortGeneralCondition from './pages/SortGeneralCondition';
+import SubItemsList from './pages/SubItemsList';
+import SingleItem from './pages/SingleItem';
+import MeterItem from './pages/MeterItem';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -24,6 +28,10 @@ Navigation.registerComponent('PropertyGround.RoomList', () => RoomList);
 Navigation.registerComponent('PropertyGround.SortRoomList', () => SortRoomList);
 Navigation.registerComponent('PropertyGround.EditPropertyInfo', () => EditPropertyInfo);
 Navigation.registerComponent('PropertyGround.GeneralCondition', () => GeneralCondition);
+Navigation.registerComponent('PropertyGround.SortGeneralCondition', ()=> SortGeneralCondition);
+Navigation.registerComponent('PropertyGround.SubItemsList', ()=> SubItemsList);
+Navigation.registerComponent('PropertyGround.SingleItem', ()=> SingleItem);
+Navigation.registerComponent('PropertyGround.MeterItem', ()=> MeterItem);
 
 
   const navigatorStyle = {

@@ -63,6 +63,8 @@ export default class AddRoomList extends Component{
       master_items: []
     };
 
+    this.property_subitem_link = {};
+
   }
 
   //navigator button actions
@@ -105,19 +107,22 @@ export default class AddRoomList extends Component{
 
     let roomlist = this.state.roomlist;
 
+    //console.log(roomlist);
+    console.log('----------------------');
+
     for(let i = 0, l = roomlist.length; i < l; i++){
       let room = roomlist[i];
 
-      if(room.option == "NUM" && room.total_num > 0){ // number control
+      if(room.option == "NUM" && room.total_num > 0 && room.type == 'DEFAULT'){ // number control
 
         for(let k =0, j = this.state.master_items.length; k < j;  k++){
 
           if(room.com_master_id == this.state.master_items[k].com_master_id){ // same company id
 
             for(let n =0; n < room.total_num; n++){ // loop through number of rooms
-
+              let prop_master_id = helper.generateUid();
               let new_room = {
-                prop_master_id: helper.generateUid(),
+                prop_master_id: prop_master_id,
                 property_id: this.state.property_id,
                 com_master_id: this.state.master_items[k].com_master_id,
                 type: 'SELF',
@@ -132,6 +137,8 @@ export default class AddRoomList extends Component{
                 sync: 1
               };
 
+              this.addSubitem(prop_master_id, this.state.master_items[k], room.prop_master_id );
+
               roomlist.push(new_room);
 
             } // end of number room loop
@@ -144,6 +151,7 @@ export default class AddRoomList extends Component{
       else if(room.option == "OPT"){ // options
 
         // its already saved to list man
+        //console.log(room.status);
       }
 
     }//loop end room list
@@ -157,40 +165,53 @@ export default class AddRoomList extends Component{
 
       // saved to store
       AsyncStorage.setItem(TableKeys.PROPERTY_MASTERITEM_LINK, JSON.stringify(prop_master_items), () => {
-        console.log('property meter table stored');
+        console.log('property master table stored');
+        //console.log(roomlist);
+        //console.log(prop_master_items);
 
-        console.log(prop_master_items);
+        AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(this.property_subitem_link), () => {
+          console.log('property sub table stored');
 
-        MessageBarManager.showAlert({
-          message: 'Successfully saved!',
-          alertType: 'success',
-          animationType: 'SlideFromTop',
-          position: 'top',
-          shouldHideOnTap: true,
-          stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
-          messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
-          duration: 700,
-          durationToShow: 0,
-          durationToHide: 300,
-          onHide: ()=>{
+          MessageBarManager.showAlert({
+            message: 'Successfully saved!',
+            alertType: 'success',
+            animationType: 'SlideFromTop',
+            position: 'top',
+            shouldHideOnTap: true,
+            stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
+            messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
+            duration: 700,
+            durationToShow: 0,
+            durationToHide: 300,
+            onHide: ()=>{
 
-            this.props.navigator.dismissModal({
-              animationType: 'slide-down'
-            });
+              // this.props.navigator.push({
+              //   screen: 'PropertyGround.Inspections',
+              //   title: 'Inspections',
+              //   animated: true,
+              //   animationType: 'fade',
+              //   backButtonTitle: "Back",
+              //   backButtonHidden: true,
+              //   passProps: {
+              //   },
+              // });
+              // this.props.navigator.pop({
+              //   animated: true, // does the pop have transition animation or does it happen immediately (optional)
+              //   //animationType: 'slide-horizontal'
+              // });
 
-            // this.props.navigator.push({
-            //   screen: 'PropertyGround.Inspections',
-            //   title: 'Inspections',
-            //   animated: true,
-            //   animationType: 'fade',
-            //    //backButtonTitle: "Back",
-            //   passProps: {},
-            //
-            // });
+              this.props.navigator.dismissModal({
+                animationType: 'slide-down'
+              });
 
-          }
+            }
+
+          });
+
 
         });
+
+
 
 
 
@@ -206,6 +227,59 @@ export default class AddRoomList extends Component{
   }
 
 
+  addSubitem =(prop_master_id, company_masteritem_link, master_id) =>{
+    //-------------------sub item settings--------------------
+
+
+        let subitems = this.property_subitem_link[master_id] || [];
+
+        console.log('adding sub items');
+        console.log(subitems);
+
+
+        let property_subitem_link_list = [];
+        for(let i =0, l = subitems.length; i < l; i++){
+
+            let data_property_subitem_link = {
+              prop_subitem_id: helper.generateUid(),
+              property_id: this.state.property_id,
+              prop_master_id: prop_master_id,
+              com_subitem_id: subitems[i].com_subitem_id,
+              com_master_id:  subitems[i].com_master_id,
+              item_name: subitems[i].item_name,
+              type: subitems[i].type,
+              priority: subitems[i].priority,
+              status: 1,
+              mb_createdAt: new Date().toLocaleDateString(),
+              sync: 1
+            };
+            property_subitem_link_list.push(data_property_subitem_link);
+        }
+
+        // now we same to our property sub item list
+          this.property_subitem_link[prop_master_id] = property_subitem_link_list;
+
+        // AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
+        //   let property_subitem_link = JSON.parse(result) || {};
+        //
+        //   property_subitem_link[prop_master_id] = property_subitem_link_list;
+        //   console.log('property sub table stored');
+        //   //console.log(property_subitem_link_list);
+        //
+        //   console.log(prop_master_id);
+        //
+        //   AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(property_subitem_link), () => {
+        //     console.log('-------------------------');
+        //     console.log(property_subitem_link[prop_master_id]);
+        //     console.log('property sub ----------------- stored');
+        //
+        //   });// prop sub item saving end
+        //
+        // });
+
+  }
+
+
   getRoomlist =()=>{
 
     this.setState({
@@ -216,8 +290,6 @@ export default class AddRoomList extends Component{
 
 
       let roomlist = JSON.parse(result) || {};
-      console.log('dont lnow why');
-      console.log(roomlist);
 
 
       if(roomlist.hasOwnProperty(this.state.property_id) ){
@@ -266,6 +338,10 @@ export default class AddRoomList extends Component{
 
     });
 
+    AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
+      this.property_subitem_link = JSON.parse(result) || {};
+    });
+
 
   }
 
@@ -295,11 +371,11 @@ export default class AddRoomList extends Component{
     let roomlist = this.state.roomlist;
 
     for(let i = 0, l = roomlist.length; i < l ; i++){
-      let room = roomlist[i];
 
-      if(room.prop_master_id ==  item.prop_master_id && room.option ==  'OPT'){
+      if(roomlist[i].prop_master_id ==  item.prop_master_id){
         //ww have same master id
-        room.status = value? 1 : 0;
+        roomlist[i].status = value? 1 : 0;
+        //console.log('saved man');
         break;
       }
 
@@ -309,7 +385,7 @@ export default class AddRoomList extends Component{
       roomlist
     });
 
-    console.log(roomlist);
+    //console.log(roomlist);
 
   }
 

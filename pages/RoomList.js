@@ -7,6 +7,8 @@
 import React, {Component} from 'react';
 import {
   StyleSheet,
+  NativeModules,
+  LayoutAnimation,
   View,
   Text,
   Dimensions,
@@ -32,6 +34,11 @@ const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 const PARALLAX_HEADER_HEIGHT = 250;
 const STICKY_HEADER_HEIGHT = 40;
+
+const { UIManager } = NativeModules;
+
+UIManager.setLayoutAnimationEnabledExperimental &&
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 
 export default class RoomList extends Component{
 
@@ -61,7 +68,9 @@ export default class RoomList extends Component{
       refreshing: false,
       property_id: this.props.property_id,
       property: this.props.property,
-      imgErr: false
+      imgErr: false,
+      height: 0,
+      meterlist: []
     };
 
   }
@@ -132,6 +141,10 @@ export default class RoomList extends Component{
 
       roomlist = filter_roomlist;
 
+      roomlist = roomlist.filter(function(item){
+        return (item.status == 1);
+      });
+
        roomlist.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
        roomlist.push(
          {
@@ -193,6 +206,16 @@ export default class RoomList extends Component{
         refreshing: false
       });
 
+    });
+
+    AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+      let property_meter_link = JSON.parse(result) || {};
+      let meterlist =  property_meter_link[this.state.property_id] || [];
+      console.log('meter list');
+      console.log(meterlist);
+      this.setState({
+        meterlist
+      });
     });
 
   }
@@ -278,6 +301,7 @@ export default class RoomList extends Component{
 
   openLink = (item) =>{
 
+
     if(item.type == "PROP"){
 
       this.props.navigator.push({
@@ -307,8 +331,98 @@ export default class RoomList extends Component{
       });
 
     }
+    else if(item.com_type == 'SUB'){
+      console.log('its sub');
+      this.props.navigator.push({
+        screen: 'PropertyGround.SubItemsList',
+        title: item.name,
+        animated: true,
+        animationType: 'fade',
+        backButtonTitle: "Back",
+        passProps: {
+          property_id: this.state.property_id,
+          master_id: item.prop_master_id
+        },
+      });
+
+    }
+    else if(item.com_type == 'ITEM'){
+      console.log('its single');
+      this.props.navigator.push({
+        screen: 'PropertyGround.SingleItem',
+        title: item.name,
+        animated: true,
+        animationType: 'fade',
+        backButtonTitle: "Back",
+        passProps: {
+          property_id: this.state.property_id,
+          master_id: item.prop_master_id
+        },
+      });
+
+    }
+    else if(item.com_type == 'METER'){
+      if(this.state.height == 180){
+        LayoutAnimation.easeInEaseOut();
+        this.setState(
+          {
+            height: 0
+          });
+      }
+      else{
+        LayoutAnimation.spring();
+        this.setState(
+          {
+            height: 180
+          });
+      }
+    }
 
 
+  }
+
+  openMeter = (meter) =>{
+    console.log(meter);
+    this.props.navigator.push({
+      screen: 'PropertyGround.MeterItem',
+      title: meter.meter_name,
+      animated: true,
+      animationType: 'fade',
+      backButtonTitle: "Back",
+      passProps: {
+        prop_meter_id: meter.prop_meter_id,
+        meter: meter
+      },
+    });
+  }
+
+  getMeters  = (item) =>{
+      return(
+        <View style={{
+          overflow: 'hidden',
+          flexDirection: 'column',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: this.state.height }}>
+          {
+            this.state.meterlist.map( (item, i) =>{
+              return(
+                  <TouchableHighlight underlayColor="transparent" style={[styles.rowWrapper, {paddingLeft: 15, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}]}
+                    onPress={()=>this.openMeter(item)}>
+                      <View  style={[styles.listContainer,{marginTop: 6, }]}>
+                        <Text style={styles.subtitle}>{item.meter_name}</Text>
+                          <Image
+                            source={require('../images/arrow_right_colored.png')}
+                            style = {styles.arrowRight}
+                          />
+                      </View>
+                    </TouchableHighlight>
+                    )
+            })
+          }
+        </View>
+      );
   }
 
   _renderItem = ({item}) => (
@@ -328,9 +442,14 @@ export default class RoomList extends Component{
 
             </View>
 
+            {item.com_type == 'METER' &&
+              this.getMeters(item)
+            }
+
           </View>
 
     </TouchableHighlight>
+
   );
 
   //render actionBar
@@ -416,7 +535,7 @@ export default class RoomList extends Component{
             parallaxHeaderHeight={ PARALLAX_HEADER_HEIGHT }
             backgroundSpeed={10}
             // backgroundColor="#e8e8e8"
-             contentBackgroundColor="#e8e8e8"
+             contentBackgroundColor="#F9F9F9"
 
             renderBackground={() => (
 
@@ -516,6 +635,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#475566"
+  },
+  subtitle:{
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#A9ACBC"
   },
   photoTxt:{
     fontSize: 13,

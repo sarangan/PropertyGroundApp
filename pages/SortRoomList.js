@@ -15,8 +15,7 @@ import {
   TouchableHighlight,
   TextInput,
   ActivityIndicator,
-  Image,
-  Switch
+  Image
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -210,6 +209,10 @@ export default class SortRoomList extends Component{
       // }
 
       //roomlist = filter_roomlist;
+      roomlist = roomlist.filter(function(item){
+        return (item.status == 1);
+      });
+      
       roomlist.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
 
 

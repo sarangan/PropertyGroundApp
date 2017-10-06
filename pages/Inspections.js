@@ -60,32 +60,31 @@ export default class Inspections extends Component{
 
       if (event.id == 'property') {
 
-        this.props.navigator.showModal({
-            screen: "PropertyGround.NewProperty",
-            title: 'Add new property',
-            animationType: 'slide-up',
-            navigatorStyle:{
-              navBarTextColor: 'white',
-              navBarButtonColor: 'white',
-              statusBarTextColorScheme: 'light',
-              navBarBackgroundColor: '#00BDDB',
-              navBarBlur: false,
-              screenBackgroundColor: '#FFFFFF',
-              navBarTransparent: false,
-            },
-            passProps: {
-            },
-        });
-
-
-        // this.props.navigator.push({
-        //   screen: 'PropertyGround.NewProperty',
-        //   title: 'Add new property',
-        //   animated: true,
-        //   //animationType: 'fade',
-        //    backButtonTitle: "Back",
-        //   passProps: {}
+        // this.props.navigator.showModal({
+        //     screen: "PropertyGround.NewProperty",
+        //     title: 'Add new property',
+        //     animationType: 'slide-up',
+        //     navigatorStyle:{
+        //       navBarTextColor: 'white',
+        //       navBarButtonColor: 'white',
+        //       statusBarTextColorScheme: 'light',
+        //       navBarBackgroundColor: '#00BDDB',
+        //       navBarBlur: false,
+        //       screenBackgroundColor: '#FFFFFF',
+        //       navBarTransparent: false,
+        //     },
+        //     passProps: {
+        //     },
         // });
+
+        this.props.navigator.push({
+          screen: 'PropertyGround.NewProperty',
+          title: 'Add new property',
+          animated: true,
+          //animationType: 'fade',
+           backButtonTitle: "Back",
+          passProps: {}
+        });
 
 
 
