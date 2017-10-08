@@ -55,10 +55,18 @@ export default class MeterItem extends Component{
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
-      property_id: '',
+      property_id: this.props.property_id,
       loading: false,
-      item_details: this.props.item,
-      photos: ['https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg']
+      photos: ['https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', ],
+      feedback: {},
+      prop_feedback_id: false,
+      meter_feedbacks: {},
+      reading_value: this.props.meter.reading_value,
+      prop_meter_id: this.props.prop_meter_id,
+      prop_master_id: this.props.prop_master_id,
+      meter:  this.props.meter,
+      description: false,
+      comment: '',
     };
 
   }
@@ -67,44 +75,187 @@ export default class MeterItem extends Component{
   onNavigatorEvent(event) {
     if (event.type == 'NavBarButtonPress') {
       if (event.id == 'save') {
-        this.doSave();
-
+        this.handleSave(true);
       }
 
     }
   }
 
  componentWillUnmount () {
+   this.handleSave(false);
    // Remove the alert located on this master page from te manager
    MessageBarManager.unregisterMessageBar();
  }
 
   componentDidMount(){
-
+    this.getDetails();
     MessageBarManager.registerMessageBar(this.refs.alert);
 
-    this.setState({
-      company_id: auth.USER.company_id
-    });
-
   }
 
-  handleCondition =(item)=>{
+  //get the meter feedback
+  //get the whichever item details
+  getDetails = () =>{
 
-    let items = this.state.coditions;
-    for(let i=0, l = items.length; i < l; i++){
-        items[i].selected = false;
-        if(items[i].text == item.text ){
-          items[i].selected = true;
+    if(this.state.property_id && this.state.prop_meter_id){
+
+      this.setState({
+        loading: true
+      });
+
+      AsyncStorage.getItem(TableKeys.PROPERTY_FEEDBACK, (err, result) => {
+        let property_subitem_feedback = JSON.parse(result) || {};
+
+        if(property_subitem_feedback.hasOwnProperty(this.state.property_id) ){
+
+          let feedbacks = property_subitem_feedback[this.state.property_id];
+
+          if(feedbacks.hasOwnProperty(this.state.prop_meter_id) ){ //same item id
+              this.setState({
+                prop_feedback_id: feedbacks[this.state.prop_meter_id].prop_feedback_id,
+                feedback: feedbacks[this.state.prop_meter_id],
+                type : feedbacks[this.state.prop_meter_id].type,
+                option: feedbacks[this.state.prop_meter_id].option,
+                description: feedbacks[this.state.prop_meter_id].description == '1' ? true: false,
+                comment: feedbacks[this.state.prop_meter_id].comment,
+              });
+          }
+
+          AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+            let property_meter_link = JSON.parse(result) || {};
+            let meterlist =  property_meter_link[this.state.property_id] || [];
+
+            for(let i=0, l = meterlist.length; i < l ; i++){
+              if(meterlist[i].prop_meter_id == this.state.prop_meter_id ){
+                this.setState({
+                  reading_value : meterlist[i].reading_value
+                });
+                break;
+              }
+            }
+
+          });
+
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+          });
         }
+        else{
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+            feedback: {}
+          });
+
+        }
+
+
+      });
+
+
+
     }
-    this.setState({
-      coditions: items
-    });
 
   }
 
-  handleSwitchChange =(item)=>{
+  //save details of feedback
+  handleSave = (showMsg = true) =>{
+
+    if(this.state.property_id && this.state.prop_meter_id){
+
+      this.setState({
+        loading: true
+      });
+
+      AsyncStorage.getItem(TableKeys.PROPERTY_FEEDBACK, (err, result) => {
+        let property_subitem_feedback = JSON.parse(result) || {};
+
+        let feedback = {
+          prop_feedback_id: this.state.prop_feedback_id ? this.state.prop_feedback_id: helper.generateUid(),
+          property_id: this.state.property_id,
+          item_id: this.state.prop_meter_id,
+          parent_id: this.state.prop_master_id,
+          option: '',
+          description: this.state.description,
+          comment: this.state.comment,
+          type: this.state.type,
+          mb_createdAt:  new Date().toLocaleDateString(),
+          sync: 1
+        }
+
+        let feedbacks = {};
+        if (property_subitem_feedback.hasOwnProperty(this.state.property_id) ){
+          feedbacks =  property_subitem_feedback[this.state.property_id];
+        }
+        feedbacks[this.state.prop_meter_id] = feedback;
+
+        property_subitem_feedback[this.state.property_id] = feedbacks;
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PROPERTY_FEEDBACK, JSON.stringify(property_subitem_feedback), () => {
+          console.log('property feedback saved');
+          console.log(property_subitem_feedback);
+
+          AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+            let property_meter_link = JSON.parse(result) || {};
+            let meterlist =  property_meter_link[this.state.property_id] || [];
+            console.log('meter list');
+            console.log(meterlist);
+
+            for(let i=0, l = meterlist.length; i < l ; i++){
+              if(meterlist[i].prop_meter_id == this.state.prop_meter_id ){
+                meterlist[i].reading_value = this.state.reading_value;
+                property_meter_link[this.state.property_id] =  meterlist;
+                AsyncStorage.setItem(TableKeys.PROPERTY_METER_LINK, JSON.stringify(property_meter_link), () => {
+                  console.log('property meter table stored');
+                  console.log(property_meter_link);
+                });
+                break;
+
+              }
+            }
+
+
+          });
+
+          if(showMsg == true){
+            MessageBarManager.showAlert({
+              message: 'Successfully saved!',
+              alertType: 'success',
+              animationType: 'SlideFromTop',
+              position: 'top',
+              shouldHideOnTap: true,
+              stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
+              messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
+              duration: 700,
+              durationToShow: 0,
+              durationToHide: 300,
+            });
+          }
+
+
+        });
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+          });
+
+      });
+
+    }
+
+  }
+
+
+  handleSwitchChange =(value)=>{
+
+    this.setState({
+      description: value
+    });
 
   }
 
@@ -198,29 +349,31 @@ export default class MeterItem extends Component{
 
           <TextInput
             style={styles.txtInput}
-            onChangeText={(text) => this.setState({description:text})}
+            onChangeText={(text) => this.setState({reading_value:text})}
             placeholder="Meter reading"
             placeholderTextColor="#A9ACBC"
+            value={this.state.reading_value}
           />
 
           <Text style={styles.divTxt}>Need maintenance?</Text>
 
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
-              <Text style={{color: '#A9ACBC'}}>Property needs maintenance</Text>
+              <Text style={{color: '#A9ACBC'}}>Need maintenance</Text>
             <Switch
               onValueChange={(value) => this.handleSwitchChange(value)}
-              value={false} />
+              value={this.state.description } />
           </View>
 
           <Text style={styles.divTxt}>Comment</Text>
 
           <TextInput
             style={[styles.txtInput, {height: 100}]}
-            onChangeText={(text) => this.setState({description:text})}
+            onChangeText={(text) => this.setState({comment:text})}
             placeholder="Any comments?"
             placeholderTextColor="#A9ACBC"
             multiline = {true}
             numberOfLines = {7}
+            value={this.state.comment}
           />
 
           <Text style={styles.divTxt}>Photos</Text>
@@ -293,8 +446,8 @@ const styles = StyleSheet.create({
   },
   camWrapper:{
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
 
   },
   camera_img:{
@@ -336,7 +489,7 @@ const styles = StyleSheet.create({
   listGrid: {
    justifyContent: 'flex-start',
    flexDirection: 'row',
-   flexWrap: 'wrap',
+   //flexWrap: 'wrap',
    alignContent: 'flex-start',
    alignSelf: 'flex-start',
   },

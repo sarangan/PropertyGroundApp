@@ -45,8 +45,8 @@ export default class RoomList extends Component{
   static navigatorButtons = {
    rightButtons: [
      {
-       title: 'Sort',
-       id: 'sort'
+       title: 'Refresh',
+       id: 'refresh'
      }
    ],
   //  leftButtons: [
@@ -79,9 +79,9 @@ export default class RoomList extends Component{
   onNavigatorEvent(event) {
     if (event.type == 'NavBarButtonPress') {
 
-      if (event.id == 'sort') {
+      if (event.id == 'refresh') {
 
-        this.callSortList();
+        this.getRoomlist();
 
       }
 
@@ -109,114 +109,121 @@ export default class RoomList extends Component{
 
     this.setState({
       loading: true,
-    });
+      roomlist: [],
+      height: 0,
+      meterlist: []
+    }, ()=>{
 
-    AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, result) => {
+      AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, result) => {
 
 
-      let roomlist = JSON.parse(result) || {};
+        let roomlist = JSON.parse(result) || {};
 
-      if(roomlist.hasOwnProperty(this.state.property_id) ){
-        roomlist = roomlist[this.state.property_id];
-      }
-      else{
-        roomlist = [];
-      }
-
-      console.log('roomlist');
-      console.log(roomlist);
-      let filter_roomlist = [];
-
-      for(let i = 0, l = roomlist.length; i < l; i++){
-        let room = roomlist[i];
-
-        if(room.option == "NUM" && room.type == 'DEFAULT'){ // number control TODO
-          //skip default types
+        if(roomlist.hasOwnProperty(this.state.property_id) ){
+          roomlist = roomlist[this.state.property_id];
         }
         else{
-          filter_roomlist.push(room);
+          roomlist = [];
         }
 
-      }
+        console.log('roomlist');
+        console.log(roomlist);
+        let filter_roomlist = [];
 
-      roomlist = filter_roomlist;
+        for(let i = 0, l = roomlist.length; i < l; i++){
+          let room = roomlist[i];
 
-      roomlist = roomlist.filter(function(item){
-        return (item.status == 1);
+          if(room.option == "NUM" && room.type == 'DEFAULT'){ // number control TODO
+            //skip default types
+          }
+          else{
+            filter_roomlist.push(room);
+          }
+
+        }
+
+        roomlist = filter_roomlist;
+
+        roomlist = roomlist.filter(function(item){
+          return (item.status == 1);
+        });
+
+         roomlist.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
+         roomlist.push(
+           {
+             prop_master_id: '',
+             property_id: this.state.property_id,
+             com_master_id: '',
+             type: 'SIG',
+             com_type: '',
+             option: '',
+             self_prop_master_id: 0,
+             name: 'Signatures',
+             priority: 0,
+             total_num: 0,
+             status: 1,
+             mb_createdAt: '',
+             sync: 1
+           }
+          );
+
+          roomlist.unshift(
+           {
+             prop_master_id: '',
+             property_id: this.state.property_id,
+             com_master_id: '',
+             type: 'GENERAL',
+             com_type: '',
+             option: '',
+             self_prop_master_id: 0,
+             name: 'General conditions',
+             priority: 0,
+             total_num: 0,
+             status: 1,
+             mb_createdAt: '',
+             sync: 1
+           }
+          );
+
+          roomlist.unshift(
+           {
+             prop_master_id: '',
+             property_id: this.state.property_id,
+             com_master_id: '',
+             type: 'PROP',
+             com_type: '',
+             option: '',
+             self_prop_master_id: 0,
+             name: 'Property info',
+             priority: 0,
+             total_num: 0,
+             status: 1,
+             mb_createdAt: '',
+             sync: 1
+           }
+          );
+
+        this.setState({
+          roomlist: roomlist,
+          loading: false,
+          refreshing: false
+        });
+
       });
 
-       roomlist.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
-       roomlist.push(
-         {
-           prop_master_id: '',
-           property_id: this.state.property_id,
-           com_master_id: '',
-           type: 'SIG',
-           com_type: '',
-           option: '',
-           self_prop_master_id: 0,
-           name: 'Signatures',
-           priority: 0,
-           total_num: 0,
-           status: 1,
-           mb_createdAt: '',
-           sync: 1
-         }
-        );
-
-        roomlist.unshift(
-         {
-           prop_master_id: '',
-           property_id: this.state.property_id,
-           com_master_id: '',
-           type: 'GENERAL',
-           com_type: '',
-           option: '',
-           self_prop_master_id: 0,
-           name: 'General conditions',
-           priority: 0,
-           total_num: 0,
-           status: 1,
-           mb_createdAt: '',
-           sync: 1
-         }
-        );
-
-        roomlist.unshift(
-         {
-           prop_master_id: '',
-           property_id: this.state.property_id,
-           com_master_id: '',
-           type: 'PROP',
-           com_type: '',
-           option: '',
-           self_prop_master_id: 0,
-           name: 'Property info',
-           priority: 0,
-           total_num: 0,
-           status: 1,
-           mb_createdAt: '',
-           sync: 1
-         }
-        );
-
-      this.setState({
-        roomlist: roomlist,
-        loading: false,
-        refreshing: false
+      AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+        let property_meter_link = JSON.parse(result) || {};
+        let meterlist =  property_meter_link[this.state.property_id] || [];
+        console.log('meter list');
+        console.log(meterlist);
+        this.setState({
+          meterlist
+        });
       });
 
     });
 
-    AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
-      let property_meter_link = JSON.parse(result) || {};
-      let meterlist =  property_meter_link[this.state.property_id] || [];
-      console.log('meter list');
-      console.log(meterlist);
-      this.setState({
-        meterlist
-      });
-    });
+
 
   }
 
@@ -341,7 +348,8 @@ export default class RoomList extends Component{
         backButtonTitle: "Back",
         passProps: {
           property_id: this.state.property_id,
-          master_id: item.prop_master_id
+          master_id: item.prop_master_id,
+          prop_master_name: item.name,
         },
       });
 
@@ -356,7 +364,9 @@ export default class RoomList extends Component{
         backButtonTitle: "Back",
         passProps: {
           property_id: this.state.property_id,
-          master_id: item.prop_master_id
+          item_id : item.prop_master_id,
+          parent_id: item.prop_master_id,
+          type : 'ITEM', //SUB ITEM METER GENERAL,
         },
       });
 
@@ -381,7 +391,7 @@ export default class RoomList extends Component{
 
   }
 
-  openMeter = (meter) =>{
+  openMeter = (meter, room_item) =>{
     console.log(meter);
     this.props.navigator.push({
       screen: 'PropertyGround.MeterItem',
@@ -391,12 +401,14 @@ export default class RoomList extends Component{
       backButtonTitle: "Back",
       passProps: {
         prop_meter_id: meter.prop_meter_id,
-        meter: meter
+        meter: meter,
+        property_id: this.state.property_id,
+        prop_master_id: room_item.prop_master_id
       },
     });
   }
 
-  getMeters  = (item) =>{
+  getMeters  = (room_item) =>{
       return(
         <View style={{
           overflow: 'hidden',
@@ -409,7 +421,7 @@ export default class RoomList extends Component{
             this.state.meterlist.map( (item, i) =>{
               return(
                   <TouchableHighlight underlayColor="transparent" style={[styles.rowWrapper, {paddingLeft: 15, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}]}
-                    onPress={()=>this.openMeter(item)}>
+                    onPress={()=>this.openMeter(item, room_item)} key={i+1}>
                       <View  style={[styles.listContainer,{marginTop: 6, }]}>
                         <Text style={styles.subtitle}>{item.meter_name}</Text>
                           <Image
@@ -639,7 +651,7 @@ const styles = StyleSheet.create({
   subtitle:{
     fontSize: 14,
     fontWeight: "600",
-    color: "#A9ACBC"
+    color: "#747478"
   },
   photoTxt:{
     fontSize: 13,

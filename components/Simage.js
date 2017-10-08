@@ -9,7 +9,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   View,
-  Image
+  Image,
+  ImageBackground
 } from 'react-native';
 
 export default class Simage extends Component{
@@ -30,7 +31,7 @@ export default class Simage extends Component{
 
     if(this.state.errImg == false ){
       return(
-        <Image
+        <ImageBackground
           onLoadStart={(e) => this.setState({isLoading: true}) }
           onLoadEnd={ ()=> this.setState({ isLoading: false}) }
           onError= { ()=> this.setState({ errImg: true}) }
@@ -39,17 +40,17 @@ export default class Simage extends Component{
         >
           <ActivityIndicator animating={ this.state.isLoading }/>
           {this.props.sChild}
-        </Image>
+        </ImageBackground>
       );
     }
     else{
       return(
-        <Image
+        <ImageBackground
           source={require('../images/err_image.png')}
           style={[this.props.style, { justifyContent: 'center', alignItems: 'center', resizeMode: 'contain' }]}
         >
           {this.props.sChild}
-        </Image>
+        </ImageBackground>
       );
     }
 

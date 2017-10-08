@@ -17,6 +17,7 @@ import {
   Image
 } from 'react-native';
 
+
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
 import config from '../keys/config';
@@ -34,12 +35,12 @@ export default class Inspections extends Component{
        id: 'property'
      }
    ],
-  //  leftButtons: [
-  //    {
-  //      title: 'Cancel',
-  //      id: 'cancel'
-  //    }
-  //  ],
+   leftButtons: [
+     {
+       title: 'Refresh',
+       id: 'refresh'
+     }
+   ],
 
  };
 
@@ -88,6 +89,9 @@ export default class Inspections extends Component{
 
 
 
+      }
+      else if( event.id == 'refresh' ){
+          this.getProperties();
       }
 
     }
@@ -334,7 +338,7 @@ export default class Inspections extends Component{
 
                   <View style={[styles.cardGenre, {flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start'} ]}>
                     <View style={styles.triangleCorner} />
-                    <Text style={styles.storeTxt}>Inventory and Check-in Report</Text>
+                    <Text style={styles.storeTxt}>{item.report_type}</Text>
                   </View>
 
                   <Text

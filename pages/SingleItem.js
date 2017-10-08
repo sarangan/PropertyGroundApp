@@ -29,6 +29,7 @@ import auth from '../keys/auth';
 import helper from '../helper/helper';
 import FilterPicker from "../components/FilterPicker";
 import Simage from "../components/Simage";
+import PGCamera from "../components/PGCamera";
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
@@ -56,11 +57,21 @@ export default class SingleItem extends Component{
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       coditions : [ {text:"N/A", url: require('../images/na.png'), selected: false }, {text:"Used", url: require('../images/used.png'), selected: false }, {text:"New", url: require('../images/new.png'), selected: false }, {text:"Poor", url: require('../images/poor.png'), selected: false}, {text:"Damage", url: require('../images/damage.png'), selected: false } ],
-      property_id: '',
+      property_id: this.props.property_id,
       loading: false,
-      item_details: this.props.item,
-      photos: ['https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg']
+      photos: [],
+      feedback: {},
+      prop_feedback_id: false,
+      item_id : this.props.item_id,
+      parent_id: this.props.parent_id,
+      type : this.props.type, //SUB ITEM METER GENERAL,
+      description: false,
+      comment: '',
+      isCamera: false
     };
+
+    //this.closeCamera = this.closeCamera.bind(this);
+    //this.snapPhoto = this.snapPhoto.bind(this);
 
   }
 
@@ -68,7 +79,7 @@ export default class SingleItem extends Component{
   onNavigatorEvent(event) {
     if (event.type == 'NavBarButtonPress') {
       if (event.id == 'save') {
-        this.doSave();
+        this.handleSave(true);
 
       }
 
@@ -77,16 +88,79 @@ export default class SingleItem extends Component{
 
  componentWillUnmount () {
    // Remove the alert located on this master page from te manager
+   this.handleSave(false);
    MessageBarManager.unregisterMessageBar();
  }
 
   componentDidMount(){
 
+    this.getDetails();
     MessageBarManager.registerMessageBar(this.refs.alert);
 
-    this.setState({
-      company_id: auth.USER.company_id
-    });
+  }
+
+  //get the whichever item details
+  getDetails = () =>{
+
+    if(this.state.property_id && this.state.item_id){
+
+      this.setState({
+        loading: true
+      });
+
+      AsyncStorage.getItem(TableKeys.PROPERTY_FEEDBACK, (err, result) => {
+        let property_subitem_feedback = JSON.parse(result) || {};
+
+        if(property_subitem_feedback.hasOwnProperty(this.state.property_id) ){
+
+          let feedbacks = property_subitem_feedback[this.state.property_id];
+
+            if(feedbacks.hasOwnProperty(this.state.item_id) ){ //same item id
+              this.setState({
+                prop_feedback_id: feedbacks[this.state.item_id].prop_feedback_id,
+                feedback: feedbacks[this.state.item_id],
+                type : feedbacks[this.state.item_id].type,
+                option: feedbacks[this.state.item_id].option,
+                description: feedbacks[this.state.item_id].description == '1'? true: false,
+                comment: feedbacks[this.state.item_id].comment,
+              });
+
+              let items = this.state.coditions;
+              for(let i=0, l = items.length; i < l; i++){
+                  items[i].selected = false;
+                  if(items[i].text == feedbacks[this.state.item_id].option ){
+                    items[i].selected = true;
+                  }
+              }
+              this.setState({
+                coditions: items
+              });
+
+
+            }
+
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+          });
+        }
+        else{
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+            feedback: {}
+          });
+
+        }
+
+
+      });
+
+
+
+    }
 
   }
 
@@ -97,6 +171,9 @@ export default class SingleItem extends Component{
         items[i].selected = false;
         if(items[i].text == item.text ){
           items[i].selected = true;
+          this.setState({
+            option: items[i].text
+          });
         }
     }
     this.setState({
@@ -105,7 +182,131 @@ export default class SingleItem extends Component{
 
   }
 
-  handleSwitchChange =(item)=>{
+  handleSwitchChange =(value)=>{
+    console.log(value);
+
+    this.setState({
+      description: value
+    });
+
+  }
+
+  handleTextChange = (txt) =>{
+
+    this.setState({
+      comment: txt
+    });
+  }
+
+  //save details of feedback
+  handleSave = (showMsg = true) =>{
+
+    if(this.state.property_id && this.state.item_id){
+
+      this.setState({
+        loading: true
+      });
+
+      AsyncStorage.getItem(TableKeys.PROPERTY_FEEDBACK, (err, result) => {
+        let property_subitem_feedback = JSON.parse(result) || {};
+
+        let feedback = {
+          prop_feedback_id: this.state.prop_feedback_id ? this.state.prop_feedback_id: helper.generateUid(),
+          property_id: this.state.property_id,
+          item_id: this.state.item_id,
+          parent_id: this.state.parent_id,
+          option: this.state.option,
+          description: this.state.description,
+          comment: this.state.comment,
+          type: this.state.type,
+          mb_createdAt:  new Date().toLocaleDateString(),
+          sync: 1
+        }
+
+        let feedbacks = {};
+        if (property_subitem_feedback.hasOwnProperty(this.state.property_id) ){
+          feedbacks =  property_subitem_feedback[this.state.property_id];
+        }
+
+
+        feedbacks[this.state.item_id]= feedback;
+
+        property_subitem_feedback[this.state.property_id] = feedbacks;
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PROPERTY_FEEDBACK, JSON.stringify(property_subitem_feedback), () => {
+          console.log('property feedback saved');
+          console.log(property_subitem_feedback);
+
+          if(showMsg == true){
+            MessageBarManager.showAlert({
+              message: 'Successfully saved!',
+              alertType: 'success',
+              animationType: 'SlideFromTop',
+              position: 'top',
+              shouldHideOnTap: true,
+              stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
+              messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
+              duration: 700,
+              durationToShow: 0,
+              durationToHide: 300,
+            });
+          }
+
+
+        });
+
+          this.setState({
+            loading: false,
+            refreshing: false,
+          });
+
+      });
+
+    }
+
+  }
+
+  openCamera = () =>{
+    this.setState({
+      isCamera : true
+    });
+  }
+
+  closeCamera = () =>{
+    this.setState({
+      isCamera : false
+    });
+  }
+
+  snapPhoto = (photo) =>{
+    console.log(photo);
+    console.log()
+    let photos = this.state.photos;
+    photos.push(photo);
+    this.setState({
+      photos
+    });
+  }
+
+  openImage = (photo) =>{
+
+    let index = this.state.photos.indexOf(photo);
+
+    this.props.navigator.showLightBox({
+      screen: "PropertyGround.ImageLightBox",
+        passProps: {
+          imagePath: photo,
+          images: JSON.stringify(this.state.photos),
+          index: index
+        },
+        style: {
+         backgroundBlur: "dark",
+          //backgroundColor: "#ff000080",
+          backgroundColor: "#333333",
+          tapBackgroundToDismiss: true
+       }
+    });
 
   }
 
@@ -115,11 +316,14 @@ export default class SingleItem extends Component{
     return (
       <View
         style={{
-          paddingVertical: 20,
-          borderTopWidth: 0,
-          justifyContent: 'center',
+          paddingVertical: 10,
+          marginTop: 10,
+          marginBottom: 10,
+          flex: 1,
           alignSelf: 'center',
-          alignContent: 'center'
+          alignContent: 'center',
+          justifyContent: 'center',
+          width: SCREENWIDTH
           //marginTop: 20,
         }}
       >
@@ -157,7 +361,7 @@ export default class SingleItem extends Component{
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1} >
+    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)} >
         <View style={styles.rowContainer}>
            <Simage
             source={item}
@@ -184,15 +388,16 @@ export default class SingleItem extends Component{
                 extraData={this.state}
                 horizontal={false}
                 ListEmptyComponent={this.renderEmptyData}
+                numColumns={3}
               />
 
             </View>
           );
   }
 
-  render(){
-
+  renderFormx = () =>{
     return(
+
       <View style={styles.fill}>
         <ScrollView>
           <Text style={styles.divTxt}>Condition</Text>
@@ -218,21 +423,22 @@ export default class SingleItem extends Component{
           <Text style={styles.divTxt}>Need maintenance?</Text>
 
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
-              <Text style={{color: '#A9ACBC'}}>Property needs maintenance</Text>
+              <Text style={{color: '#A9ACBC'}}>Need maintenance</Text>
             <Switch
               onValueChange={(value) => this.handleSwitchChange(value)}
-              value={false} />
+              value={this.state.description } />
           </View>
 
           <Text style={styles.divTxt}>Comment</Text>
 
           <TextInput
             style={[styles.txtInput, {height: 100}]}
-            onChangeText={(text) => this.setState({description:text})}
+            onChangeText={(text) => this.handleTextChange(text) }
             placeholder="Any comments?"
             placeholderTextColor="#A9ACBC"
             multiline = {true}
             numberOfLines = {7}
+            value={this.state.comment}
           />
 
           <Text style={styles.divTxt}>Photos</Text>
@@ -249,15 +455,37 @@ export default class SingleItem extends Component{
 
         <MessageBarAlert ref='alert' />
 
-        <View style={styles.roundBox}>
+        <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
           <Image
             source={require('../images/gen_camera.png')}
             style = {styles.genIcons}
           />
-        </View>
+        </TouchableHighlight>
 
       </View>
+
     );
+  }
+
+  renderCamera =() =>{
+    return(
+      <PGCamera close={this.closeCamera} capture={this.snapPhoto}/>
+    );
+  }
+
+  render(){
+
+    if(this.state.isCamera == false){
+      return(
+        this.renderFormx()
+      )
+    }
+    else{
+      return (
+        this.renderCamera()
+      )
+    }
+
   }
 }
 
@@ -305,8 +533,8 @@ const styles = StyleSheet.create({
   },
   camWrapper:{
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
 
   },
   camera_img:{
@@ -328,6 +556,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
@@ -347,8 +576,9 @@ const styles = StyleSheet.create({
   },
   listGrid: {
    justifyContent: 'flex-start',
-   flexDirection: 'row',
-   flexWrap: 'wrap',
+   flexDirection: 'column',
+   //flexDirection: 'row',
+   //flexWrap: 'wrap',
    alignContent: 'flex-start',
    alignSelf: 'flex-start',
   },

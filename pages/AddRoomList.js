@@ -78,8 +78,6 @@ export default class AddRoomList extends Component{
       }
       else if(event.id == 'cancel'){
 
-        console.log('cancel');
-
         this.props.navigator.dismissModal({
           animationType: 'slide-down'
         });

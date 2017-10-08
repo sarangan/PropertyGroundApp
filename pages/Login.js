@@ -17,7 +17,7 @@ import {
   Image,
   TextInput,
   ScrollView,
-  AlertIOS
+  Alert
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -219,7 +219,7 @@ export default class Login extends Component{
 
     }
     else{
-        AlertIOS.alert(
+        Alert.alert(
          'PropertyGround',
          'Username or password cannot be blank!'
         );
@@ -244,6 +244,7 @@ export default class Login extends Component{
 
   render(){
     return(
+      <ScrollView>
       <View style={styles.fill}>
 
         <Image source={require('../images/pg_logo.png')} style={styles.pg_logo}/>
@@ -286,6 +287,7 @@ export default class Login extends Component{
         </View>
 
       </View>
+      </ScrollView>
     );
   }
 }
@@ -298,7 +300,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: 30,
-    paddingBottom: 30
+    paddingBottom: 30,
+    backgroundColor: '#FFFFFF',
   },
   txtInput: {
     height: 40,

@@ -18,6 +18,8 @@ import SortGeneralCondition from './pages/SortGeneralCondition';
 import SubItemsList from './pages/SubItemsList';
 import SingleItem from './pages/SingleItem';
 import MeterItem from './pages/MeterItem';
+import GeneralComment from './pages/GeneralComment';
+import ImageLightBox from './components/ImageLightBox';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -32,6 +34,8 @@ Navigation.registerComponent('PropertyGround.SortGeneralCondition', ()=> SortGen
 Navigation.registerComponent('PropertyGround.SubItemsList', ()=> SubItemsList);
 Navigation.registerComponent('PropertyGround.SingleItem', ()=> SingleItem);
 Navigation.registerComponent('PropertyGround.MeterItem', ()=> MeterItem);
+Navigation.registerComponent('PropertyGround.GeneralComment', ()=> GeneralComment);
+Navigation.registerComponent('PropertyGround.ImageLightBox', ()=> ImageLightBox);
 
 
   const navigatorStyle = {

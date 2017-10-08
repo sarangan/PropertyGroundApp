@@ -97,6 +97,7 @@ export default class GenCommentBlock extends Component {
               placeholderTextColor="#A9ACBC"
               multiline = {true}
               numberOfLines = {15}
+              value={this.props.item.comment}
             />
           </View>
 

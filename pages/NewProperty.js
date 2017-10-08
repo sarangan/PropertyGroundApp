@@ -14,7 +14,7 @@ import {
   TouchableHighlight,
   ScrollView,
   Image,
-  AlertIOS,
+  Alert,
   ActivityIndicator,
   AsyncStorage
 } from 'react-native';
@@ -499,7 +499,7 @@ export default class NewProperty extends Component{
         this.setState({
           property_id: helper.generateUid()
         }, () => {
-          AlertIOS.alert(
+          Alert.alert(
            'PropertyGround',
            'Please try again!'
           );
@@ -532,7 +532,7 @@ export default class NewProperty extends Component{
           position: 'top',
           shouldHideOnTap: true,
           stylesheetSuccess : { backgroundColor : '#ea5c5c', strokeColor : '#ea5c5c' },
-          messageStyle: {color: '#475566', fontWeight: '700', fontSize: 15 },
+          messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
           duration: 700,
           durationToShow: 0,
           durationToHide: 300
@@ -549,7 +549,7 @@ export default class NewProperty extends Component{
           position: 'top',
           shouldHideOnTap: true,
           stylesheetSuccess : { backgroundColor : '#ea5c5c', strokeColor : '#ea5c5c' },
-          messageStyle: {color: '#475566', fontWeight: '700', fontSize: 15 },
+          messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
           duration: 700,
           durationToShow: 0,
           durationToHide: 300
