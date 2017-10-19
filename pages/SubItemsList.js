@@ -36,12 +36,12 @@ const SCREENHEIGHT = Dimensions.get('window').height;
 export default class SubItemsList extends Component{
 
   static navigatorButtons = {
-  //  rightButtons: [
-  //    {
-  //      title: 'Save',
-  //      id: 'save'
-  //    },
-  //  ],
+    rightButtons: [
+      {
+        title: 'Refresh',
+        id: 'refresh'
+      }
+    ],
 
  };
 
@@ -57,7 +57,8 @@ export default class SubItemsList extends Component{
       prop_master_id: this.props.master_id,
       prop_master_name: this.props.prop_master_name,
       promptVisible: false,
-      promptVisibleCopy: false
+      promptVisibleCopy: false,
+      photos: []
     };
 
     this.property_subitem_feedback = {};
@@ -68,11 +69,11 @@ export default class SubItemsList extends Component{
   onNavigatorEvent(event) {
     if (event.type == 'NavBarButtonPress') {
 
-      // if (event.id == 'save') {
-      //
-      //   this.hanldeSave(true);
-      //
-      // }
+      if (event.id == 'refresh') {
+
+        this.getData();
+
+      }
 
     }
   }
@@ -82,7 +83,7 @@ export default class SubItemsList extends Component{
     MessageBarManager.registerMessageBar(this.refs.alert);
 
     if(this.state.property_id){
-      this.getSubItemsList();
+      this.getData();
     }
 
   }
@@ -99,6 +100,38 @@ export default class SubItemsList extends Component{
     this.setState({
       loading: true
     });
+
+  }
+
+  getData = () =>{
+
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      if(photos.hasOwnProperty(this.state.property_id) ){
+
+         if(photos[this.state.property_id].hasOwnProperty(this.state.prop_master_id) ){
+
+           this.setState({
+             photos: photos[this.state.property_id][this.state.prop_master_id]
+           }, ()=>{
+             this.getSubItemsList();
+           });
+
+         }
+         else{
+             this.getSubItemsList();
+         }
+
+
+      }
+      else{
+
+        this.getSubItemsList();
+      }
+
+    });
+
 
   }
 
@@ -168,6 +201,30 @@ export default class SubItemsList extends Component{
     this.props.navigator.showModal({
         screen: "PropertyGround.GeneralComment",
         title: 'General comments',
+        animationType: 'slide-up',
+        navigatorStyle:{
+          navBarTextColor: 'white',
+          navBarButtonColor: 'white',
+          statusBarTextColorScheme: 'light',
+          navBarBackgroundColor: '#00BDDB',
+          navBarBlur: false,
+          screenBackgroundColor: '#FFFFFF',
+          navBarTransparent: false,
+        },
+        passProps: {
+          property_id: this.state.property_id,
+          general_id : item.prop_subitem_id,
+          prop_master_id: item.prop_master_id,
+        },
+    });
+
+  }
+
+  openGenPhotos = (item) =>{
+
+    this.props.navigator.showModal({
+        screen: "PropertyGround.GeneralPhoto",
+        title: 'General photos',
         animationType: 'slide-up',
         navigatorStyle:{
           navBarTextColor: 'white',
@@ -573,6 +630,23 @@ export default class SubItemsList extends Component{
 
   }
 
+  getPhotoStatus = (item) =>{
+    let photo = '';
+    //console.log(item);
+    if(this.state.photos.hasOwnProperty(item.prop_subitem_id)){
+
+      let num_photos  = this.state.photos[item.prop_subitem_id].length;
+      photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
+
+    }
+    else{
+      photo = 'no images';
+    }
+
+    return photo;
+
+  }
+
   renderFooter = () => {
     if (!this.state.loading) return null;
 
@@ -614,7 +688,7 @@ export default class SubItemsList extends Component{
          //properties: [],
        },
        () => {
-         this.getSubItemsList();
+         this.getData();
 
        }
      );
@@ -626,13 +700,6 @@ export default class SubItemsList extends Component{
         <Image style={{ width: 80, height: 80, marginTop: SCREENHEIGHT / 3 }} source={require('../images/nodata.png')} />
       </View>
     );
-  }
-
-  getPhotoStatus = (item) =>{
-    let photo = '';
-    photo = 'no images'
-
-    return photo;
   }
 
   //render actionBar
@@ -689,12 +756,12 @@ export default class SubItemsList extends Component{
                           style = {styles.genIcons}
                         />
                       </TouchableHighlight>
-                      <View style={styles.roundBox}>
+                      <TouchableHighlight style={styles.roundBox} underlayColor='transparent' onPress={()=>this.openGenPhotos(item)}>
                         <Image
                           source={require('../images/gen_camera.png')}
                           style = {styles.genIcons}
                         />
-                      </View>
+                      </TouchableHighlight>
                       <View style={styles.roundBox}>
                         <Image
                           source={require('../images/gen_voice.png')}

@@ -259,6 +259,7 @@ export default class Login extends Component{
           clearButtonMode="while-editing"
           onSubmitEditing={this.doLogin}
           keyboardType="email-address"
+          underlineColorAndroid='transparent'
         />
         <TextInput
           style={styles.txtInput}
@@ -269,6 +270,7 @@ export default class Login extends Component{
           clearButtonMode="while-editing"
           onSubmitEditing={this.doLogin}
           secureTextEntry= {true}
+          underlineColorAndroid='transparent'
         />
         <TouchableHighlight  underlayColor='transparent' style={styles.loginWrapper} onPress={this.doLogin}>
           <Text style={styles.loginBtn}>Login</Text>

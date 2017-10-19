@@ -70,7 +70,8 @@ export default class RoomList extends Component{
       property: this.props.property,
       imgErr: false,
       height: 0,
-      meterlist: []
+      meterlist: [],
+      photos: []
     };
 
   }
@@ -81,7 +82,7 @@ export default class RoomList extends Component{
 
       if (event.id == 'refresh') {
 
-        this.getRoomlist();
+        this.getData();
 
       }
 
@@ -90,7 +91,7 @@ export default class RoomList extends Component{
 
   componentDidMount(){
     if(this.state.property_id){
-      this.getRoomlist();
+      this.getData();
     }
   }
 
@@ -103,6 +104,30 @@ export default class RoomList extends Component{
       backButtonTitle: "Back",
       passProps: {property_id: this.state.property_id}
     });
+  }
+
+  getData = () =>{
+
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      if(photos.hasOwnProperty(this.state.property_id) ){
+
+        this.setState({
+          photos: photos[this.state.property_id]
+        }, ()=>{
+          this.getRoomlist();
+        });
+
+      }
+      else{
+
+        this.getRoomlist();
+      }
+
+    });
+
+
   }
 
   getRoomlist =()=>{
@@ -126,8 +151,8 @@ export default class RoomList extends Component{
           roomlist = [];
         }
 
-        console.log('roomlist');
-        console.log(roomlist);
+        //console.log('roomlist');
+        //console.log(roomlist);
         let filter_roomlist = [];
 
         for(let i = 0, l = roomlist.length; i < l; i++){
@@ -214,8 +239,8 @@ export default class RoomList extends Component{
       AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
         let property_meter_link = JSON.parse(result) || {};
         let meterlist =  property_meter_link[this.state.property_id] || [];
-        console.log('meter list');
-        console.log(meterlist);
+        //console.log('meter list');
+        //console.log(meterlist);
         this.setState({
           meterlist
         });
@@ -286,11 +311,67 @@ export default class RoomList extends Component{
 
   getPhotoStatus = (item) =>{
     let photo = '';
-    if(item.option != 'SIG' || item.option != 'PROP' || item.option != 'GENERAL'){
-        photo = '3 images';
+    //console.log(item);
+    if(item.type == 'SIG' || item.type == 'PROP' || item.type == 'GENERAL'){
+        photo = ' ';
     }
     else{
-      photo = 'no images'
+      if(this.state.photos.hasOwnProperty(item.prop_master_id) ){
+
+
+
+        let master_photos = this.state.photos[item.prop_master_id];
+        if(item.com_type ==  'ITEM'){
+          if(master_photos.hasOwnProperty(item.prop_master_id)){
+
+            let num_photos  = master_photos[item.prop_master_id].length;
+            photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
+
+          }
+          else{
+            photo = 'no images';
+          }
+        }
+        else{
+
+
+          let items = Object.keys(master_photos);
+          let num_photos = 0;
+          for(let key in master_photos){
+            num_photos  += master_photos[key].length;
+          }
+
+          photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
+        }
+
+
+      }
+      else{
+        photo = 'no images';
+      }
+
+    }
+
+    return photo;
+
+  }
+
+  getMeterPhotoStatus = (item, prop_master_id) =>{
+    let photo = '';
+    //console.log(item);
+    if(this.state.photos.hasOwnProperty(prop_master_id) ){
+
+      let master_photos = this.state.photos[prop_master_id];
+      if(master_photos.hasOwnProperty(item.prop_meter_id)){
+        let num_photos = master_photos[item.prop_meter_id].length;
+        photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
+      }
+      else{
+        photo = 'no images';
+      }
+    }
+    else{
+      photo = 'no images';
     }
 
     return photo;
@@ -420,15 +501,22 @@ export default class RoomList extends Component{
           {
             this.state.meterlist.map( (item, i) =>{
               return(
-                  <TouchableHighlight underlayColor="transparent" style={[styles.rowWrapper, {paddingLeft: 15, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}]}
+                  <TouchableHighlight underlayColor="transparent" style={{paddingLeft: 15, paddingRight: 10, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}}
                     onPress={()=>this.openMeter(item, room_item)} key={i+1}>
-                      <View  style={[styles.listContainer,{marginTop: 6, }]}>
-                        <Text style={styles.subtitle}>{item.meter_name}</Text>
-                          <Image
-                            source={require('../images/arrow_right_colored.png')}
-                            style = {styles.arrowRight}
-                          />
+
+                      <View style={styles.rowWrapper}>
+                        <View  style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
+                          <Text style={styles.subtitle}>{item.meter_name}</Text>
+                          <View style={{justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', flex: 1}}>
+                            <Text style={styles.photoTxt}>{this.getMeterPhotoStatus(item, room_item.prop_master_id)}</Text>
+                            <Image
+                              source={require('../images/arrow_right_colored.png')}
+                              style = {styles.arrowRight}
+                            />
+                          </View>
+                        </View>
                       </View>
+
                     </TouchableHighlight>
                     )
             })
@@ -522,7 +610,7 @@ export default class RoomList extends Component{
 
   getHeaderImg =()=>{
     let map_url = this.getAddress(this.state.property.address_1 , this.state.property.address_2, this.state.property.city, this.state.property.postalcode);
-    console.log(map_url);
+    //console.log(map_url);
     let img =
     <Image source={{uri: map_url,
                   width: SCREENWIDTH,

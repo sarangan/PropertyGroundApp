@@ -14,7 +14,7 @@ import {
   TouchableHighlight,
   ScrollView,
   Image,
-  AlertIOS,
+  Alert,
   ActivityIndicator,
   AsyncStorage,
   FlatList,
@@ -29,6 +29,7 @@ import auth from '../keys/auth';
 import helper from '../helper/helper';
 import FilterPicker from "../components/FilterPicker";
 import Simage from "../components/Simage";
+import PGCamera from "../components/PGCamera";
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
@@ -57,7 +58,7 @@ export default class MeterItem extends Component{
     this.state = {
       property_id: this.props.property_id,
       loading: false,
-      photos: ['https://upload.wikimedia.org/wikipedia/commons/8/81/Murugan_by_Raja_Ravi_Varma.jpg', ],
+      photos: [],
       feedback: {},
       prop_feedback_id: false,
       meter_feedbacks: {},
@@ -65,8 +66,10 @@ export default class MeterItem extends Component{
       prop_meter_id: this.props.prop_meter_id,
       prop_master_id: this.props.prop_master_id,
       meter:  this.props.meter,
+      type: 'METER',
       description: false,
       comment: '',
+      isCamera: false
     };
 
   }
@@ -125,7 +128,7 @@ export default class MeterItem extends Component{
             let property_meter_link = JSON.parse(result) || {};
             let meterlist =  property_meter_link[this.state.property_id] || [];
 
-            for(let i=0, l = meterlist.length; i < l ; i++){
+            for(let i=0, l = meterlist.length; i < l; i++){
               if(meterlist[i].prop_meter_id == this.state.prop_meter_id ){
                 this.setState({
                   reading_value : meterlist[i].reading_value
@@ -155,7 +158,21 @@ export default class MeterItem extends Component{
 
       });
 
-
+      // get photos
+      AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+        let photos = JSON.parse(result) || {};
+        if(photos.hasOwnProperty(this.state.property_id) ){
+          let property_photos = photos[this.state.property_id];
+          if(property_photos.hasOwnProperty(this.state.prop_master_id) ){
+            let master_photos = property_photos[this.state.prop_master_id];
+            if(master_photos.hasOwnProperty(this.state.prop_meter_id) ){
+              this.setState({
+                photos: master_photos[this.state.prop_meter_id]
+              });
+            }
+          }
+        }
+      });
 
     }
 
@@ -251,6 +268,94 @@ export default class MeterItem extends Component{
   }
 
 
+  openCamera = () =>{
+    this.setState({
+      isCamera : true
+    });
+  }
+
+  closeCamera = () =>{
+    this.setState({
+      isCamera : false
+    });
+  }
+
+  snapPhoto = (photo_url) =>{
+    //console.log(photo_url);
+
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      let property_photos = photos[this.state.property_id] || {};
+      let master_photos = property_photos[this.state.prop_master_id] || { };
+      //let sub_photos = master_photos[this.state.item_id] || { this.state.item_id: [] };
+
+      let photos_array = this.state.photos;
+      let photo_data = {
+        photo_id: helper.generateUid(),
+        property_id: this.state.property_id,
+        item_id: this.state.prop_meter_id,
+        parent_id: this.state.prop_master_id,
+        type: this.state.type,
+        img_url: photo_url,
+        mb_createdAt: new Date().toLocaleDateString(),
+        sync: 1
+      };
+      photos_array.push(photo_data);
+
+      //sub_photos[this.state.item_id] = photos_array;
+      master_photos[this.state.prop_meter_id] = photos_array;
+      property_photos[this.state.prop_master_id] = master_photos;
+      photos[this.state.property_id] = property_photos;
+
+      this.setState({
+        photos: photos_array
+      }, ()=>{
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(photos), () => {
+          console.log('saved photos');
+          console.log(photos);
+        });
+
+      });
+
+
+
+    });
+
+  }
+
+  openImage = (photo) =>{
+
+    let index = 0;//this.state.photos.indexOf(photo);
+    let photos = [];
+    for(let i =0, l = this.state.photos.length; i < l; i++){
+      photos.push(this.state.photos[i].img_url);
+      if(this.state.photos[i].photo_id == photo.photo_id){
+        index = i;
+      }
+
+    }
+
+    this.props.navigator.showLightBox({
+      screen: "PropertyGround.ImageLightBox",
+        passProps: {
+          imagePath: photo,
+          images: JSON.stringify(photos),
+          index: index
+        },
+        style: {
+         backgroundBlur: "dark",
+          //backgroundColor: "#ff000080",
+          backgroundColor: "#333333",
+          tapBackgroundToDismiss: true
+       }
+    });
+
+  }
+
+
   handleSwitchChange =(value)=>{
 
     this.setState({
@@ -307,10 +412,10 @@ export default class MeterItem extends Component{
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1} >
+    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)} >
         <View style={styles.rowContainer}>
            <Simage
-            source={item}
+            source={item.img_url}
             style={styles.gridImg}
           />
 
@@ -340,8 +445,14 @@ export default class MeterItem extends Component{
           );
   }
 
-  render(){
+  renderCamera =() =>{
+    return(
+      <PGCamera close={this.closeCamera} capture={this.snapPhoto}/>
+    );
+  }
 
+
+  renderFormx = () =>{
     return(
       <View style={styles.fill}>
         <ScrollView>
@@ -353,6 +464,7 @@ export default class MeterItem extends Component{
             placeholder="Meter reading"
             placeholderTextColor="#A9ACBC"
             value={this.state.reading_value}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Need maintenance?</Text>
@@ -374,6 +486,7 @@ export default class MeterItem extends Component{
             multiline = {true}
             numberOfLines = {7}
             value={this.state.comment}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Photos</Text>
@@ -390,16 +503,33 @@ export default class MeterItem extends Component{
 
         <MessageBarAlert ref='alert' />
 
-        <View style={styles.roundBox}>
+          <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
           <Image
             source={require('../images/gen_camera.png')}
             style = {styles.genIcons}
           />
-        </View>
+        </TouchableHighlight>
 
       </View>
     );
+
   }
+
+  render(){
+
+    if(this.state.isCamera == false){
+      return(
+        this.renderFormx()
+      )
+    }
+    else{
+      return (
+        this.renderCamera()
+      )
+    }
+
+  }
+
 }
 
 

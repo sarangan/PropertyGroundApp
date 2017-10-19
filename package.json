@@ -10,6 +10,7 @@
 		"react": "16.0.0-alpha.12",
 		"react-native": "0.48.4",
 		"react-native-camera": "^0.10.0",
+		"react-native-image-crop-picker": "^0.17.3",
 		"react-native-message-bar": "^2.0.4",
 		"react-native-navigation": "^1.1.229",
 		"react-native-parallax-scroll-view": "^0.19.0",

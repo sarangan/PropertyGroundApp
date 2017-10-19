@@ -616,6 +616,7 @@ export default class NewProperty extends Component{
             placeholder="Address"
             placeholderTextColor="#A9ACBC"
             ref={component => this.address_1 = component}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -625,6 +626,7 @@ export default class NewProperty extends Component{
             placeholder="Address 2"
             placeholderTextColor="#A9ACBC"
             ref={component => this.address_2 = component}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -634,6 +636,7 @@ export default class NewProperty extends Component{
             placeholder="City"
             placeholderTextColor="#A9ACBC"
             ref={component => this.city = component}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -643,6 +646,7 @@ export default class NewProperty extends Component{
             placeholder="Postal code"
             placeholderTextColor="#A9ACBC"
             ref={component => this.postalcode = component}
+            underlineColorAndroid='transparent'
           />
 
 
@@ -665,6 +669,7 @@ export default class NewProperty extends Component{
             placeholder="Report date (dd/mm/yyyy)"
             placeholderTextColor="#A9ACBC"
             ref={component => this.report_date = component}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Additional info</Text>
@@ -677,6 +682,7 @@ export default class NewProperty extends Component{
             multiline = {true}
             numberOfLines = {5}
             ref={component => this.description = component}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Report image</Text>

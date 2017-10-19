@@ -14,7 +14,7 @@ import {
   TouchableHighlight,
   ScrollView,
   Image,
-  AlertIOS,
+  Alert,
   ActivityIndicator,
   AsyncStorage
 } from 'react-native';
@@ -274,7 +274,7 @@ export default class EditPropertyInfo extends Component{
         this.setState({
           property_id: helper.generateUid()
         }, () => {
-          AlertIOS.alert(
+          Alert.alert(
            'PropertyGround',
            'Please try again!'
           );
@@ -388,6 +388,7 @@ export default class EditPropertyInfo extends Component{
             placeholder="Address"
             placeholderTextColor="#A9ACBC"
             value={this.state.address_1}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -397,6 +398,7 @@ export default class EditPropertyInfo extends Component{
             placeholder="Address 2"
             placeholderTextColor="#A9ACBC"
             value={this.state.address_2}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -406,6 +408,7 @@ export default class EditPropertyInfo extends Component{
             placeholder="City"
             placeholderTextColor="#A9ACBC"
             value={this.state.city}
+            underlineColorAndroid='transparent'
           />
           <View style={styles.divider}></View>
 
@@ -415,6 +418,7 @@ export default class EditPropertyInfo extends Component{
             placeholder="Postal code"
             placeholderTextColor="#A9ACBC"
             value={this.state.postalcode}
+            underlineColorAndroid='transparent'
           />
 
 
@@ -437,6 +441,7 @@ export default class EditPropertyInfo extends Component{
             placeholder="Report date (dd/mm/yyyy)"
             placeholderTextColor="#A9ACBC"
             value={this.state.report_date}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Additional info</Text>
@@ -449,6 +454,7 @@ export default class EditPropertyInfo extends Component{
             multiline = {true}
             numberOfLines = {5}
             value={this.state.description}
+            underlineColorAndroid='transparent'
           />
 
           <Text style={styles.divTxt}>Report image</Text>

@@ -96,8 +96,9 @@ export default class GenCommentBlock extends Component {
               placeholder="Enter your comment"
               placeholderTextColor="#A9ACBC"
               multiline = {true}
-              numberOfLines = {15}
+              numberOfLines = {4}
               value={this.props.item.comment}
+              underlineColorAndroid='transparent'
             />
           </View>
 
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     left: 0,
   },
   txtInput:{
-    height: SCREENWIDTH,
+    height: 80,
     // paddingLeft: 10,
     // paddingRight: 10,
     backgroundColor: '#F6F6F8',

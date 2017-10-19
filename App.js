@@ -20,6 +20,7 @@ import SingleItem from './pages/SingleItem';
 import MeterItem from './pages/MeterItem';
 import GeneralComment from './pages/GeneralComment';
 import ImageLightBox from './components/ImageLightBox';
+import GeneralPhoto from './pages/GeneralPhoto';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -36,6 +37,7 @@ Navigation.registerComponent('PropertyGround.SingleItem', ()=> SingleItem);
 Navigation.registerComponent('PropertyGround.MeterItem', ()=> MeterItem);
 Navigation.registerComponent('PropertyGround.GeneralComment', ()=> GeneralComment);
 Navigation.registerComponent('PropertyGround.ImageLightBox', ()=> ImageLightBox);
+Navigation.registerComponent('PropertyGround.GeneralPhoto', ()=> GeneralPhoto);
 
 
   const navigatorStyle = {

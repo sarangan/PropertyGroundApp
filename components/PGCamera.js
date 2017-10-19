@@ -15,11 +15,12 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   NativeModules,
-  ImagePickerIOS,
+  ScrollView,
   Animated,
   Easing,
 } from 'react-native';
 import Camera from 'react-native-camera';
+import ImagePicker from 'react-native-image-crop-picker';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -36,7 +37,9 @@ export default class PGCamera extends Component{
       flashMode: Camera.constants.FlashMode.off,
       imagePath: '',
       spinValue: new Animated.Value(0),
-      startCapture: false
+      startCapture: false,
+      lastestPhotos: [],
+      showPhotos: 5
     };
 
   }
@@ -50,7 +53,7 @@ export default class PGCamera extends Component{
       this.camera.capture({metadata: options})
         .then(
          (data) => {
-          // console.log(data);
+           console.log(data);
            this.setState({
              imagePath: data.path,
              spinValue: new Animated.Value(0),
@@ -58,6 +61,12 @@ export default class PGCamera extends Component{
            }, ()=>{
              // call the method TODO
              this.props.capture(this.state.imagePath);
+
+             let lastestPhotos = this.state.lastestPhotos;
+             lastestPhotos.push(this.state.imagePath);
+             this.setState({
+               lastestPhotos
+             });
 
            });
 
@@ -94,14 +103,31 @@ export default class PGCamera extends Component{
 
   callPhotoLib(){
 
-    ImagePickerIOS.openSelectDialog({}, imageUri => {
+    /*ImagePickerIOS.openSelectDialog({}, imageUri => {
       console.log(imageUri);
 
       this.setState({ imagePath: imageUri }, ()=>{
         //call method TODO
          this.props.capture(this.state.imagePath);
       });
-    }, error => console.log(error));
+    }, error => console.log(error));*/
+
+    ImagePicker.openPicker({
+      multiple: true
+    }).then(images => {
+      console.log(images);
+      if(Array.isArray(images)){
+        images.map((img) =>{
+           this.props.capture(img.path);
+           let lastestPhotos = this.state.lastestPhotos;
+           lastestPhotos.push(img.path);
+           this.setState({
+             lastestPhotos
+           });
+
+        });
+      }
+    });
 
 
   }
@@ -207,6 +233,42 @@ export default class PGCamera extends Component{
    return img;
   }
 
+  //show lastest photos
+  getLastestPhotos = () =>{
+
+    let photos = [];
+    this.state.lastestPhotos.map((photo, index) =>{
+      photos.push(
+        <TouchableHighlight underlayColor="transparent" onPress={()=>this.openImage(photo, index)}>
+        <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri: photo }} />
+      </TouchableHighlight>
+      );
+    });
+
+    return photos;
+
+  }
+
+  openImage = (photo, index) =>{
+    console.log(photo);
+    console.log(index);
+    this.props.navigator.showLightBox({
+      screen: "PropertyGround.ImageLightBox",
+        passProps: {
+          imagePath: photo,
+          images: JSON.stringify(this.state.lastestPhotos),
+          index: index
+        },
+        style: {
+         backgroundBlur: "dark",
+          //backgroundColor: "#ff000080",
+          backgroundColor: "#333333",
+          tapBackgroundToDismiss: true
+       }
+    });
+
+  }
+
   //render crop image module
   renderCropImage(){
    return(
@@ -258,6 +320,12 @@ export default class PGCamera extends Component{
 
 
         <View style={styles.actionbarWrapper}>
+
+          <View style={{backgroundColor: 'rgba(0,189,219, 0.28)', flex: 0, marginBottom: 5, flexDirection: 'row', }}>
+            <ScrollView horizontal={true}>
+            {this.getLastestPhotos()}
+          </ScrollView>
+          </View>
 
           <View style={styles.camActionBar}>
 

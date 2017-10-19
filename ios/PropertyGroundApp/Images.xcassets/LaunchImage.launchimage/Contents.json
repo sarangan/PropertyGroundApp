@@ -127,34 +127,6 @@
     {
       "filename" : "Default-750@2x~iphone6-portrait_750x1334.png",
       "unassigned" : true
-    },
-    {
-      "filename" : "Default-1242@3x~iphone6s-landscape_2208x1242.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default-1242@3x~iphone6s-portrait_1242x2208.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default-Landscape@2x~ipad_2048x1496.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default-Landscape@2x~ipad_2048x1536.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default-Portrait@2x~ipad_1536x2008.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default-Portrait@2x~ipad_1536x2048.png",
-      "unassigned" : true
-    },
-    {
-      "filename" : "Default~ipad.png",
-      "unassigned" : true
     }
   ],
   "info" : {

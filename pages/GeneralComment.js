@@ -14,7 +14,7 @@ import {
   TouchableHighlight,
   ScrollView,
   Image,
-  AlertIOS,
+  Alert,
   ActivityIndicator,
   AsyncStorage,
 } from 'react-native';
@@ -231,6 +231,7 @@ export default class GeneralComment extends Component{
             multiline = {true}
             numberOfLines = {15}
             value={this.state.comment}
+            underlineColorAndroid='transparent'
           />
 
         </ScrollView>

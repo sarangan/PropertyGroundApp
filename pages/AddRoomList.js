@@ -480,13 +480,7 @@ export default class AddRoomList extends Component{
           ListFooterComponent={this.renderFooter}
           ItemSeparatorComponent={this.renderSeparator}
           extraData={this.state}
-          //ListHeaderComponent={this.renderHeader}
-          //onEndReached={this.handleLoadMore}
-          //onEndReachedThreshold={0.5}
-          //refreshing={this.state.refreshing}
-          //onRefresh={this.handleRefresh}
           ListEmptyComponent={this.renderEmptyData}
-          //horizontal={false}
         />
 
         <MessageBarAlert ref='alert' />
