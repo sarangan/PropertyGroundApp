@@ -26,6 +26,9 @@ import auth from '../keys/auth';
 
 import helper from '../helper/helper';
 import FilterPicker from "../components/FilterPicker";
+import DatePicker from 'react-native-datepicker';
+
+var ImagePicker = require('react-native-image-picker');
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
@@ -227,6 +230,29 @@ export default class NewProperty extends Component{
             };
             properties_info.push(data_property_info);
 
+            //----------------create sync table-----------------------
+            AsyncStorage.getItem(TableKeys.SYNC, (err, result) => {
+              let sync = JSON.parse(result) || {};
+
+              let data_sync = {
+                sync_id: helper.generateUid(),
+                property_id: this.state.property_id,
+                sync: 1,
+                send_mail: 1,
+                mb_createdAt: new Date().toLocaleDateString(),
+              };
+
+              sync[this.state.property_id] = data_sync;
+
+              AsyncStorage.setItem(TableKeys.SYNC, JSON.stringify(sync), () => {
+                //saved proprty info
+                console.log("saved sync tbl");
+
+              });
+
+            });
+
+
             AsyncStorage.setItem(TableKeys.PROPERTY_INFO, JSON.stringify(properties_info), () => {
               //saved proprty info
               console.log("saved property info tbl");
@@ -347,7 +373,7 @@ export default class NewProperty extends Component{
                                         property_masteritem_link_list.push(data_property_masteritem_link);
 
                                         //----------------subitem-------------------------------
-                                        //TODO
+
                                         this.addSubitem(prop_master_id, company_masteritem_link[i] );
 
                                       } //end com master loop
@@ -603,6 +629,50 @@ export default class NewProperty extends Component{
     })
   }
 
+  //open camera
+  openCamera = () =>{
+    var options = {
+      title: 'Report image',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images'
+      },
+      //allowsEditing: true
+    };
+
+      ImagePicker.showImagePicker(options, (response) => {
+        console.log('Response = ', response);
+
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        }
+        else if (response.error) {
+          console.log('ImagePicker Error: ', response.error);
+        }
+        else if (response.customButton) {
+          //console.log('User tapped custom button: ', response.customButton);
+        }
+        else {
+
+          this.setState({
+            image_url: response.uri
+          });
+
+        }
+      });
+
+  }
+
+  getImage = () =>{
+    let img = <Image source={require('../images/camera.png')} style={styles.camera_img}/>;
+    if(this.state.image_url){
+
+      img = <Image source={{ uri: this.state.image_url }} style={{width: SCREENWIDTH, height: SCREENWIDTH * 0.75, resizeMode: 'cover'}} />
+    }
+
+    return (img);
+  }
+
   render(){
 
     return(
@@ -661,15 +731,44 @@ export default class NewProperty extends Component{
 
           <View style={styles.divider}></View>
 
-
-
-          <TextInput
+          {/* <TextInput
             style={styles.txtInput}
             onChangeText={(text) => this.setState({report_date:text})}
             placeholder="Report date (dd/mm/yyyy)"
             placeholderTextColor="#A9ACBC"
             ref={component => this.report_date = component}
             underlineColorAndroid='transparent'
+          /> */}
+
+          <DatePicker
+              style={{width: SCREENWIDTH - 20, borderWidth: 0, marginTop: 5,
+              marginBottom : 5,}}
+              date={this.state.report_date}
+              mode="date"
+              placeholder="Select Report date"
+              format="DD-MM-YYYY"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  right: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 25,
+                  marginRight: 25,
+                  height: 45,
+                  backgroundColor: '#FFFFFF',
+                  fontSize: 15,
+                  borderWidth: 0,
+                  textAlign: 'left',
+                  alignItems: 'flex-start',
+                }
+
+              }}
+              onDateChange={(date) => {this.setState({report_date: date})}}
           />
 
           <Text style={styles.divTxt}>Additional info</Text>
@@ -686,9 +785,9 @@ export default class NewProperty extends Component{
           />
 
           <Text style={styles.divTxt}>Report image</Text>
-          <TouchableHighlight underlayColor="transparent">
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.openCamera()}>
             <View style={styles.camWrapper}>
-              <Image source={require('../images/camera.png')} style={styles.camera_img}/>
+              {this.getImage()}
               <Text style={styles.helpTxt}>Tab here to add cover image</Text>
             </View>
           </TouchableHighlight>

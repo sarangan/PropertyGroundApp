@@ -39,7 +39,7 @@ export default class Simage extends Component{
           style={[this.props.style, { justifyContent: 'center', alignItems: 'center' }]}
         >
           <ActivityIndicator animating={ this.state.isLoading }/>
-          {this.props.sChild}
+          {this.props.children}
         </ImageBackground>
       );
     }
@@ -49,7 +49,7 @@ export default class Simage extends Component{
           source={require('../images/err_image.png')}
           style={[this.props.style, { justifyContent: 'center', alignItems: 'center', resizeMode: 'contain' }]}
         >
-          {this.props.sChild}
+          {this.props.children}
         </ImageBackground>
       );
     }

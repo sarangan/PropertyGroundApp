@@ -67,7 +67,9 @@ export default class SingleItem extends Component{
       type : this.props.type, //SUB ITEM METER GENERAL,
       description: false,
       comment: '',
-      isCamera: false
+      isCamera: false,
+      canSelect: false,
+      selected: [],
     };
 
     //this.closeCamera = this.closeCamera.bind(this);
@@ -363,21 +365,137 @@ export default class SingleItem extends Component{
 
     }
 
-    this.props.navigator.showLightBox({
-      screen: "PropertyGround.ImageLightBox",
-        passProps: {
-          imagePath: photo,
-          images: JSON.stringify(photos),
-          index: index
-        },
-        style: {
-         backgroundBlur: "dark",
-          //backgroundColor: "#ff000080",
-          backgroundColor: "#333333",
-          tapBackgroundToDismiss: true
+    if(this.state.canSelect == false){
+
+      this.props.navigator.showLightBox({
+        screen: "PropertyGround.ImageLightBox",
+          passProps: {
+            imagePath: photo,
+            images: JSON.stringify(photos),
+            index: index
+          },
+          style: {
+           backgroundBlur: "dark",
+            //backgroundColor: "#ff000080",
+            backgroundColor: "#333333",
+            tapBackgroundToDismiss: true
+         }
+      });
+
+    }
+    else{
+
+      // select image
+      let selectedItems = this.state.selected;
+      let tempIndex = selectedItems.indexOf(photo.photo_id);
+
+      if( tempIndex == -1 ){
+        selectedItems.push(photo.photo_id);
+      }
+      else{
+        selectedItems.splice(tempIndex, 1);
+      }
+
+      this.setState({
+        selected: selectedItems
+      });
+
+    }
+
+
+  }
+
+  deletePhoto = () =>{
+
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      let property_photos = photos[this.state.property_id] || {};
+      let master_photos = property_photos[this.state.parent_id] || { };
+
+      let photos_array = this.state.photos;
+
+
+      for(let i =0, l = this.state.selected.length; i < l; i++){
+
+
+       for(let j =0, pl = photos_array.length; j < pl; j++){
+
+          if(this.state.selected[i] == photos_array[j].photo_id ){
+            //we found the photo id so can delete it
+            photos_array.splice(j, 1);
+            break;
+
+          }
+
        }
+
+      }
+
+      master_photos[this.state.item_id] = photos_array;
+      property_photos[this.state.parent_id] = master_photos;
+      photos[this.state.property_id] = property_photos;
+
+      this.setState({
+        photos: photos_array,
+        canSelect: false,
+        selected: [],
+
+      }, ()=>{
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(photos), () => {
+          console.log('saved photos');
+          console.log(photos);
+        });
+
+      });
+
+
+
     });
 
+  }
+
+  getSelectImage(item){
+    let selectIcon = null;
+    if(this.state.canSelect && this.state.selected.indexOf(item.photo_id) != -1 ){
+      selectIcon = <Image style={ styles.selectIcon } source={ require('../images/selected_img.png') } />;
+    }
+    else if(this.state.canSelect == true){
+      selectIcon = <Image style={ styles.selectIcon } source={ require('../images/no_select_img.png') } />;
+    }
+    else if(this.state.canSelect == false){
+      selectIcon = null;
+    }
+
+    return selectIcon;
+  }
+
+  // make it select
+  makeItSelect(item){
+    console.log('long press');
+
+    this.setState({
+      canSelect: true,
+      selected: [],
+    }, ()=>{
+      this.openImage(item);
+    });
+  }
+
+  cancelSelect = () =>{
+    this.setState({
+      canSelect: false,
+      selected: [],
+    });
+  }
+
+  selectImage = () =>{
+    this.setState({
+      canSelect: true,
+      selected: [],
+    });
   }
 
   renderFooter = () => {
@@ -431,12 +549,15 @@ export default class SingleItem extends Component{
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)} >
+    <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)}
+      onLongPress={()=>this.makeItSelect(item)}>
         <View style={styles.rowContainer}>
            <Simage
             source={item.img_url}
             style={styles.gridImg}
-          />
+          >
+            {this.getSelectImage(item)}
+          </Simage>
 
         </View>
      </TouchableHighlight>
@@ -512,7 +633,22 @@ export default class SingleItem extends Component{
             underlineColorAndroid='transparent'
           />
 
-          <Text style={styles.divTxt}>Photos</Text>
+          <View style={styles.photoDivTxt}>
+            <Text style={styles.photoTxt}>Photos</Text>
+            {!this.state.canSelect &&
+              <Text style={styles.photoTxt} onPress={()=>this.selectImage()}>Select</Text>
+            }
+            {this.state.canSelect &&
+              <Text style={styles.photoTxt} onPress={()=>this.cancelSelect()}>Cancel</Text>
+            }
+            {this.state.canSelect &&
+              <TouchableHighlight onPress={()=>this.deletePhoto()} underlayColor="transparent">
+              <Image style={{width: 20, height: 20, resizeMode: 'contain'}} source={require('../images/delete.png')} />
+              </TouchableHighlight>
+            }
+
+          </View>
+
           {this.getPhotos()}
 
         </ScrollView>
@@ -524,14 +660,14 @@ export default class SingleItem extends Component{
           </View>
         }
 
-        <MessageBarAlert ref='alert' />
-
         <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
           <Image
             source={require('../images/gen_camera.png')}
             style = {styles.genIcons}
           />
         </TouchableHighlight>
+
+        <MessageBarAlert ref='alert' />
 
       </View>
 
@@ -540,7 +676,7 @@ export default class SingleItem extends Component{
 
   renderCamera =() =>{
     return(
-      <PGCamera close={this.closeCamera} capture={this.snapPhoto} navigator={this.props.navigator}/>
+      <PGCamera close={this.closeCamera} capture={this.snapPhoto} navigator={this.props.navigator} />
     );
   }
 
@@ -576,6 +712,25 @@ const styles = StyleSheet.create({
     textAlign: "left",
     padding: 10,
   },
+  photoDivTxt:{
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    backgroundColor: "#F7F7F9",
+    width: SCREENWIDTH,
+    padding: 10,
+  },
+  photoTxt:{
+    backgroundColor: "#F7F7F9",
+    color: "#81C5D3",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "left",
+    flex: 0,
+    justifyContent: 'flex-start'
+  },
+
   txtInput:{
     height: 45,
     paddingLeft: 10,
@@ -666,9 +821,9 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   roundBox:{
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#3a8bbb',
     marginRight: 10,
     justifyContent: 'center',
@@ -678,10 +833,17 @@ const styles = StyleSheet.create({
     right: '2%'
   },
   genIcons:{
-    width: 22,
-    height: 22,
+    width: 30,
+    height: 30,
     resizeMode: 'contain',
     alignSelf: 'center',
   },
+  selectIcon: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    width: 18,
+    height: 18
+  }
 
 });

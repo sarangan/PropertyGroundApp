@@ -3,12 +3,17 @@ package com.propertygroundapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.rnim.rn.audio.ReactNativeAudioPackage;
+import com.rnim.rn.audio.ReactNativeAudioPackage;
+import com.imagepicker.ImagePickerPackage;
+import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.reactnativenavigation.NavigationReactPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.futurice.rctaudiotoolkit.AudioPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +30,13 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ReactNativeAudioPackage(),
+            new ReactNativeAudioPackage(),
+            new ImagePickerPackage(),
+            new RCTCameraPackage(),
             new PickerPackage(),
             new NavigationReactPackage()
+            new AudioPackage()
       );
     }
   };

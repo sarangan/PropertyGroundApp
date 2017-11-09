@@ -6,7 +6,6 @@ let tablekeys = {
   COMPANY_METER_LINK: "company_meter_link",
   COMPANY_GENERAL_CONDITION_LINK: "company_general_condition_link",
   SYNC: "sync",
-  CURRENT_SYNC: "current_sync",
 
   PROPERTY: "property",
   PROPERTY_INFO: "property_info",

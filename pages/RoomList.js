@@ -1,5 +1,5 @@
 /**
- * Sanppar React Native App
+ * PG React Native App
  * https://sph.com.sg
  * @sara
  * Inspections page
@@ -18,7 +18,9 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
-  Switch
+  Switch,
+  Animated,
+  Easing,
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -71,7 +73,11 @@ export default class RoomList extends Component{
       imgErr: false,
       height: 0,
       meterlist: [],
-      photos: []
+      photos: [],
+      singantes_list : ['Tenant', 'Lanlord', 'Clerk'],
+      sig_height: 0,
+      spinValue: new Animated.Value(0),
+      meter_spinValue: new Animated.Value(0),
     };
 
   }
@@ -335,7 +341,6 @@ export default class RoomList extends Component{
         else{
 
 
-          let items = Object.keys(master_photos);
           let num_photos = 0;
           for(let key in master_photos){
             num_photos  += master_photos[key].length;
@@ -363,6 +368,16 @@ export default class RoomList extends Component{
 
       let master_photos = this.state.photos[prop_master_id];
       if(master_photos.hasOwnProperty(item.prop_meter_id)){
+
+        // let items = Object.keys(master_photos);
+        // let num_photos = 0;
+        // for(let key in master_photos){
+        //   num_photos  += master_photos[key].length;
+        // }
+        //
+        // photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
+
+
         let num_photos = master_photos[item.prop_meter_id].length;
         photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
       }
@@ -453,20 +468,85 @@ export default class RoomList extends Component{
 
     }
     else if(item.com_type == 'METER'){
-      if(this.state.height == 180){
-        LayoutAnimation.easeInEaseOut();
-        this.setState(
-          {
-            height: 0
-          });
+      if(this.state.height == 200){
+
+        Animated.timing(
+          this.state.meter_spinValue,
+               {
+                toValue: 0,
+                duration: 200,
+                easing: Easing.linear
+               }
+           ).start( ()=>{
+             LayoutAnimation.easeInEaseOut();
+             this.setState(
+               {
+                 height: 0
+               });
+           });
+
       }
       else{
-        LayoutAnimation.spring();
-        this.setState(
-          {
-            height: 180
+        Animated.timing(
+          this.state.meter_spinValue,
+               {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear
+               }
+           ).start( ()=>{
+                LayoutAnimation.spring();
+                this.setState(
+                  {
+                    height: 200
+                  });
+
           });
       }
+    }
+    else if(item.type == 'SIG'){
+
+      if(this.state.sig_height == 140){
+
+        Animated.timing(
+          this.state.spinValue,
+               {
+                toValue: 0,
+                duration: 200,
+                easing: Easing.linear
+               }
+           ).start( ()=>{
+
+             LayoutAnimation.easeInEaseOut();
+             this.setState(
+               {
+                 sig_height: 0,
+
+               });
+
+        });
+
+
+      }
+      else{
+        Animated.timing(
+          this.state.spinValue,
+               {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear
+               }
+           ).start( ()=>{
+
+             LayoutAnimation.spring();
+             this.setState({
+               sig_height: 140
+             });
+
+           });
+      }
+
+
     }
 
 
@@ -489,6 +569,7 @@ export default class RoomList extends Component{
     });
   }
 
+  //get sub meters
   getMeters  = (room_item) =>{
       return(
         <View style={{
@@ -505,7 +586,7 @@ export default class RoomList extends Component{
                     onPress={()=>this.openMeter(item, room_item)} key={i+1}>
 
                       <View style={styles.rowWrapper}>
-                        <View  style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
+                        <View style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
                           <Text style={styles.subtitle}>{item.meter_name}</Text>
                           <View style={{justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', flex: 1}}>
                             <Text style={styles.photoTxt}>{this.getMeterPhotoStatus(item, room_item.prop_master_id)}</Text>
@@ -525,7 +606,96 @@ export default class RoomList extends Component{
       );
   }
 
+  getSigns  = (room_item) =>{
+
+      return(
+        <View style={{
+          overflow: 'hidden',
+          flexDirection: 'column',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: this.state.sig_height }}>
+          {
+            this.state.singantes_list.map( (item, i) =>{
+              return(
+                  <TouchableHighlight underlayColor="transparent" style={{paddingLeft: 15, paddingRight: 10, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}}
+                    onPress={()=>this.openSig(item, room_item)} key={i+1}>
+
+                      <View style={styles.rowWrapper}>
+                        <View  style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
+                          <Text style={styles.subtitle}>{item}</Text>
+                          <View style={{justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', flex: 1}}>
+                            <Image
+                              source={require('../images/arrow_right_colored.png')}
+                              style = {styles.arrowRight}
+                            />
+                          </View>
+                        </View>
+                      </View>
+
+                    </TouchableHighlight>
+                    )
+            })
+          }
+        </View>
+      );
+  }
+
+  openSig = (sig, room_item) =>{
+
+    this.props.navigator.push({
+      screen: 'PropertyGround.Signaturepad',
+      title: 'Signaturepad',
+      animated: true,
+      animationType: 'fade',
+      backButtonTitle: "Back",
+      passProps: {
+        property_id: this.state.property_id,
+        type: sig
+      },
+    });
+  }
+
+  _getArrow = (type, com_type) =>{
+
+
+       let img = <Image
+         source={require('../images/arrow_right.png')}
+         style = {styles.arrowRight}
+       />
+
+       if(type == 'SIG'){
+         let spin = this.state.spinValue.interpolate({
+              inputRange: [0,1],
+              outputRange: ['0deg', '90deg']
+          });
+
+         img = <Animated.Image
+           source={require('../images/arrow_right.png')}
+           style = {[styles.arrowRight, {transform: [{rotate: spin}] }  ]}
+         />
+       }
+
+       if(com_type ==  'METER'){
+         let spin = this.state.meter_spinValue.interpolate({
+              inputRange: [0,1],
+              outputRange: ['0deg', '90deg']
+          });
+
+         img = <Animated.Image
+           source={require('../images/arrow_right.png')}
+           style = {[styles.arrowRight, {transform: [{rotate: spin}] }  ]}
+         />
+       }
+
+    return(img);
+
+  }
+
   _renderItem = ({item}) => (
+
+
 
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.openLink(item)}>
 
@@ -534,16 +704,18 @@ export default class RoomList extends Component{
               <Text style={styles.title}>{item.name}</Text>
               <View style={styles.imagePhotosWrapper}>
                 <Text style={styles.photoTxt}>{this.getPhotoStatus(item)}</Text>
-                <Image
-                  source={require('../images/arrow_right.png')}
-                  style = {styles.arrowRight}
-                />
+
+                {this._getArrow(item.type, item.com_type)}
               </View>
 
             </View>
 
             {item.com_type == 'METER' &&
               this.getMeters(item)
+            }
+
+            {item.type == 'SIG' &&
+              this.getSigns(item)
             }
 
           </View>
@@ -567,14 +739,14 @@ export default class RoomList extends Component{
             </View>
           </TouchableHighlight>
 
-          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem}
+          {/* <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem}
              >
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
               <Text style={styles.actionBarTxt}>Lock</Text>
               <Image style={ styles.actionBarIcon } source={require('../images/lock.png')} >
               </Image>
             </View>
-          </TouchableHighlight>
+          </TouchableHighlight> */}
 
           <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.callSortList()}
             >
@@ -593,6 +765,8 @@ export default class RoomList extends Component{
 
 
   renderList(){
+
+
     let _keyExtractor = (item, index) => index;
     return(
       <FlatList
@@ -775,17 +949,21 @@ const styles = StyleSheet.create({
   actionBar:{
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     flexWrap: 'wrap',
     alignItems: 'center',
     width: SCREENWIDTH,
     height: 40,
-    backgroundColor: '#F9F9F9'
+    backgroundColor: '#F9F9F9',
+    paddingLeft: 20,
+    paddingRight: 20,
+
   },
   actionBarItem:{
     // width: 30,
     // height: 30
     alignContent: 'center',
+    padding: 5
   },
   actionBarIcon: {
     alignSelf: 'center',
@@ -811,6 +989,8 @@ const styles = StyleSheet.create({
     // paddingBottom:1,
     // paddingTop:2,
     marginRight: 2,
-    color: '#333333'
+    color: '#333333',
+    fontWeight: '600',
+    marginRight: 5
   },
 });

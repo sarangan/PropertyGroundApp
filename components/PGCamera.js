@@ -79,6 +79,17 @@ export default class PGCamera extends Component{
 
   }
 
+  //delete the image from stack
+  deleteImg = (index) =>{
+    //let img = this.state.images[this.state.pageIndex];
+
+    let images = this.state.lastestPhotos;
+    images.splice(index, 1);
+
+    this.props.delete(index);
+
+  };
+
   takePicture() {
 
     this.setState({
@@ -428,9 +439,9 @@ const styles = StyleSheet.create({
   },
   camActionCameraIcon: {
     flex: 0,
-    width: 60,
-    height: 60,
-    marginLeft: 20,
+    width: 70,
+    height: 70,
+    //marginLeft: 20,
     //paddingRight: 20
     //marginBottom: 25
   },

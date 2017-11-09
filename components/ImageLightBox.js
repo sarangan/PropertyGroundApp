@@ -49,11 +49,11 @@ export default class ImageLightBox extends Component {
     let img = this.state.images[this.state.pageIndex];
 
     Share.share({
-      message: 'Shared via Snappar',
-      title: 'Snappar',
+      message: 'Shared via PropertyGround',
+      title: 'PropertyGround',
       url: img
     }, {
-      dialogTitle: 'Snappar - Share image',
+      dialogTitle: 'PropertyGround - Share image',
     })
     .then(
         this._showResult
@@ -61,6 +61,17 @@ export default class ImageLightBox extends Component {
     .catch(err => console.log(err))
 
   }
+
+  //delete the image from stack
+  deleteImg = () =>{
+    //let img = this.state.images[this.state.pageIndex];
+
+    let images = this.state.images;
+    images.splice(this.state.pageIndex, 1);
+
+    this.props.delete(this.state.pageIndex);
+
+  };
 
   getSlids =() =>{
 
@@ -104,7 +115,7 @@ export default class ImageLightBox extends Component {
             <Image style={styles.actionCloseImg} source={require('../images/back.png')} />
           </TouchableHighlight>
 
-          <TouchableHighlight underlayColor="transparent" onPress={()=>this.shareImg()} style={styles.actionShareWrapper}>
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.shareImg} style={styles.actionShareWrapper}>
             <Image style={styles.actionShareImg} source={require('../images/share_img.png')} />
           </TouchableHighlight>
 
@@ -117,7 +128,7 @@ export default class ImageLightBox extends Component {
               loop={true}
               index={this.state.index}
               autoplay={true}
-              autoplayTimeout={6}
+              autoplayTimeout={12}
               onMomentumScrollEnd={(event, state) => {
               this.setState({
                 pageIndex: state.index,

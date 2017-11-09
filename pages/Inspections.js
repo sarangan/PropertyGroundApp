@@ -78,14 +78,7 @@ export default class Inspections extends Component{
         //     },
         // });
 
-        this.props.navigator.push({
-          screen: 'PropertyGround.NewProperty',
-          title: 'Add new property',
-          animated: true,
-          //animationType: 'fade',
-           backButtonTitle: "Back",
-          passProps: {}
-        });
+        this.addNewProperty()
 
 
 
@@ -95,6 +88,17 @@ export default class Inspections extends Component{
       }
 
     }
+  }
+
+  addNewProperty =() =>{
+    this.props.navigator.push({
+      screen: 'PropertyGround.NewProperty',
+      title: 'Add new property',
+      animated: true,
+      //animationType: 'fade',
+       backButtonTitle: "Back",
+      passProps: {}
+    });
   }
 
 
@@ -390,6 +394,13 @@ export default class Inspections extends Component{
           //horizontal={false}
         />
 
+        <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.addNewProperty()}>
+          <Image
+            source={require('../images/add.png')}
+            style = {styles.genIcons}
+          />
+        </TouchableHighlight>
+
       </View>
     );
   }
@@ -480,5 +491,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 21,
     borderLeftColor: 'transparent',
     borderTopColor: '#81C5D3',
+  },
+  roundBox:{
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#3a8bbb',
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: '5%',
+    right: '2%'
+  },
+  genIcons:{
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
 });

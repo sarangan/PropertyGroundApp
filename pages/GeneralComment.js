@@ -1,8 +1,8 @@
 /**
- * Sanppar React Native App
+ * PG React Native App
  * https://sph.com.sg
  * @sara
- * Singlew item page
+ * General comment
  */
 import React, {Component} from 'react';
 import {
@@ -82,7 +82,7 @@ export default class GeneralComment extends Component{
     }
   }
 
- componentWillUnmount () {
+ componentWillUnmount() {
    this.handleSave(false);
    // Remove the alert located on this master page from te manager
    MessageBarManager.unregisterMessageBar();

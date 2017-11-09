@@ -21,6 +21,8 @@ import MeterItem from './pages/MeterItem';
 import GeneralComment from './pages/GeneralComment';
 import ImageLightBox from './components/ImageLightBox';
 import GeneralPhoto from './pages/GeneralPhoto';
+import Signaturepad from './components/Signaturepad';
+import GeneralAudio from './pages/GeneralAudio';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -38,6 +40,8 @@ Navigation.registerComponent('PropertyGround.MeterItem', ()=> MeterItem);
 Navigation.registerComponent('PropertyGround.GeneralComment', ()=> GeneralComment);
 Navigation.registerComponent('PropertyGround.ImageLightBox', ()=> ImageLightBox);
 Navigation.registerComponent('PropertyGround.GeneralPhoto', ()=> GeneralPhoto);
+Navigation.registerComponent('PropertyGround.Signaturepad', ()=> Signaturepad);
+Navigation.registerComponent('PropertyGround.GeneralAudio', ()=> GeneralAudio);
 
 
   const navigatorStyle = {

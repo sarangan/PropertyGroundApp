@@ -26,12 +26,16 @@ import auth from '../keys/auth';
 
 import helper from '../helper/helper';
 import FilterPicker from "../components/FilterPicker";
+import DatePicker from 'react-native-datepicker';
+
+var ImagePicker = require('react-native-image-picker');
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
+
 
 export default class EditPropertyInfo extends Component{
 
@@ -123,13 +127,13 @@ export default class EditPropertyInfo extends Component{
         if(properties_info[i].property_id == this.state.property_id ){
 
           this.setState({
-            address_1: properties_info[i].address_1,
-            address_2: properties_info[i].address_2,
-            city: properties_info[i].city,
-            postalcode: properties_info[i].postalcode,
-            report_type: properties_info[i].report_type,
-            report_date: properties_info[i].report_date,
-            image_url: properties_info[i].image_url,
+            address_1: properties_info[i].address_1 || null,
+            address_2: properties_info[i].address_2 || null,
+            city: properties_info[i].city || null,
+            postalcode: properties_info[i].postalcode || null,
+            report_type: properties_info[i].report_type || null,
+            report_date: properties_info[i].report_date || null,
+            image_url: properties_info[i].image_url || '',
             locked : properties_info[i].locked,
             default_report_type:  properties_info[i].report_type,
           });
@@ -220,6 +224,7 @@ export default class EditPropertyInfo extends Component{
               console.log("saved property info tbl");
 
               // save other tables -------------------------
+
 
               this.setState({
                 isSending: false,
@@ -375,6 +380,52 @@ export default class EditPropertyInfo extends Component{
     })
   }
 
+  //open camera
+  openCamera = () =>{
+    var options = {
+      title: 'Report image',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images'
+      },
+      //allowsEditing: true
+    };
+
+      ImagePicker.showImagePicker(options, (response) => {
+        //console.log('Response = ', response);
+
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        }
+        else if (response.error) {
+          console.log('ImagePicker Error: ', response.error);
+        }
+        else if (response.customButton) {
+          //console.log('User tapped custom button: ', response.customButton);
+        }
+        else {
+
+          this.setState({
+            image_url: response.uri//'data:image/jpeg;base64,' + response.data //response.uri
+          });
+
+        }
+      });
+
+
+
+  }
+
+  getImage = () =>{
+    let img = <Image source={require('../images/camera.png')} style={styles.camera_img}/>;
+    if(this.state.image_url){
+
+      img = <Image source={{ uri: this.state.image_url }} style={{width: SCREENWIDTH, height: SCREENWIDTH * 0.75, resizeMode: 'cover'}} />
+    }
+
+    return (img);
+  }
+
   render(){
 
     return(
@@ -433,15 +484,44 @@ export default class EditPropertyInfo extends Component{
 
           <View style={styles.divider}></View>
 
-
-
-          <TextInput
+          {/* <TextInput
             style={styles.txtInput}
             onChangeText={(text) => this.setState({report_date:text})}
             placeholder="Report date (dd/mm/yyyy)"
             placeholderTextColor="#A9ACBC"
             value={this.state.report_date}
             underlineColorAndroid='transparent'
+          /> */}
+
+          <DatePicker
+              style={{width: SCREENWIDTH - 20, borderWidth: 0, marginTop: 5,
+              marginBottom : 5,}}
+              date={this.state.report_date}
+              mode="date"
+              placeholder="Select Report date"
+              format="DD-MM-YYYY"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  right: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 25,
+                  marginRight: 25,
+                  height: 45,
+                  backgroundColor: '#FFFFFF',
+                  fontSize: 15,
+                  borderWidth: 0,
+                  textAlign: 'left',
+                  alignItems: 'flex-start',
+                }
+
+              }}
+              onDateChange={(date) => {this.setState({report_date: date})}}
           />
 
           <Text style={styles.divTxt}>Additional info</Text>
@@ -458,9 +538,9 @@ export default class EditPropertyInfo extends Component{
           />
 
           <Text style={styles.divTxt}>Report image</Text>
-          <TouchableHighlight underlayColor="transparent">
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.openCamera()}>
             <View style={styles.camWrapper}>
-              <Image source={require('../images/camera.png')} style={styles.camera_img}/>
+              {this.getImage()}
               <Text style={styles.helpTxt}>Tab here to add cover image</Text>
             </View>
           </TouchableHighlight>

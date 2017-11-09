@@ -1,8 +1,8 @@
 /**
- * Sanppar React Native App
+ * PG React Native App
  * https://sph.com.sg
  * @sara
- * General condition page
+ * sub items list page
  */
 import React, {Component} from 'react';
 import {
@@ -225,6 +225,31 @@ export default class SubItemsList extends Component{
     this.props.navigator.showModal({
         screen: "PropertyGround.GeneralPhoto",
         title: 'General photos',
+        animationType: 'slide-up',
+        navigatorStyle:{
+          navBarTextColor: 'white',
+          navBarButtonColor: 'white',
+          statusBarTextColorScheme: 'light',
+          navBarBackgroundColor: '#00BDDB',
+          navBarBlur: false,
+          screenBackgroundColor: '#FFFFFF',
+          navBarTransparent: false,
+        },
+        passProps: {
+          property_id: this.state.property_id,
+          general_id : item.prop_subitem_id,
+          prop_master_id: item.prop_master_id,
+        },
+    });
+
+  }
+
+  openGenAudio = (item) =>{
+    console.log(item);
+
+    this.props.navigator.showModal({
+        screen: "PropertyGround.GeneralAudio",
+        title: 'Audios',
         animationType: 'slide-up',
         navigatorStyle:{
           navBarTextColor: 'white',
@@ -762,12 +787,12 @@ export default class SubItemsList extends Component{
                           style = {styles.genIcons}
                         />
                       </TouchableHighlight>
-                      <View style={styles.roundBox}>
+                      <TouchableHighlight underlayColor='transparent' style={styles.roundBox} onPress={()=>this.openGenAudio(item)} >
                         <Image
                           source={require('../images/gen_voice.png')}
                           style = {styles.genIcons}
                         />
-                      </View>
+                      </TouchableHighlight>
                   </View>
                 }
                 {item.type == 'ITEM' &&
