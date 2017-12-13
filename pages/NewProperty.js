@@ -426,12 +426,13 @@ export default class NewProperty extends Component{
                                               durationToHide: 300,
                                               onHide: ()=>{
 
-                                                this.description.setNativeProps({text: ''});
-                                                this.address_1.setNativeProps({text: ''});
-                                                this.address_2.setNativeProps({text: ''});
-                                                this.city.setNativeProps({text: ''});
-                                                this.postalcode.setNativeProps({text: ''});
-                                                this.report_date.setNativeProps({text: ''});
+                                                //TODO must clear the text
+                                                // this.description.setNativeProps({text: ''});
+                                                // this.address_1.setNativeProps({text: ''});
+                                                // this.address_2.setNativeProps({text: ''});
+                                                // this.city.setNativeProps({text: ''});
+                                                // this.postalcode.setNativeProps({text: ''});
+                                                // this.report_date.setNativeProps({text: ''});
 
                                                 this.props.navigator.showModal({
                                                     screen: "PropertyGround.AddRoomList",

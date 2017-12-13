@@ -39,6 +39,7 @@ var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 
+var RNFS = require('react-native-fs');
 
 export default class GeneralAudio extends Component{
 
@@ -74,7 +75,10 @@ export default class GeneralAudio extends Component{
       audios: [],
       audiosfiles: [],
       firstCall: true,
-      filename : helper.generateUid() + '.mp4'
+      //filename : helper.generateUid() + '.mp4'
+      filename : 'test.mp4',
+
+      audioPath : ''
 
     };
 
@@ -96,6 +100,8 @@ export default class GeneralAudio extends Component{
   componentWillUnmount() {
     //console.log('unmount');
     clearInterval(this._progressInterval);
+
+
   }
 
   _shouldUpdateProgressBar() {
@@ -108,14 +114,31 @@ export default class GeneralAudio extends Component{
    this.recorder = null;
    this.lastSeek = 0;
 
+   console.log('document dire')
+   console.log(RNFS.DocumentDirectoryPath);
+
+   // write the file
+    RNFS.exists(RNFS.DocumentDirectoryPath + '/test.mp4')
+    .then((success) => {
+      console.log('FILE exists!');
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+
+
+
    this._reloadPlayer();
    this._reloadRecorder();
+
 
    this._progressInterval = setInterval(() => {
      if (this.player && this._shouldUpdateProgressBar()) {// && !this._dragging) {
        this.setState({progress: Math.max(0, this.player.currentTime) / this.player.duration});
      }
    }, 100);
+
+
  }
 
  _updateState(err) {
@@ -206,6 +229,23 @@ _reloadRecorder() {
     //format: 'ac3', // autodetected
     //encoder: 'aac', // autodetected
   });
+   // .prepare((err, fsPath) => {
+   //     console.log('fsPath', fsPath);
+   //
+   //     this.setState({
+   //       audioPath: fsPath
+   //     });
+   //
+   //     if (err) {
+   //       console.log('error at reloadRecorder():');
+   //       console.log(err);
+   //     }
+   //     this._updateState();
+   //  });
+
+  console.log('file path');
+
+  //console.log(this.recorder._options._recorderId);
 
   this._updateState();
 }

@@ -23,6 +23,7 @@ import ImageLightBox from './components/ImageLightBox';
 import GeneralPhoto from './pages/GeneralPhoto';
 import Signaturepad from './components/Signaturepad';
 import GeneralAudio from './pages/GeneralAudio';
+//import GeneralAudio from './pages/GeneralAudiox';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);

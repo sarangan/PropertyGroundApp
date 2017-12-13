@@ -3,8 +3,8 @@ package com.propertygroundapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.rnim.rn.audio.ReactNativeAudioPackage;
-import com.rnim.rn.audio.ReactNativeAudioPackage;
+import com.rnfs.RNFSPackage;
+import com.reactnativerecordsound.ReactNativeRecordSoundPackager;
 import com.imagepicker.ImagePickerPackage;
 import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
@@ -30,14 +30,19 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new ReactNativeAudioPackage(),
-            new ReactNativeAudioPackage(),
+            new RNFSPackage(),
+            new ReactNativeRecordSoundPackager(),
             new ImagePickerPackage(),
             new RCTCameraPackage(),
             new PickerPackage(),
             new NavigationReactPackage()
             new AudioPackage()
       );
+    }
+
+    @Override
+    protected String getJSMainModuleName() {
+      return "index";
     }
   };
 
