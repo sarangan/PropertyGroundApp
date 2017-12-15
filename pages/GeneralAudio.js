@@ -29,8 +29,7 @@ import auth from '../keys/auth';
 
 import helper from '../helper/helper';
 
-import { Player, Recorder, MediaStates } from 'react-native-audio-toolkit';
-
+import { Recorder, MediaStates } from 'react-native-audio-toolkit';
 import PGAudioPlayer from '../components/PGAudioPlayer';
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
@@ -57,227 +56,263 @@ export default class GeneralAudio extends Component{
   constructor(props){
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+
     this.state = {
       property_id: this.props.property_id,
+      item_id: this.props.general_id,
+      parent_id: this.props.prop_master_id,
       loading: false,
-      general_id: this.props.general_id,
-      prop_master_id: this.props.prop_master_id,
 
-      recordButton: 'Preparing...',
-
-      playButtonDisabled: true,
       recordButtonDisabled: true,
-
-      loopButtonStatus: false,
-      progress: 0,
 
       error: null,
       audios: [],
-      audiosfiles: [],
-      firstCall: true,
-      //filename : helper.generateUid() + '.mp4'
-      filename : 'test.mp4',
-
+      filename : helper.generateUid() + '.mp4',
       audioPath : ''
-
     };
 
   }
 
-  //navigator button actions
-  onNavigatorEvent(event) {
-    if (event.type == 'NavBarButtonPress') {
+    //navigator button actions
+    onNavigatorEvent(event) {
+      if (event.type == 'NavBarButtonPress') {
 
-      if(event.id == 'close'){
-        this.props.navigator.dismissModal({
-          animationType: 'slide-down'
-        });
+        if(event.id == 'close'){
+          this.props.navigator.dismissModal({
+            animationType: 'slide-down'
+          });
+        }
+
       }
+    }
+
+    componentWillUnmount() {
 
     }
-  }
-
-  componentWillUnmount() {
-    //console.log('unmount');
-    clearInterval(this._progressInterval);
 
 
-  }
+   componentWillMount() {
 
-  _shouldUpdateProgressBar() {
-    // Debounce progress bar update by 200 ms
-    return Date.now() - this.lastSeek > 200;
-  }
+     this.recorder = null;
+     this._reloadRecorder();
 
- componentWillMount() {
-   this.player = null;
-   this.recorder = null;
-   this.lastSeek = 0;
+   }
 
-   console.log('document dire')
-   console.log(RNFS.DocumentDirectoryPath);
 
-   // write the file
-    RNFS.exists(RNFS.DocumentDirectoryPath + '/test.mp4')
-    .then((success) => {
-      console.log('FILE exists!');
-    })
-    .catch((err) => {
-      console.log(err.message);
+   componentDidMount(){
+      this.getDetails(); //get all the related audios
+   }
+
+   //get the whichever item details
+   getDetails = () =>{
+
+     if(this.state.property_id && this.state.item_id){
+
+       this.setState({
+         loading: true
+       });
+
+       // get photos
+       AsyncStorage.getItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL, (err, result) => {
+         let audios = JSON.parse(result) || {};
+
+         if(audios.hasOwnProperty(this.state.property_id) ){
+
+           let property_audios = audios[this.state.property_id];
+
+           if(property_audios.hasOwnProperty(this.state.parent_id) ){
+
+             let master_audios = property_audios[this.state.parent_id];
+
+             if(master_audios.hasOwnProperty(this.state.item_id) ){
+
+               this.setState({
+                 audios: master_audios[this.state.item_id],
+                 loading: false,
+               });
+
+             }
+             else{
+               this.emptyData();
+             }
+
+           }
+           else{
+             this.emptyData();
+           }
+
+         }
+         else{
+           this.emptyData();
+         }
+
+       });
+
+
+     }
+
+   }
+
+
+   // just to clear stuffs
+   emptyData = () =>{
+     this.setState({
+       loading: false,
+       audios: []
+     });
+   }
+
+   _updateState(err) {
+     this.setState({
+       recordButtonDisabled: !this.recorder,
+     });
+   }
+
+
+  _reloadRecorder() {
+    if (this.recorder){
+      this.recorder.destroy();
+    }
+
+    let filename = helper.generateUid() + '.mp4';
+    this.setState({
+      filename : filename,
+      audioPath : RNFS.DocumentDirectoryPath + '/' + filename
+    }, () =>{
+
+      this.recorder = new Recorder(this.state.filename, {
+        bitrate: 256000,
+        channels: 2,
+        sampleRate: 44100,
+        quality: 'max'
+        //format: 'ac3', // autodetected
+        //encoder: 'aac', // autodetected
+      });
+
+      this._updateState();
+
     });
 
+    this._updateState();
+  }
+
+  _toggleRecord() {
+
+    this.recorder.toggleRecord((err, stopped) => {
+      if (err) {
+        this.setState({
+          error: err.message
+        });
+      }
+      if (stopped) {
+        this.updateAudios(this.state.filename, this.state.audioPath);
+        this._reloadRecorder();
+      }
+
+      this._updateState();
+    });
+  }
 
 
-   this._reloadPlayer();
-   this._reloadRecorder();
+  // update audios
+  updateAudios = (filename, audioPath) =>{
 
+    AsyncStorage.getItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL, (err, result) => {
+      let audios = JSON.parse(result) || {};
 
-   this._progressInterval = setInterval(() => {
-     if (this.player && this._shouldUpdateProgressBar()) {// && !this._dragging) {
-       this.setState({progress: Math.max(0, this.player.currentTime) / this.player.duration});
-     }
-   }, 100);
+      let property_audios = audios[this.state.property_id] || {};
+      let master_audios = property_audios[this.state.parent_id] || {};
 
+      let audios_array = this.state.audios;
 
- }
+      let filepart = Date.now();
+      let voice_name = 'Voice_'+ filepart;
 
- _updateState(err) {
-   this.setState({
-     playPauseButton:      this.player    && this.player.isPlaying     ? 'Pause' : 'Play',
-     recordButton:         this.recorder  && this.recorder.isRecording ? 'Stop' : 'Record',
+      let audio_data = {
+        prop_sub_feedback_general_id: helper.generateUid(),
+        property_id: this.state.property_id,
+        item_id: this.state.item_id,
+        parent_id: this.state.parent_id,
+        voice_name: voice_name,
+        voice_url: audioPath,
+        file_name: filename,
+        mb_createdAt:  new Date().toLocaleDateString(),
+        sync: 1
+      };
+      audios_array.push(audio_data);
 
-     stopButtonDisabled:   !this.player   || !this.player.canStop,
-     playButtonDisabled:   !this.player   || !this.player.canPlay || this.recorder.isRecording,
-     recordButtonDisabled: !this.recorder || (this.player         && !this.player.isStopped),
-   });
- }
+      master_audios[this.state.item_id] = audios_array;
+      property_audios[this.state.parent_id] = master_audios;
+      audios[this.state.property_id] = property_audios;
 
-
-
-
- _playPause() {
-  this.player.playPause((err, playing) => {
-    if (err) {
       this.setState({
-        error: err.message
+        audios: audios_array
+      }, ()=>{
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL, JSON.stringify(audios), () => {
+          console.log('saved audios');
+          console.log(audios);
+        });
+
       });
-    }
-    this._updateState();
-  });
-}
 
-_stop() {
-  this.player.stop(() => {
-    this._updateState();
-  });
-}
 
-_seek(percentage) {
-  if (!this.player) {
-    return;
-  }
+    });
 
-  this.lastSeek = Date.now();
-
-  let position = percentage * this.player.duration;
-
-  this.player.seek(position, () => {
-    this._updateState();
-  });
-}
-
-_reloadPlayer() {
-  if (this.player) {
-    this.player.destroy();
   }
 
 
+  // delete audio
+  deleteAudio = (index, filename) =>{
+    console.log(index);
 
-  this.player = new Player(this.state.filename, {
-    autoDestroy: false
-  }).prepare((err) => {
-    if (err) {
-      console.log('error at _reloadPlayer():');
-      console.log(err);
-    } else {
-      this.player.looping = this.state.loopButtonStatus;
-    }
 
-    this._updateState();
-  });
+    // create a path you want to delete
+    var audiopath = RNFS.DocumentDirectoryPath + '/' + filename;
 
-  this._updateState();
+      RNFS.unlink(audiopath)
+      .then(() => {
+        console.log('FILE DELETED');
 
-  this.player.on('ended', () => {
-    this._updateState();
-  });
-  this.player.on('pause', () => {
-    this._updateState();
-  });
-}
+        // now we can update the AsyncStorage
 
-_reloadRecorder() {
-  if (this.recorder) {
-    this.recorder.destroy();
-  }
+        AsyncStorage.getItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL, (err, result) => {
+          let audios = JSON.parse(result) || {};
 
-  this.recorder = new Recorder(this.state.filename, {
-    bitrate: 256000,
-    channels: 2,
-    sampleRate: 44100,
-    quality: 'max'
-    //format: 'ac3', // autodetected
-    //encoder: 'aac', // autodetected
-  });
-   // .prepare((err, fsPath) => {
-   //     console.log('fsPath', fsPath);
-   //
-   //     this.setState({
-   //       audioPath: fsPath
-   //     });
-   //
-   //     if (err) {
-   //       console.log('error at reloadRecorder():');
-   //       console.log(err);
-   //     }
-   //     this._updateState();
-   //  });
+          let property_audios = audios[this.state.property_id] || {};
+          let master_audios = property_audios[this.state.parent_id] || {};
 
-  console.log('file path');
+          let audios_array = this.state.audios;
+          audios_array.splice(index, 1);
 
-  //console.log(this.recorder._options._recorderId);
+          master_audios[this.state.item_id] = audios_array;
+          property_audios[this.state.parent_id] = master_audios;
+          audios[this.state.property_id] = property_audios;
 
-  this._updateState();
-}
+          this.setState({
+            audios: audios_array
+          }, ()=>{
 
-_toggleRecord() {
-  if (this.player) {
-    this.player.destroy();
-  }
+            // saved to store
+            AsyncStorage.setItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL, JSON.stringify(audios), () => {
+              console.log('saved audios');
+              console.log(audios);
+            });
 
-  this.recorder.toggleRecord((err, stopped) => {
-    if (err) {
-      this.setState({
-        error: err.message
+          });
+
+
+        });
+
+
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
-    }
-    if (stopped) {
-      this._reloadPlayer();
-      this._reloadRecorder();
-    }
 
-    this._updateState();
-  });
-}
-
-_toggleLooping(value) {
-  this.setState({
-    loopButtonStatus: value
-  });
-  if (this.player) {
-    this.player.looping = value;
   }
-}
+
 
   getRecordImage = () =>{
     let img = <Image
@@ -285,13 +320,13 @@ _toggleLooping(value) {
       style = {styles.genIcons}
     />;
 
-    if(this.state.recordButton == 'Stop'){
+    if(this.recorder && this.recorder.isRecording ){
       img = <Image
         source={require('../images/stop.png')}
         style = {styles.genIcons}
       />
     }
-    else if(this.state.recordButton == 'Record'){
+    else {
       img = <Image
         source={require('../images/gen_voice.png')}
         style = {styles.genIcons}
@@ -301,52 +336,32 @@ _toggleLooping(value) {
     return (img);
   }
 
+
   render(){
-    console.log(this.state.audios);
 
     return(
       <View style={styles.fill}>
+        {this.recorder && this.recorder.isRecording &&
+          <View>
+            <Image source={require('../images/recording.gif')} style={styles.recording}/>
+          </View>
+        }
+
+        {this.state.error &&
+          <View>
+            <Text style={styles.errorMessage}>{this.state.error}</Text>
+          </View>
+        }
+
         <ScrollView>
 
-          <Text style={styles.divTxt}>Audio</Text>
+          <Text style={styles.divTxt}>Audios</Text>
 
-          {/* {
-            this.state.audiosfiles.map( (item, index) =>{
-              return <PGAudioPlayer filename={item} />
+          {
+            this.state.audios.map( (item, index) =>{
+              return <PGAudioPlayer audio={item} filename={item.file_name} key={index} delete={this.deleteAudio} audioIndex={index} />
             })
-          } */}
-
-
-          <View style={styles.buttonContainer}>
-          <Button disabled={this.state.playButtonDisabled} style={styles.button} onPress={() => this._playPause()} title={this.state.playPauseButton}>
-
-          </Button>
-          <Button disabled={this.state.stopButtonDisabled} style={styles.button} onPress={() => this._stop()} title="stop">
-
-          </Button>
-        </View>
-        <View style={styles.settingsContainer}>
-          <Switch
-          onValueChange={(value) => this._toggleLooping(value)}
-          value={this.state.loopButtonStatus} />
-          <Text>Toggle Looping</Text>
-        </View>
-        <View style={styles.slider}>
-          <Slider step={0.0001} disabled={this.state.playButtonDisabled} onValueChange={(percentage) => this._seek(percentage)} value={this.state.progress}/>
-        </View>
-        <View>
-          <Text style={styles.title}>
-            Recording
-          </Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button disabled={this.state.recordButtonDisabled} style={styles.button} onPress={() => this._toggleRecord()} title={this.state.recordButton}>
-
-          </Button>
-        </View>
-        <View>
-          <Text style={styles.errorMessage}>{this.state.error}</Text>
-        </View>
+          }
 
 
         </ScrollView>
@@ -384,12 +399,11 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(99,175,203,0.3)',
   },
-
   roundBox:{
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#3a8bbb',
+    backgroundColor: '#E70000',
     marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -403,41 +417,16 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignSelf: 'center',
   },
-
-
-  button: {
-   padding: 20,
-   fontSize: 20,
-   backgroundColor: 'white',
- },
-
- buttonContainer: {
-   flex: 1,
-   flexDirection: 'row',
-   justifyContent: 'space-between',
-   alignItems: 'center',
- },
- settingsContainer: {
-   flex: 1,
-   justifyContent: 'space-between',
-   alignItems: 'center',
- },
- container: {
-   borderRadius: 4,
-   borderWidth: 0.5,
-   borderColor: '#d6d7da',
- },
- title: {
-   fontSize: 19,
-   fontWeight: 'bold',
-   textAlign: 'center',
-   padding: 20,
- },
- errorMessage: {
-   fontSize: 15,
-   textAlign: 'center',
-   padding: 10,
-   color: 'red'
+  recording:{
+    width: SCREENWIDTH,
+    height: 80,
+    resizeMode: 'contain'
+  },
+  errorMessage: {
+   fontSize: 14,
+   textAlign: 'left',
+   color: '#EE2B47',
+   padding: 5
  }
 
 });
