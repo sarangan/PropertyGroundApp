@@ -161,34 +161,42 @@ export default class SingleItem extends Component{
       });
 
       // get photos
-      AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
-        let photos = JSON.parse(result) || {};
+      this.getPhotosFromStore();
 
-        if(photos.hasOwnProperty(this.state.property_id) ){
 
-          let property_photos = photos[this.state.property_id];
 
-          if(property_photos.hasOwnProperty(this.state.parent_id) ){
+    }
 
-            let master_photos = property_photos[this.state.parent_id];
+  }
 
-            if(master_photos.hasOwnProperty(this.state.item_id) ){
 
-              this.setState({
-                photos: master_photos[this.state.item_id]
-              });
+  //get all photos
+  getPhotosFromStore = () =>{
 
-            }
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      if(photos.hasOwnProperty(this.state.property_id) ){
+
+        let property_photos = photos[this.state.property_id];
+
+        if(property_photos.hasOwnProperty(this.state.parent_id) ){
+
+          let master_photos = property_photos[this.state.parent_id];
+
+          if(master_photos.hasOwnProperty(this.state.item_id) ){
+
+            this.setState({
+              photos: master_photos[this.state.item_id]
+            });
 
           }
 
         }
 
-      });
+      }
 
-
-
-    }
+    });
 
   }
 
@@ -372,7 +380,11 @@ export default class SingleItem extends Component{
           passProps: {
             imagePath: photo,
             images: JSON.stringify(photos),
-            index: index
+            index: index,
+            property_id: this.state.property_id,
+            item_id : this.state.item_id,
+            parent_id: this.state.parent_id,
+            showDelete: true
           },
           style: {
            backgroundBlur: "dark",
@@ -635,6 +647,10 @@ export default class SingleItem extends Component{
 
           <View style={styles.photoDivTxt}>
             <Text style={styles.photoTxt}>Photos</Text>
+            <TouchableHighlight underlayColor="transparent" onPress={()=>this.getPhotosFromStore()} >
+              <Image style={{width: 20, height: 20, resizeMode: 'contain', paddingLeft: 10, paddingRight: 10}} source={require('../images/reload.png')} />
+            </TouchableHighlight>
+
             {!this.state.canSelect &&
               <Text style={styles.photoTxt} onPress={()=>this.selectImage()}>Select</Text>
             }
@@ -646,6 +662,7 @@ export default class SingleItem extends Component{
               <Image style={{width: 20, height: 20, resizeMode: 'contain'}} source={require('../images/delete.png')} />
               </TouchableHighlight>
             }
+
 
           </View>
 

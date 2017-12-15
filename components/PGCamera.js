@@ -86,7 +86,9 @@ export default class PGCamera extends Component{
     let images = this.state.lastestPhotos;
     images.splice(index, 1);
 
-    this.props.delete(index);
+    this.setState({
+      lastestPhotos: images
+    });
 
   };
 
@@ -250,9 +252,15 @@ export default class PGCamera extends Component{
     let photos = [];
     this.state.lastestPhotos.map((photo, index) =>{
       photos.push(
-        <TouchableHighlight underlayColor="transparent" onPress={()=>this.openImage(photo, index)}>
-        <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri: photo }} />
-      </TouchableHighlight>
+        <View style={{flex: 0 }}>
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.openImage(photo, index)}>
+            <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri: photo }} />
+          </TouchableHighlight>
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.deleteImg(index)} style={{flex: 0, position: 'absolute', top: 3, right: 3}}>
+            <Image style={{width: 17, height: 17, resizeMode: 'cover'}} source={require('../images/delete_photo.png')} />
+          </TouchableHighlight>
+        </View>
+
       );
     });
 
@@ -268,7 +276,8 @@ export default class PGCamera extends Component{
         passProps: {
           imagePath: photo,
           images: JSON.stringify(this.state.lastestPhotos),
-          index: index
+          index: index,
+          showDelete: false
         },
         style: {
          backgroundBlur: "dark",
@@ -314,7 +323,7 @@ export default class PGCamera extends Component{
         flashMode={this.state.flashMode}
         captureQuality={Camera.constants.CaptureQuality.medium}
         //onFocusChanged={() => {}}
-       //  onFocusChanged={() => {}}
+        //  onFocusChanged={() => {}}
           onZoomChanged={() => {}}
        //   defaultTouchToFocus
        //defaultOnFocusComponent={true}

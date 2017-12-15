@@ -1,5 +1,5 @@
 /**
- * Sanppar React Native App
+ * PropertyGround React Native App
  * https://sph.com.sg
  * @sara
  * Image light box to show larger image
@@ -13,11 +13,12 @@ import {
   Dimensions,
   Text,
   TouchableHighlight,
-  Share
+  AsyncStorage
 } from 'react-native';
 
 import TImage from 'react-native-transformable-image';
 import Swiper from 'react-native-swiper';
+import TableKeys from '../keys/tableKeys';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -31,6 +32,10 @@ export default class ImageLightBox extends Component {
       images: JSON.parse(this.props.images),
       index: this.props.index? this.props.index: 0,
       pageIndex: this.props.index? this.props.index: 0,
+      property_id: this.props.property_id,
+      item_id : this.props.item_id,
+      parent_id: this.props.parent_id,
+      showDelete: this.props.showDelete
     };
 
     console.log(JSON.parse(this.props.images));
@@ -64,16 +69,44 @@ export default class ImageLightBox extends Component {
 
   //delete the image from stack
   deleteImg = () =>{
-    //let img = this.state.images[this.state.pageIndex];
 
+    let index = this.state.pageIndex;
     let images = this.state.images;
-    images.splice(this.state.pageIndex, 1);
+    images.splice(index, 1);
 
-    this.props.delete(this.state.pageIndex);
+    this.setState({
+      images
+    }, ()=>{
 
-  };
+      AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+        let photos = JSON.parse(result) || {};
 
-  getSlids =() =>{
+        let property_photos = photos[this.state.property_id] || {};
+        let master_photos = property_photos[this.state.parent_id] || {};
+
+        let photos_array = master_photos[this.state.item_id] || [];
+
+        photos_array.splice(index, 1);
+
+        master_photos[this.state.item_id] = photos_array;
+        property_photos[this.state.parent_id] = master_photos;
+        photos[this.state.property_id] = property_photos;
+
+        // saved to store
+        AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(photos), () => {
+          console.log('saved photos');
+          console.log(photos);
+        });
+
+      });
+
+    })
+
+
+
+  }
+
+  getSlids = () =>{
 
     let slides= [];
 
@@ -114,10 +147,11 @@ export default class ImageLightBox extends Component {
           <TouchableHighlight underlayColor="transparent" onPress={this.dismissImgBox} style={styles.actionCloseWrapper}>
             <Image style={styles.actionCloseImg} source={require('../images/back.png')} />
           </TouchableHighlight>
-
-          <TouchableHighlight underlayColor="transparent" onPress={()=>this.shareImg} style={styles.actionShareWrapper}>
-            <Image style={styles.actionShareImg} source={require('../images/share_img.png')} />
-          </TouchableHighlight>
+          {this.state.showDelete &&
+            <TouchableHighlight underlayColor="transparent" onPress={()=>this.deleteImg()} style={styles.actionShareWrapper}>
+              <Image style={styles.actionShareImg} source={require('../images/remove.png')} />
+            </TouchableHighlight>
+          }
 
             <Swiper showsButtons={false} showsPagination={true}
               dot={<View style={{backgroundColor: 'rgba(129,197,211,.2)', width: 5, height: 5, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3}} />}
