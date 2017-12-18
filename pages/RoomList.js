@@ -415,13 +415,6 @@ export default class RoomList extends Component{
 
         });
 
-
-
-
-
-
-
-
     }
     else{
       MessageBarManager.showAlert({
