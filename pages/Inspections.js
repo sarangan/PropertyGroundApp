@@ -78,9 +78,7 @@ export default class Inspections extends Component{
         //     },
         // });
 
-        this.addNewProperty()
-
-
+        this.addNewProperty();
 
       }
       else if( event.id == 'refresh' ){
@@ -320,6 +318,23 @@ export default class Inspections extends Component{
     );
   }
 
+  //get sync text
+  getSyncText = (sync) =>{
+    let sync_text = '';
+    if(sync == 1){
+       sync_text = 'Not Sync';
+    }
+    else if(sync == 2){
+      sync_text = 'Syncing';
+    }
+    else if(sync == 3){
+      sync_text = 'Synced';
+    }
+
+    return sync_text;
+
+  }
+
   _renderItem = ({item}) => (
 
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)}>
@@ -359,7 +374,7 @@ export default class Inspections extends Component{
                   <View style={styles.cardNumbers}>
                     <View style={styles.cardStar}>
                       <Text style={styles.cardStarRatings}>{item.mb_createdAt}</Text>
-                      <Text style={styles.cardStarRatings}>{item.sync==1? 'Not Sync': 'Synced'}</Text>
+                      <Text style={styles.cardStarRatings}>{this.getSyncText(item.sync)}</Text>
                     </View>
                   </View>
 

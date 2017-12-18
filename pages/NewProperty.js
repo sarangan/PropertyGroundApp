@@ -77,7 +77,7 @@ export default class NewProperty extends Component{
       report_type: '',
       report_date: '',
       image_url: '',
-      locked : 0,
+      locked : 0, // 1 is locked 0 is not locked
 
       isSending: false,
 
@@ -145,7 +145,7 @@ export default class NewProperty extends Component{
               priority: company_subitem_link[i].priority,
               status: 1,
               mb_createdAt: new Date().toLocaleDateString(),
-              sync: 1
+              sync: 1 // 1 is is not yet sync  2 is sync start  3 is sync finished
             };
             property_subitem_link_list.push(data_property_subitem_link);
           }

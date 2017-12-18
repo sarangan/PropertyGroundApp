@@ -1,6 +1,5 @@
 /**
  * PG React Native App
- * https://sph.com.sg
  * @sara
  * sub items list page
  */
