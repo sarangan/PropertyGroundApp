@@ -1,6 +1,5 @@
 /**
- * Sanppar React Native App
- * https://sph.com.sg
+ * PropertyGround React Native App
  * @sara
  * this is the extended version of Image
  */

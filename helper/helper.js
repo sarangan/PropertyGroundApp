@@ -1,4 +1,6 @@
 'use strict';
+import { NetInfo } from 'react-native';
+import Sync from './Sync';
 
 let helper = {
 
@@ -6,9 +8,30 @@ let helper = {
       const uuidv4 = require('uuid/v4');
       return uuidv4();
   },
-  // synSrv: function(){
-  //  " sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, pk_name text, status integer )"); //task INSERT, UPDATE, DELET
-  // }
+  synSrv: function(property){
+
+    function handleFirstConnectivityChange(connectionInfo) {
+      console.log('First change, type: ' + connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType);
+
+      if(connectionInfo.type.toLowerCase() ==  'wifi'){
+        // okay to sync
+        const sync = new Sync(property);
+        sync.syncCheck();
+      }
+
+      NetInfo.removeEventListener(
+        'connectionChange',
+        handleFirstConnectivityChange
+      );
+    }
+
+    NetInfo.addEventListener(
+      'connectionChange',
+      handleFirstConnectivityChange
+    );
+
+  },
+
 
 
 }

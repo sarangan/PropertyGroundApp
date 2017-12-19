@@ -17,11 +17,14 @@ import {
   Image
 } from 'react-native';
 
-
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
 import config from '../keys/config';
 import auth from '../keys/auth';
+
+import helper from '../helper/helper';
+
+import SyncImg from '../components/SyncImg';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -50,10 +53,13 @@ export default class Inspections extends Component{
 
     this.state = {
       properties : [],
+      master_properties: [],
       loading: false,
       refreshing: false,
+
     };
   }
+
 
   //navigator button actions
   onNavigatorEvent(event) {
@@ -109,6 +115,16 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
+
+  }
+
+  //checking sync
+  checkSync = () =>{
+
+      for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+        helper.synSrv(this.state.master_properties[i]);
+      }
+
   }
 
 
@@ -119,8 +135,8 @@ export default class Inspections extends Component{
       console.log(JSON.parse(result));
       if(result){
         //user already saw it
-        console.log('got something');
-        console.log(result);
+
+        //console.log(result);
 
         let pgauth = JSON.parse(result) || {};
 
@@ -137,11 +153,23 @@ export default class Inspections extends Component{
 
             let properties_info = JSON.parse(result) || [];
 
-            this.setState({
-              properties: properties_info,
-              loading: false,
-              refreshing: false
+            AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
+
+              let master_properties = JSON.parse(result) || [];
+
+              this.setState({
+                properties: properties_info,
+                master_properties: master_properties,
+                loading: false,
+                refreshing: false
+              }, ()=>{
+                this.checkSync();
+              });
+
             });
+
+
+
 
           });
 
@@ -181,6 +209,8 @@ export default class Inspections extends Component{
     });
 
   }
+
+
 
   renderFooter = () => {
     if (!this.state.loading) return null;
@@ -223,7 +253,24 @@ export default class Inspections extends Component{
 
       }
 
-      if(isTotalRoomsMore){
+      if(this.getLockText(item.property_id) == 1 ){
+
+        this.props.navigator.push({
+          screen: 'PropertyGround.Report',
+          title: 'Summary Report',
+          animated: true,
+          animationType: 'fade',
+          backButtonTitle: "Back",
+          passProps: {
+            property_id: item.property_id,
+            property: item,
+            syncText: this.getSyncText(item.property_id),
+            sync: this.findSyncStatus(item.property_id)
+          },
+        });
+
+      }
+      else if(isTotalRoomsMore){
         // ok to show room list TODO
 
         this.props.navigator.push({
@@ -319,8 +366,17 @@ export default class Inspections extends Component{
   }
 
   //get sync text
-  getSyncText = (sync) =>{
+  getSyncText = (property_id) =>{
     let sync_text = '';
+    let sync = 0;
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+      if(property_id == this.state.master_properties[i].property_id ){
+        sync = this.state.master_properties[i].sync;
+        break;
+      }
+
+    }
+
     if(sync == 1){
        sync_text = 'Not Sync';
     }
@@ -335,7 +391,44 @@ export default class Inspections extends Component{
 
   }
 
+  //check sync status
+  findSyncStatus = (property_id) =>{
+
+    let sync = 0;
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+      if(property_id == this.state.master_properties[i].property_id ){
+        sync = this.state.master_properties[i].sync;
+        break;
+      }
+
+    }
+
+    return sync;
+
+  }
+
+  //get sync text
+  getLockText = (property_id) =>{
+
+    let lock = 0;
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+      if(property_id == this.state.master_properties[i].property_id ){
+        lock = this.state.master_properties[i].locked;
+        break;
+      }
+
+    }
+
+    return lock;
+
+  }
+
+
+
   _renderItem = ({item}) => (
+
+
 
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)}>
 
@@ -374,7 +467,11 @@ export default class Inspections extends Component{
                   <View style={styles.cardNumbers}>
                     <View style={styles.cardStar}>
                       <Text style={styles.cardStarRatings}>{item.mb_createdAt}</Text>
-                      <Text style={styles.cardStarRatings}>{this.getSyncText(item.sync)}</Text>
+                      <Text style={[styles.cardStarRatings, {color: '#FF5C5C'}]}>{this.getLockText(item.property_id) == 1? 'Locked' : ''}</Text>
+                      <View style={{flex:0, justifyContent: 'flex-start', flexDirection: 'row'}}>
+                        <SyncImg sync={this.findSyncStatus(item.property_id)}/>
+                        <Text style={[styles.cardStarRatings, {color: '#40A798'}]}>{this.getSyncText(item.property_id)}</Text>
+                      </View>
                     </View>
                   </View>
 
@@ -525,4 +622,5 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignSelf: 'center',
   },
+
 });

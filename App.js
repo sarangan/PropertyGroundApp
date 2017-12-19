@@ -23,7 +23,7 @@ import ImageLightBox from './components/ImageLightBox';
 import GeneralPhoto from './pages/GeneralPhoto';
 import Signaturepad from './components/Signaturepad';
 import GeneralAudio from './pages/GeneralAudio';
-//import GeneralAudio from './pages/GeneralAudiox';
+import Report from './pages/Report';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -43,6 +43,7 @@ Navigation.registerComponent('PropertyGround.ImageLightBox', ()=> ImageLightBox)
 Navigation.registerComponent('PropertyGround.GeneralPhoto', ()=> GeneralPhoto);
 Navigation.registerComponent('PropertyGround.Signaturepad', ()=> Signaturepad);
 Navigation.registerComponent('PropertyGround.GeneralAudio', ()=> GeneralAudio);
+Navigation.registerComponent('PropertyGround.Report', ()=> Report);
 
 
   const navigatorStyle = {

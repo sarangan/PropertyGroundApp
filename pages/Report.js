@@ -1,8 +1,7 @@
 /**
  * PG React Native App
- * https://sph.com.sg
  * @sara
- * Inspections page
+ * Report page
  */
 import React, {Component} from 'react';
 import {
@@ -33,6 +32,7 @@ import helper from '../helper/helper';
 import NumberControl from '../components/NumberControl';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import Prompt from 'react-native-prompt';
+import SyncImg from '../components/SyncImg';
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
@@ -42,32 +42,13 @@ const PARALLAX_HEADER_HEIGHT = 250;
 const STICKY_HEADER_HEIGHT = 40;
 
 const { UIManager } = NativeModules;
+UIManager.setLayoutAnimationEnabledExperimental &&  UIManager.setLayoutAnimationEnabledExperimental(true);
 
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
+export default class Report extends Component{
 
-export default class RoomList extends Component{
-
-  static navigatorButtons = {
-   rightButtons: [
-     {
-       title: 'Refresh',
-       id: 'refresh'
-     }
-   ],
-  //  leftButtons: [
-  //    {
-  //      title: 'Cancel',
-  //      id: 'cancel'
-  //    }
-  //  ],
-
- };
 
   constructor(props){
     super(props);
-    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-
 
     this.state = {
       roomlist : [],
@@ -85,29 +66,20 @@ export default class RoomList extends Component{
       meter_spinValue: new Animated.Value(0),
       sync_spinValue : new Animated.Value(0),
       promptVisibleCopy: false,
+      conditionsList: []
 
     };
 
 
   }
 
-  //navigator button actions
-  onNavigatorEvent(event) {
-    if (event.type == 'NavBarButtonPress') {
-
-      if (event.id == 'refresh') {
-
-        this.getData();
-
-      }
-
-    }
-  }
 
   componentDidMount(){
     if(this.state.property_id){
       this.getData();
+      this.getConditionsList();
     }
+
 
     MessageBarManager.registerMessageBar(this.refs.alert);
 
@@ -118,16 +90,6 @@ export default class RoomList extends Component{
     MessageBarManager.unregisterMessageBar();
   }
 
-  callSortList=()=>{
-    this.props.navigator.push({
-      screen: 'PropertyGround.SortRoomList',
-      title: 'Sort room list',
-      animated: true,
-      //animationType: 'fade',
-      backButtonTitle: "Back",
-      passProps: {property_id: this.state.property_id}
-    });
-  }
 
   getData = () =>{
 
@@ -153,6 +115,28 @@ export default class RoomList extends Component{
 
   }
 
+  getConditionsList =()=>{
+    console.log('general condition link');
+
+
+    AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
+      let property_general_condition_link = JSON.parse(result) || [];
+
+        if(property_general_condition_link.hasOwnProperty(this.state.property_id) ){
+
+          let gen_list = property_general_condition_link[this.state.property_id];
+          gen_list.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
+
+          this.setState({
+            conditionsList: gen_list,
+          });
+
+        }
+
+    });
+
+  }
+
   openPromptCopy = () =>{
 
     this.setState({
@@ -165,8 +149,8 @@ export default class RoomList extends Component{
   doSync = () =>{
 
     Alert.alert(
-    'Sync property',
-    'Are you sure do you want to sync this property?',
+    'Unlock property',
+    'Are you sure do you want to unlock this property?',
         [
           {text: 'No', onPress: () => console.log('Cancel Pressed') },
           {text: 'Yes', onPress: () => this.syncProperty() },
@@ -187,14 +171,11 @@ export default class RoomList extends Component{
         if(properties[i].property_id == this.state.property_id ){
 
           let data_property = properties[i];
-          data_property.sync = 2; // 1 is is not yet sync  2 is sync start  3 is sync finished
-          data_property.locked = 1; // 1 is locked  0 not locked
+          data_property.sync = 1; // 1 is is not yet sync  2 is sync start  3 is sync finished
+          data_property.locked = 0; // 1 is locked  0 not locked
 
           properties[i] = data_property;
 
-          console.log('synced proeprty......');
-          console.log(properties[i]);
-          
           break;
 
         }
@@ -203,7 +184,7 @@ export default class RoomList extends Component{
       AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
         //saved proprty
         console.log("saved property tbl");
-        this.sync_spin();
+
 
       });
 
@@ -213,19 +194,6 @@ export default class RoomList extends Component{
 
   }
 
-  sync_spin() {
-
-    this.state.sync_spinValue.setValue(0)
-    Animated.timing(
-      this.state.sync_spinValue,
-      {
-        toValue: 1,
-        duration: 4000,
-        easing: Easing.linear
-      }
-    ).start(() => this.sync_spin())
-
-  }
 
   getRoomlist =()=>{
 
@@ -349,158 +317,6 @@ export default class RoomList extends Component{
 
   }
 
-  //add new room
-  handleCopy = (roomname) =>{
-
-    if(roomname.trim().length > 0 ){
-
-
-        AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, result) => {
-
-          let prop_master_items = JSON.parse(result) || {};
-          let roomlist = [];
-          if(prop_master_items.hasOwnProperty(this.state.property_id) ){
-            roomlist = prop_master_items[this.state.property_id];
-          }
-
-          let prop_master_id = helper.generateUid();
-          for(let i=0, l = roomlist.length; i < l ; i++){
-            if( roomlist[i].property_id == this.state.property_id &&  roomlist[i].com_type == 'SUB' && roomlist[i].type == 'DEFAULT' &&  roomlist[i].name == 'Bedroom'){
-
-              console.log('copied room!');
-
-              let new_room = {
-                prop_master_id: prop_master_id,
-                property_id: this.state.property_id,
-                com_master_id: roomlist[i].com_master_id,
-                type: 'SELF',
-                com_type: roomlist[i].com_type,
-                option: roomlist[i].option,
-                self_prop_master_id: roomlist[i].prop_master_id,
-                name: roomname,
-                priority: roomlist[i].priority,
-                total_num: roomlist[i].total_num,
-                status: 1,
-                mb_createdAt: new Date().toLocaleDateString(),
-                sync: 1
-              };
-              roomlist.push(new_room);
-              this.addSubitem(prop_master_id, roomlist[i].prop_master_id );
-
-              break;
-            }
-          }
-
-          prop_master_items[this.state.property_id] = roomlist;
-
-          // saved to store
-          AsyncStorage.setItem(TableKeys.PROPERTY_MASTERITEM_LINK, JSON.stringify(prop_master_items), () => {
-            console.log('property master table stored');
-            console.log(prop_master_items);
-
-
-            MessageBarManager.showAlert({
-              message: 'Successfully saved!',
-              alertType: 'success',
-              animationType: 'SlideFromTop',
-              position: 'top',
-              shouldHideOnTap: true,
-              stylesheetSuccess : { backgroundColor : '#64c8af', strokeColor : '#64c8af'  },
-              messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
-              duration: 700,
-              durationToShow: 0,
-              durationToHide: 300,
-            });
-
-            this.getRoomlist();
-
-
-          });
-
-        });
-
-    }
-    else{
-      MessageBarManager.showAlert({
-        message: 'Please enter valid room name!',
-        alertType: 'success',
-        animationType: 'SlideFromTop',
-        position: 'top',
-        shouldHideOnTap: true,
-        stylesheetSuccess : { backgroundColor : '#ea5c5c', strokeColor : '#ea5c5c' },
-        messageStyle: {color: '#ffffff', fontWeight: '700', fontSize: 15 },
-        duration: 800,
-        durationToShow: 0,
-        durationToHide: 300
-
-      });
-    }
-
-
-  }
-
-
-  // new method
-  addSubitem =(prop_master_id, copy_prop_master_id ) =>{
-
-    AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
-      let property_subitem_link = JSON.parse(result) || [];
-
-
-        console.log('getting sub items');
-        console.log(property_subitem_link[copy_prop_master_id]);
-        console.log(copy_prop_master_id);
-        console.log(prop_master_id);
-
-
-        if(property_subitem_link.hasOwnProperty(copy_prop_master_id) ){
-
-          let sub_items = property_subitem_link[copy_prop_master_id];
-
-            let property_subitem_link_list = [];
-            for(let i=0, l = sub_items.length; i < l; i++){
-
-              let prop_subitem_id = helper.generateUid();
-              let data_property_subitem_link = {
-                prop_subitem_id: prop_subitem_id,
-                property_id: this.state.property_id,
-                prop_master_id: prop_master_id,
-                com_subitem_id: sub_items[i].com_subitem_id,
-                com_master_id:  sub_items[i].com_master_id,
-                item_name: sub_items[i].item_name,
-                type: sub_items[i].type,
-                priority: sub_items[i].priority,
-                status: 1,
-                mb_createdAt: new Date().toLocaleDateString(),
-                sync: 1
-              };
-
-              property_subitem_link_list.push(data_property_subitem_link);
-
-
-            }
-
-            AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
-              let property_subitem_link = JSON.parse(result) || {};
-
-              property_subitem_link[prop_master_id] = property_subitem_link_list;
-
-              AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(property_subitem_link), () => {
-                console.log('property sub table stored');
-
-              });// prop sub item saving end
-
-            });
-
-
-        }
-
-
-    });
-
-
-  }
-
 
 
 
@@ -569,7 +385,6 @@ export default class RoomList extends Component{
     }
     else{
       if(this.state.photos.hasOwnProperty(item.prop_master_id) ){
-
 
 
         let master_photos = this.state.photos[item.prop_master_id];
@@ -648,155 +463,6 @@ export default class RoomList extends Component{
     return adds;
   }
 
-  openLink = (item) =>{
-
-
-    if(item.type == "PROP"){
-
-      this.props.navigator.push({
-        screen: 'PropertyGround.EditPropertyInfo',
-        title: 'Edit property',
-        animated: true,
-        animationType: 'fade',
-        backButtonTitle: "Back",
-        passProps: {
-          property_id: this.state.property_id,
-          property: this.state.property
-        },
-      });
-
-    }
-    else if(item.type == 'GENERAL'){
-
-      this.props.navigator.push({
-        screen: 'PropertyGround.GeneralCondition',
-        title: 'General conditions',
-        animated: true,
-        animationType: 'fade',
-        backButtonTitle: "Back",
-        passProps: {
-          property_id: this.state.property_id,
-        },
-      });
-
-    }
-    else if(item.com_type == 'SUB'){
-      console.log('its sub');
-      this.props.navigator.push({
-        screen: 'PropertyGround.SubItemsList',
-        title: item.name,
-        animated: true,
-        animationType: 'fade',
-        backButtonTitle: "Back",
-        passProps: {
-          property_id: this.state.property_id,
-          master_id: item.prop_master_id,
-          prop_master_name: item.name,
-        },
-      });
-
-    }
-    else if(item.com_type == 'ITEM'){
-      console.log('its single');
-      this.props.navigator.push({
-        screen: 'PropertyGround.SingleItem',
-        title: item.name,
-        animated: true,
-        animationType: 'fade',
-        backButtonTitle: "Back",
-        passProps: {
-          property_id: this.state.property_id,
-          item_id : item.prop_master_id,
-          parent_id: item.prop_master_id,
-          type : 'ITEM', //SUB ITEM METER GENERAL,
-        },
-      });
-
-    }
-    else if(item.com_type == 'METER'){
-      if(this.state.height == 200){
-
-        Animated.timing(
-          this.state.meter_spinValue,
-               {
-                toValue: 0,
-                duration: 200,
-                easing: Easing.linear
-               }
-           ).start( ()=>{
-             LayoutAnimation.easeInEaseOut();
-             this.setState(
-               {
-                 height: 0
-               });
-           });
-
-      }
-      else{
-        Animated.timing(
-          this.state.meter_spinValue,
-               {
-                toValue: 1,
-                duration: 200,
-                easing: Easing.linear
-               }
-           ).start( ()=>{
-                LayoutAnimation.spring();
-                this.setState(
-                  {
-                    height: 200
-                  });
-
-          });
-      }
-    }
-    else if(item.type == 'SIG'){
-
-      if(this.state.sig_height == 140){
-
-        Animated.timing(
-          this.state.spinValue,
-               {
-                toValue: 0,
-                duration: 200,
-                easing: Easing.linear
-               }
-           ).start( ()=>{
-
-             LayoutAnimation.easeInEaseOut();
-             this.setState(
-               {
-                 sig_height: 0,
-
-               });
-
-        });
-
-
-      }
-      else{
-        Animated.timing(
-          this.state.spinValue,
-               {
-                toValue: 1,
-                duration: 200,
-                easing: Easing.linear
-               }
-           ).start( ()=>{
-
-             LayoutAnimation.spring();
-             this.setState({
-               sig_height: 140
-             });
-
-           });
-      }
-
-
-    }
-
-
-  }
 
   openMeter = (meter, room_item) =>{
     console.log(meter);
@@ -903,55 +569,16 @@ export default class RoomList extends Component{
     });
   }
 
-  _getArrow = (type, com_type) =>{
-
-
-       let img = <Image
-         source={require('../images/arrow_right.png')}
-         style = {styles.arrowRight}
-       />
-
-       if(type == 'SIG'){
-         let spin = this.state.spinValue.interpolate({
-              inputRange: [0,1],
-              outputRange: ['0deg', '90deg']
-          });
-
-         img = <Animated.Image
-           source={require('../images/arrow_right.png')}
-           style = {[styles.arrowRight, {transform: [{rotate: spin}] }  ]}
-         />
-       }
-
-       if(com_type ==  'METER'){
-         let spin = this.state.meter_spinValue.interpolate({
-              inputRange: [0,1],
-              outputRange: ['0deg', '90deg']
-          });
-
-         img = <Animated.Image
-           source={require('../images/arrow_right.png')}
-           style = {[styles.arrowRight, {transform: [{rotate: spin}] }  ]}
-         />
-       }
-
-    return(img);
-
-  }
 
   _renderItem = ({item}) => (
 
-
-
-    <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.openLink(item)}>
+    <TouchableHighlight underlayColor='transparent' aspectRatio={1} >
 
           <View style={styles.rowWrapper}>
             <View  style={styles.listContainer} >
               <Text style={styles.title}>{item.name}</Text>
               <View style={styles.imagePhotosWrapper}>
                 <Text style={styles.photoTxt}>{this.getPhotoStatus(item)}</Text>
-
-                {this._getArrow(item.type, item.com_type)}
               </View>
 
             </View>
@@ -962,6 +589,51 @@ export default class RoomList extends Component{
 
             {item.type == 'SIG' &&
               this.getSigns(item)
+            }
+
+            {item.type == 'PROP' &&
+              <View>
+                  <Text style={styles.subTitle}>Address</Text>
+                  <Text style={styles.subText}>{this.state.property.address_1 + ' ' +  this.state.property.address_2 }</Text>
+                  <Text style={styles.subText}>{this.state.property.city}</Text>
+                  <Text style={styles.subText}>{this.state.property.postalcode}</Text>
+
+                  <View
+                    style={{  height: 1, flex: 1, backgroundColor: '#E6E7E7', marginTop: 5, marginBottom: 5}}
+                  />
+
+                  <View style={{ flex:1, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                      <View style={{  flex: 0, flexDirection: 'column' }}>
+                        <Text style={styles.subTitle}>Date</Text>
+                        <Text style={styles.subText}>{this.state.property.mb_createdAt}</Text>
+                      </View>
+
+                      <View style={{  flex: 0, flexDirection: 'column' }}>
+                        <Text style={styles.subTitle}>Report Type</Text>
+                        <Text style={styles.subText}>{this.state.property.report_type}</Text>
+                      </View>
+
+                  </View>
+
+              </View>
+            }
+
+            {item.type == 'GENERAL' &&
+
+
+                this.state.conditionsList.map( (item, index) =>{
+                  return(
+                    <View>
+                      <Text style={styles.subTitle}>{item.item_name}</Text>
+                      <Text style={styles.subText}>{item.user_input}</Text>
+                      <Text style={styles.subText}>{item.comment}</Text>
+                      <View  style={{  height: 1, flex: 1, backgroundColor: '#E6E7E7', marginTop: 5, marginBottom: 5}} />
+                    </View>
+                  )
+                })
+
+
             }
 
           </View>
@@ -982,32 +654,21 @@ export default class RoomList extends Component{
 
         <View style={styles.actionBar}>
 
+          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem}
+             >
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+              <Text style={styles.actionBarTxt}>{this.props.syncText}</Text>
+              <SyncImg sync={this.props.sync}/>
+            </View>
+          </TouchableHighlight>
+
+
+
           <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.doSync()}
-             >
-            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <Text style={styles.actionBarTxt}>Sync</Text>
-
-              <Animated.Image
-                style={[styles.actionBarIcon, { transform: [{rotate: spin}] } ] }
-                  source={require('../images/sync.png')}
-              />
-            </View>
-          </TouchableHighlight>
-
-          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem}  onPress={()=>this.openPromptCopy()}
-             >
-            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <Text style={styles.actionBarTxt}>Add room</Text>
-              <Image style={ styles.actionBarIcon } source={require('../images/add_room.png')} >
-              </Image>
-            </View>
-          </TouchableHighlight>
-
-          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.callSortList()}
             >
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <Text style={styles.actionBarTxt}>Sort</Text>
-              <Image style={ styles.actionBarIcon } source={require('../images/sort.png')} >
+              <Text style={styles.actionBarTxt}>UnLock</Text>
+              <Image style={ styles.actionBarIcon } source={require('../images/lock.png')} >
               </Image>
             </View>
           </TouchableHighlight>
@@ -1063,8 +724,7 @@ export default class RoomList extends Component{
             stickyHeaderHeight={ STICKY_HEADER_HEIGHT }
             parallaxHeaderHeight={ PARALLAX_HEADER_HEIGHT }
             backgroundSpeed={10}
-            // backgroundColor="#e8e8e8"
-             contentBackgroundColor="#F9F9F9"
+            contentBackgroundColor="#F9F9F9"
 
             renderBackground={() => (
 
@@ -1128,13 +788,7 @@ export default class RoomList extends Component{
             </View>
         </ParallaxScrollView>
 
-        <Prompt
-            title="Copy room"
-            placeholder="Enter your room name here"
-            defaultValue={'copy of room'}
-            visible={this.state.promptVisibleCopy}
-            onCancel={() => this.setState({ promptVisibleCopy: false } )}
-            onSubmit={(value) => this.setState({ promptVisibleCopy: false }, ()=>{ this.handleCopy(value); } )}/>
+
 
         <MessageBarAlert ref='alert' />
 
@@ -1173,7 +827,13 @@ const styles = StyleSheet.create({
   title:{
     fontSize: 15,
     fontWeight: "700",
-    color: "#475566"
+    color: "#475566",
+    backgroundColor: '#EFF3F2',
+    paddingTop: 5,
+    paddingBottom: 5,
+    marginTop: 5,
+    marginBottom: 5,
+    width: '100%'
   },
   subtitle:{
     fontSize: 14,
@@ -1258,4 +918,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginRight: 5
   },
+  subTitle:{
+    color: '#ACBDC5',
+    fontSize: 13,
+    marginTop: 5,
+    marginBottom: 5,
+  },
+  subText:{
+    color: '#3B4C5D',
+    fontSize: 14,
+  }
 });
