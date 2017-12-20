@@ -150,6 +150,22 @@ export default class RoomList extends Component{
 
     });
 
+    AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
+
+      let master_properties = JSON.parse(result) || [];
+
+      for(let i =0, l = master_properties.length; i < l ; i++){
+        if(this.state.property_id == master_properties[i].property_id ){
+          this.setState({
+            master_property: master_properties[i],
+          });
+          break;
+        }
+
+      }
+
+    });
+
 
   }
 
@@ -194,18 +210,12 @@ export default class RoomList extends Component{
 
           console.log('synced proeprty......');
           console.log(properties[i]);
-          
+
           break;
 
         }
       }
 
-      AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
-        //saved proprty
-        console.log("saved property tbl");
-        this.sync_spin();
-
-      });
 
 
     });
@@ -346,6 +356,26 @@ export default class RoomList extends Component{
     });
 
 
+
+  }
+
+  openReport = () =>{
+
+
+    this.props.navigator.push({
+      screen: 'PropertyGround.Report',
+      title: 'Summary Report',
+      animated: true,
+      animationType: 'fade',
+      backButtonTitle: "Back",
+      passProps: {
+        property_id: this.state.property_id,
+        property: this.state.property,
+        syncText: this.props.syncText,
+        sync: this.props.sync,
+        locked: this.props.locked
+      },
+    });
 
   }
 
@@ -999,6 +1029,15 @@ export default class RoomList extends Component{
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
               <Text style={styles.actionBarTxt}>Add room</Text>
               <Image style={ styles.actionBarIcon } source={require('../images/add_room.png')} >
+              </Image>
+            </View>
+          </TouchableHighlight>
+
+          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.openReport()}
+            >
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+              <Text style={styles.actionBarTxt}>Preview</Text>
+              <Image style={ styles.actionBarIcon } source={require('../images/preview.png')} >
               </Image>
             </View>
           </TouchableHighlight>

@@ -265,7 +265,8 @@ export default class Inspections extends Component{
             property_id: item.property_id,
             property: item,
             syncText: this.getSyncText(item.property_id),
-            sync: this.findSyncStatus(item.property_id)
+            sync: this.findSyncStatus(item.property_id),
+            locked: this.getLockText(item.property_id)
           },
         });
 
@@ -281,7 +282,10 @@ export default class Inspections extends Component{
           backButtonTitle: "Back",
           passProps: {
             property_id: item.property_id,
-            property: item
+            property: item,
+            syncText: this.getSyncText(item.property_id),
+            sync: this.findSyncStatus(item.property_id),
+            locked: this.getLockText(item.property_id)
           },
         });
 
@@ -427,8 +431,6 @@ export default class Inspections extends Component{
 
 
   _renderItem = ({item}) => (
-
-
 
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)}>
 

@@ -33,8 +33,9 @@ import NumberControl from '../components/NumberControl';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import Prompt from 'react-native-prompt';
 import SyncImg from '../components/SyncImg';
-var MessageBarAlert = require('react-native-message-bar').MessageBar;
-var MessageBarManager = require('react-native-message-bar').MessageBarManager;
+import SingleReportItem from '../components/SingleReportItem';
+import SubItemsReportList from '../components/SubItemsReportList';
+
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -66,7 +67,10 @@ export default class Report extends Component{
       meter_spinValue: new Animated.Value(0),
       sync_spinValue : new Animated.Value(0),
       promptVisibleCopy: false,
-      conditionsList: []
+      conditionsList: [],
+      locked: this.props.locked,
+      sync: this.props.sync,
+      signs: {}
 
     };
 
@@ -81,13 +85,11 @@ export default class Report extends Component{
     }
 
 
-    MessageBarManager.registerMessageBar(this.refs.alert);
 
   }
 
   componentWillUnmount () {
 
-    MessageBarManager.unregisterMessageBar();
   }
 
 
@@ -146,21 +148,29 @@ export default class Report extends Component{
   }
 
   //sync property
-  doSync = () =>{
+  doUnlock = () =>{
 
     Alert.alert(
     'Unlock property',
-    'Are you sure do you want to unlock this property?',
+    'Are you sure do you want to ' +  (this.state.locked == 1? 'unlock' : 'lock') + ' this property?',
         [
           {text: 'No', onPress: () => console.log('Cancel Pressed') },
-          {text: 'Yes', onPress: () => this.syncProperty() },
+          {text: 'Yes', onPress: () => this.unLockProperty() },
         ],
         { cancelable: false }
       );
   }
 
   //set the sync flag
-  syncProperty = () =>{
+  unLockProperty = () =>{
+
+    let sync = 1;
+    if(this.state.sync == 2 || this.state.sync == 3 ){
+      sync = 1;
+    }
+    else if(this.state.sync == 1){
+      sync = 2;
+    }
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
       console.log('get property details');
@@ -171,10 +181,15 @@ export default class Report extends Component{
         if(properties[i].property_id == this.state.property_id ){
 
           let data_property = properties[i];
-          data_property.sync = 1; // 1 is is not yet sync  2 is sync start  3 is sync finished
-          data_property.locked = 0; // 1 is locked  0 not locked
+          data_property.sync =  sync; // 1 is is not yet sync  2 is sync start  3 is sync finished
+          data_property.locked = this.state.locked == 1 ? 0 : 1 ; // 1 is locked  0 not locked
 
           properties[i] = data_property;
+
+          this.setState({
+            locked: (this.state.locked == 1 ? 0 : 1),
+            sync
+          });
 
           break;
 
@@ -313,11 +328,33 @@ export default class Report extends Component{
 
     });
 
-
+    this.getSignDetails();
 
   }
 
+  //get the whichever item details
+  getSignDetails = () =>{
 
+    AsyncStorage.getItem(TableKeys.SIGNATURES, (err, result) => {
+      let signatures = JSON.parse(result) || {};
+
+      if(signatures.hasOwnProperty(this.state.property_id)){
+
+        let signs = signatures[this.state.property_id];
+        signs['tenant_url'] = signs['tenant_url'] || null;
+        signs['lanlord_url'] = signs['lanlord_url'] || null;
+        signs['clerk_url'] = signs['clerk_url'] || null;
+
+        this.setState({
+          signs
+        })
+
+      }
+
+
+    });
+
+  }
 
 
   renderFooter = () => {
@@ -338,17 +375,13 @@ export default class Report extends Component{
 
   renderSeparator = () => {
    return (
-     <View
-       style={{
-         //flex: 1,
-          height: 1,
-          alignSelf: 'flex-end',
-          // width: '80%',
-          // marginRight: 10
-          // marginBottom: 1,
-          // marginTop: 1,
-       }}
-     />
+     // <View
+     //   style={{
+     //      height: 1,
+     //      alignSelf: 'flex-end',
+     //   }}
+     // />
+     null
    );
  };
 
@@ -356,18 +389,6 @@ export default class Report extends Component{
     return null;
   }
 
-  handleRefresh = () => {
-     this.setState(
-       {
-         refreshing: true,
-         //properties: [],
-       },
-       () => {
-         this.getProperties();
-
-       }
-     );
-   };
 
   renderEmptyData = () =>{
     return(
@@ -430,14 +451,6 @@ export default class Report extends Component{
       let master_photos = this.state.photos[prop_master_id];
       if(master_photos.hasOwnProperty(item.prop_meter_id)){
 
-        // let items = Object.keys(master_photos);
-        // let num_photos = 0;
-        // for(let key in master_photos){
-        //   num_photos  += master_photos[key].length;
-        // }
-        //
-        // photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
-
 
         let num_photos = master_photos[item.prop_meter_id].length;
         photo =  num_photos > 0 ? (num_photos == 1? num_photos + " image" : num_photos + " images") : 'no images';
@@ -485,32 +498,23 @@ export default class Report extends Component{
   getMeters  = (room_item) =>{
       return(
         <View style={{
-          overflow: 'hidden',
-          flexDirection: 'column',
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: this.state.height }}>
+          }}>
           {
             this.state.meterlist.map( (item, i) =>{
               return(
-                  <TouchableHighlight underlayColor="transparent" style={{paddingLeft: 15, paddingRight: 10, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}}
-                    onPress={()=>this.openMeter(item, room_item)} key={i+1}>
 
-                      <View style={styles.rowWrapper}>
-                        <View style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
-                          <Text style={styles.subtitle}>{item.meter_name}</Text>
-                          <View style={{justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', flex: 1}}>
-                            <Text style={styles.photoTxt}>{this.getMeterPhotoStatus(item, room_item.prop_master_id)}</Text>
-                            <Image
-                              source={require('../images/arrow_right_colored.png')}
-                              style = {styles.arrowRight}
-                            />
+                      <View style={[styles.rowWrapper, { padding: 10}]} key={i+1}>
+
+                          <View style={{justifyContent: 'flex-start', flexDirection: 'row', backgroundColor: '#F2F4FB', marginBottom: 7}}>
+                            <View style={{ borderLeftWidth: 3, borderLeftColor: '#72D36C' }}/>
+                            <Text style={styles.meter_title}>{item.meter_name}</Text>
                           </View>
-                        </View>
+
+                          <SingleReportItem property_id={this.state.property_id} item_id={item.prop_meter_id} parent_id={room_item.prop_master_id} type={'METER'} reading_value={item.reading_value} navigator={this.props.navigator} />
+
                       </View>
 
-                    </TouchableHighlight>
                     )
             })
           }
@@ -520,53 +524,56 @@ export default class Report extends Component{
 
   getSigns  = (room_item) =>{
 
+      console.log('tanel url');
+      console.log(this.state.signs['tenant_url']);
+
       return(
-        <View style={{
-          overflow: 'hidden',
-          flexDirection: 'column',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: this.state.sig_height }}>
-          {
-            this.state.singantes_list.map( (item, i) =>{
-              return(
-                  <TouchableHighlight underlayColor="transparent" style={{paddingLeft: 15, paddingRight: 10, flex: 1, borderBottomColor: '#F0F1F3', borderBottomWidth: 1}}
-                    onPress={()=>this.openSig(item, room_item)} key={i+1}>
 
-                      <View style={styles.rowWrapper}>
-                        <View  style={[styles.listContainer,{marginTop: 6, flex: 3}]}>
-                          <Text style={styles.subtitle}>{item}</Text>
-                          <View style={{justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', flex: 1}}>
-                            <Image
-                              source={require('../images/arrow_right_colored.png')}
-                              style = {styles.arrowRight}
-                            />
-                          </View>
-                        </View>
-                      </View>
+        <View style={{ flex: 1 }}>
 
-                    </TouchableHighlight>
-                    )
-            })
-          }
+          <View style={[styles.rowWrapper, { padding: 10}]} >
+
+              <View style={{justifyContent: 'flex-start', flexDirection: 'row', backgroundColor: '#F2F4FB', marginBottom: 7}}>
+                <View style={{ borderLeftWidth: 3, borderLeftColor: '#72D36C' }}/>
+                <Text style={styles.meter_title}>Tenant</Text>
+              </View>
+
+              {this.state.signs['tenant_url'] &&
+                <Image style={{width: 200, height: 100 , resizeMode: 'contain'}} source={{uri: this.state.signs['tenant_url']}} />
+              }
+
+          </View>
+
+          <View style={[styles.rowWrapper, { padding: 10}]} >
+
+              <View style={{justifyContent: 'flex-start', flexDirection: 'row', backgroundColor: '#F2F4FB', marginBottom: 7}}>
+                <View style={{ borderLeftWidth: 3, borderLeftColor: '#72D36C' }}/>
+                <Text style={styles.meter_title}>Lanlord</Text>
+              </View>
+
+              {this.state.signs['lanlord_url'] &&
+                <Image style={{width: 200, height: 100 , resizeMode: 'contain'}} source={{uri: this.state.signs['lanlord_url'] }}/>
+              }
+
+          </View>
+
+          <View style={[styles.rowWrapper, { padding: 10}]} >
+
+              <View style={{justifyContent: 'flex-start', flexDirection: 'row', backgroundColor: '#F2F4FB', marginBottom: 7}}>
+                <View style={{ borderLeftWidth: 3, borderLeftColor: '#72D36C' }}/>
+                <Text style={styles.meter_title}>Clerk</Text>
+              </View>
+
+              {this.state.signs['clerk_url'] &&
+                <Image style={{width: 200, height: 100 , resizeMode: 'contain'}} source={{uri: this.state.signs['clerk_url'] }}/>
+              }
+
+          </View>
+
+
         </View>
+
       );
-  }
-
-  openSig = (sig, room_item) =>{
-
-    this.props.navigator.push({
-      screen: 'PropertyGround.Signaturepad',
-      title: 'Signaturepad',
-      animated: true,
-      animationType: 'fade',
-      backButtonTitle: "Back",
-      passProps: {
-        property_id: this.state.property_id,
-        type: sig
-      },
-    });
   }
 
 
@@ -575,17 +582,19 @@ export default class Report extends Component{
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} >
 
           <View style={styles.rowWrapper}>
-            <View  style={styles.listContainer} >
-              <Text style={styles.title}>{item.name}</Text>
+            <View  style={styles.listContainer}>
+              <View style={{justifyContent: 'flex-start', flexDirection: 'row', backgroundColor: '#F2F4FB',}}>
+                <View style={{ borderLeftWidth: 5, borderLeftColor: '#43dde6' }}/>
+                <Text style={styles.title}>{item.name}</Text>
+              </View>
               <View style={styles.imagePhotosWrapper}>
                 <Text style={styles.photoTxt}>{this.getPhotoStatus(item)}</Text>
               </View>
 
             </View>
 
-            {item.com_type == 'METER' &&
-              this.getMeters(item)
-            }
+            <View style={styles.contentWrapper}>
+
 
             {item.type == 'SIG' &&
               this.getSigns(item)
@@ -621,20 +630,32 @@ export default class Report extends Component{
 
             {item.type == 'GENERAL' &&
 
-
                 this.state.conditionsList.map( (item, index) =>{
                   return(
                     <View>
                       <Text style={styles.subTitle}>{item.item_name}</Text>
                       <Text style={styles.subText}>{item.user_input}</Text>
-                      <Text style={styles.subText}>{item.comment}</Text>
+                      <Text style={styles.subCommentText}>{item.comment}</Text>
                       <View  style={{  height: 1, flex: 1, backgroundColor: '#E6E7E7', marginTop: 5, marginBottom: 5}} />
                     </View>
                   )
                 })
 
-
             }
+
+            {item.com_type == 'ITEM' &&
+              <SingleReportItem property_id={this.state.property_id} item_id={item.prop_master_id} parent_id={item.prop_master_id} type={'ITEM'} navigator={this.props.navigator}/>
+            }
+
+            {item.com_type == 'SUB' &&
+                <SubItemsReportList property_id={this.state.property_id} master_id={item.prop_master_id} prop_master_name={item.name} navigator={this.props.navigator}/>
+            }
+
+            {item.com_type == 'METER' &&
+              this.getMeters(item)
+            }
+
+            </View>
 
           </View>
 
@@ -662,14 +683,19 @@ export default class Report extends Component{
             </View>
           </TouchableHighlight>
 
-
-
-          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.doSync()}
+          <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.doUnlock()}
             >
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <Text style={styles.actionBarTxt}>UnLock</Text>
-              <Image style={ styles.actionBarIcon } source={require('../images/lock.png')} >
-              </Image>
+              <Text style={styles.actionBarTxt}>{(this.state.locked == 1 ? 'Unlock' : 'Lock')}</Text>
+              {this.state.locked == 1 &&
+                <Image style={ styles.actionBarIcon } source={require('../images/lock.png')} />
+              }
+
+              {this.state.locked == 0 &&
+                <Image style={ styles.actionBarIcon } source={require('../images/unlock.png')} />
+              }
+
+
             </View>
           </TouchableHighlight>
 
@@ -789,9 +815,6 @@ export default class Report extends Component{
         </ParallaxScrollView>
 
 
-
-        <MessageBarAlert ref='alert' />
-
       </View>
     );
   }
@@ -812,11 +835,14 @@ const styles = StyleSheet.create({
     width: SCREENWIDTH
   },
   rowWrapper:{
-    padding: 10,
+    // padding: 10,
     paddingTop: 20,
     paddingBottom: 20,
     width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
+  },
+  contentWrapper:{
+    padding: 10,
   },
   listContainer:{
     flex: 1,
@@ -827,10 +853,10 @@ const styles = StyleSheet.create({
   title:{
     fontSize: 15,
     fontWeight: "700",
-    color: "#475566",
-    backgroundColor: '#EFF3F2',
-    paddingTop: 5,
-    paddingBottom: 5,
+    color: '#364f6b',
+    paddingLeft: 5,
+    paddingTop: 7,
+    paddingBottom: 7,
     marginTop: 5,
     marginBottom: 5,
     width: '100%'
@@ -927,5 +953,20 @@ const styles = StyleSheet.create({
   subText:{
     color: '#3B4C5D',
     fontSize: 14,
-  }
+  },
+  subCommentText:{
+    color: '#a1a1a1',
+    fontSize: 14,
+  },
+  meter_title:{
+    fontSize: 14,
+    fontWeight: "700",
+    color: '#364f6b',
+    paddingLeft: 5,
+    paddingTop: 2,
+    paddingBottom: 2,
+    marginTop: 5,
+    marginBottom: 5,
+  },
+
 });
