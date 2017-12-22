@@ -1,6 +1,5 @@
 /**
- * Sanppar React Native App
- * https://sph.com.sg
+ * PropertyGround React Native App
  * @sara
  * Inspections page
  */
@@ -38,12 +37,12 @@ export default class Inspections extends Component{
        id: 'property'
      }
    ],
-   leftButtons: [
-     {
-       title: 'Refresh',
-       id: 'refresh'
-     }
-   ],
+   // leftButtons: [
+   //   {
+   //     title: 'Refresh',
+   //     id: 'refresh'
+   //   }
+   // ],
 
  };
 
