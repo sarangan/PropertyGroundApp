@@ -122,6 +122,7 @@ export default class SortGeneralCondition extends Component{
       let conditionsList = this.state.conditionsList;
       for(let i = 0, l = conditionsList.length; i < l; i++){
         conditionsList[i].priority = (i+1);
+        conditionsList[i].sync = 1;
       }
       this.setState({
         conditionsList

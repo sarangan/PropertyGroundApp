@@ -12,11 +12,11 @@ let tablekeys = {
   PROPERTY_MASTERITEM_LINK: "property_masteritem_link",
   PROPERTY_SUBITEM_LINK: "property_subitem_link",
   PROPERTY_GENERAL_CONDITION_LINK: "property_general_condition_link",
+  PROPERTY_METER_LINK: "property_meter_link",
   PROPERTY_FEEDBACK: "property_feedback",
   PHOTOS: "photos",
   PROPERTY_SUB_FEEDBACK_GENERAL: "property_sub_feedback_general",
   PROPERTY_SUB_VOICE_GENERAL: "property_sub_voice_general",
-  PROPERTY_METER_LINK: "property_meter_link",
   SIGNATURES: "signatures"
 
 

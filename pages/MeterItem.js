@@ -227,6 +227,7 @@ export default class MeterItem extends Component{
             for(let i=0, l = meterlist.length; i < l ; i++){
               if(meterlist[i].prop_meter_id == this.state.prop_meter_id ){
                 meterlist[i].reading_value = this.state.reading_value;
+                meterlist[i].sync = 1;
                 property_meter_link[this.state.property_id] =  meterlist;
                 AsyncStorage.setItem(TableKeys.PROPERTY_METER_LINK, JSON.stringify(property_meter_link), () => {
                   console.log('property meter table stored');

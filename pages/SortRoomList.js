@@ -125,6 +125,7 @@ export default class SortRoomList extends Component{
       let roomlist = this.state.roomlist;
       for(let i = 0, l = roomlist.length; i < l; i++){
         roomlist[i].priority = (i+1);
+        roomlist[i].sync = 1;
       }
       this.setState({
         roomlist
@@ -212,7 +213,7 @@ export default class SortRoomList extends Component{
       roomlist = roomlist.filter(function(item){
         return (item.status == 1);
       });
-      
+
       roomlist.sort(function(a,b) {return (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0);} );
 
 

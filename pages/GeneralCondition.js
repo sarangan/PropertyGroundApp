@@ -215,7 +215,7 @@ export default class GeneralCondition extends Component{
       if(item.prop_general_id == gen_list[i].prop_general_id){
         // same general data
         gen_list[i].comment =  text;
-
+        gen_list[i].sync = 1;
         this.setState({
           conditionsList: gen_list,
         });
