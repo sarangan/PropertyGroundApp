@@ -14,12 +14,11 @@ let tablekeys = {
   PROPERTY_GENERAL_CONDITION_LINK: "property_general_condition_link",
   PROPERTY_METER_LINK: "property_meter_link",
   PROPERTY_FEEDBACK: "property_feedback",
-  PHOTOS: "photos",
   PROPERTY_SUB_FEEDBACK_GENERAL: "property_sub_feedback_general",
   PROPERTY_SUB_VOICE_GENERAL: "property_sub_voice_general",
-  SIGNATURES: "signatures"
-
-
+  SIGNATURES: "signatures",
+  PHOTOS: "photos",
+  
 }
 
 module.exports = tablekeys;

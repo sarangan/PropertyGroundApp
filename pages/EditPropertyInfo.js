@@ -176,7 +176,7 @@ export default class EditPropertyInfo extends Component{
               description: this.state.description,
               status: properties[i].status,
               mb_createdAt: properties[i].mb_createdAt,
-              sync: properties[i].sync,
+              sync: 1
             };
 
             properties[i] = data_property;
@@ -210,7 +210,7 @@ export default class EditPropertyInfo extends Component{
                   image_url: this.state.image_url,
                   locked: properties_info[i].locked,
                   mb_createdAt: properties_info[i].mb_createdAt,
-                  sync: properties_info[i].sync,
+                  sync: 1
                 };
 
                 properties_info[i] = data_property_info;

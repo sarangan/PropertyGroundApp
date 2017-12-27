@@ -165,11 +165,18 @@ export default class Report extends Component{
   unLockProperty = () =>{
 
     let sync = 1;
-    if(this.state.sync == 2 || this.state.sync == 3 ){
+    if(this.state.sync == 2 ){
       sync = 1;
     }
     else if(this.state.sync == 1){
       sync = 2;
+    }
+    else if(this.state.sync == 3){
+      sync = 3; // we cannot switch back to sync
+      Alert.alert(
+       'PropertyGround',
+       'Failed to process this action!'
+      );
     }
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {

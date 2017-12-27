@@ -287,6 +287,7 @@ export default class SubItemsList extends Component{
         for(let i=0, l = roomlist.length; i < l ; i++){
           if(roomlist[i].prop_master_id == this.state.prop_master_id){
             roomlist[i].name = roomname;
+            roomlist[i].sync = 1
             break;
           }
         }
