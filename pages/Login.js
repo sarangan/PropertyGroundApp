@@ -17,7 +17,8 @@ import {
   Image,
   TextInput,
   ScrollView,
-  Alert
+  Alert,
+  Linking
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -112,6 +113,13 @@ export default class Login extends Component{
     });
 
 
+  }
+
+  // open react website
+  openPgWeb = (action) =>{
+    let url = encodeURI(action);
+
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
   }
 
   doLogin=()=>{
@@ -225,21 +233,6 @@ export default class Login extends Component{
         );
     }
 
-
-
-    // AsyncStorage.getItem(AppKeys.LOGINKEY, (err, result) => {
-    //   console.log('get login details');
-    //   console.log(result);
-    //   if(result){
-    //     //user already saw it
-    //     console.log('got something');
-    //     console.log(result);
-    //   }
-    //   else{
-    //     console.log("no login yet ");
-    //   }
-    // });
-
   }
 
   render(){
@@ -254,7 +247,7 @@ export default class Login extends Component{
           style={styles.txtInput}
           onChangeText={(text) => this.setState({username:text})}
           returnKeyType="done"
-          placeholder="Enter a email / username"
+          placeholder="Enter your email"
           placeholderTextColor="#757575"
           clearButtonMode="while-editing"
           onSubmitEditing={this.doLogin}
@@ -277,15 +270,15 @@ export default class Login extends Component{
         </TouchableHighlight>
 
         {this.state.isSending &&
-          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: SCREENWIDTH }} >
+          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: SCREENWIDTH, margin: 10 }} >
             <ActivityIndicator animating  size='small' />
           </View>
         }
 
 
         <View style={styles.otherActionsBtnWrapper}>
-          <TouchableHighlight  underlayColor='transparent'><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
-          <TouchableHighlight  underlayColor='transparent'><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
+          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('http://propertyground.co.uk/') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
+          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('http://propertyground.co.uk/') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
         </View>
 
       </View>
@@ -301,7 +294,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: 30,
+    paddingTop: 20,
     paddingBottom: 30,
     backgroundColor: '#FFFFFF',
   },
@@ -324,8 +317,8 @@ const styles = StyleSheet.create({
   inventoryTxt:{
     fontSize: 45,
     fontWeight: '700',
-    color: "#333333",
-    marginBottom: 40
+    color: "#0E275D",
+    marginBottom: 20
   },
   helpTxt:{
     color: "grey"

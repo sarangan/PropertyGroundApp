@@ -22,11 +22,14 @@ import config from '../keys/config';
 import auth from '../keys/auth';
 
 import helper from '../helper/helper';
-
 import SyncImg from '../components/SyncImg';
+
+import SyncStore from "../stores/SyncStore";
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
+
+export let homeNavigator = null; // to use in drawer
 
 export default class Inspections extends Component{
 
@@ -37,17 +40,18 @@ export default class Inspections extends Component{
        id: 'property'
      }
    ],
-   // leftButtons: [
-   //   {
-   //     title: 'Refresh',
-   //     id: 'refresh'
-   //   }
-   // ],
+   leftButtons: [
+     {
+       icon: require('../images/hamburger_menu.png'),
+       id: 'menu'
+     }
+   ],
 
  };
 
   constructor(props){
     super(props);
+    homeNavigator = this.props.navigator;
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
 
     this.state = {
@@ -57,6 +61,8 @@ export default class Inspections extends Component{
       refreshing: false,
 
     };
+
+    this.getSyncStatus = this.getSyncStatus.bind(this);
   }
 
 
@@ -89,6 +95,14 @@ export default class Inspections extends Component{
       else if( event.id == 'refresh' ){
           this.getProperties();
       }
+      else if (event.id == 'menu') {
+
+        this.props.navigator.toggleDrawer({
+         side: 'left',
+         animated: true
+       });
+
+      }
 
     }
   }
@@ -102,6 +116,14 @@ export default class Inspections extends Component{
        backButtonTitle: "Back",
       passProps: {}
     });
+  }
+
+  componentWillMount() {
+    SyncStore.on("change", this.getSyncStatus);
+  }
+
+  componentWillUnmount () {
+    SyncStore.removeListener("change", this.getSyncStatus);
   }
 
 
@@ -121,13 +143,30 @@ export default class Inspections extends Component{
   checkSync = () =>{
 
       for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-        helper.synSrv(this.state.master_properties[i]);
+
+        // console.log(this.state.master_properties[i].property_id);
+        // console.log(this.state.master_properties[i].sync);
+
+        if(this.state.master_properties[i].sync == 2){
+          helper.synSrv(this.state.master_properties[i]);
+        }
       }
 
   }
 
+  //get synced status
+  getSyncStatus(){
 
-  getProperties =()=>{
+   let property_id = SyncStore.getSyncedProperty();
+
+   console.log('synced finihsed from ui thread');
+   console.log(property_id);
+   this.getProperties(true);
+
+ }
+
+
+  getProperties =(nosync = false)=>{
 
     AsyncStorage.getItem(AppKeys.LOGINKEY, (err, result) => {
       console.log('get login details');
@@ -156,13 +195,19 @@ export default class Inspections extends Component{
 
               let master_properties = JSON.parse(result) || [];
 
+              //console.log(master_properties);
+
               this.setState({
                 properties: properties_info,
                 master_properties: master_properties,
                 loading: false,
                 refreshing: false
               }, ()=>{
-                this.checkSync();
+
+                if(!nosync){
+                  this.checkSync();
+                }
+
               });
 
             });

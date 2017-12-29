@@ -24,6 +24,8 @@ import GeneralPhoto from './pages/GeneralPhoto';
 import Signaturepad from './components/Signaturepad';
 import GeneralAudio from './pages/GeneralAudio';
 import Report from './pages/Report';
+import About from './pages/About';
+import Drawer from './components/Drawer';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
@@ -44,6 +46,8 @@ Navigation.registerComponent('PropertyGround.GeneralPhoto', ()=> GeneralPhoto);
 Navigation.registerComponent('PropertyGround.Signaturepad', ()=> Signaturepad);
 Navigation.registerComponent('PropertyGround.GeneralAudio', ()=> GeneralAudio);
 Navigation.registerComponent('PropertyGround.Report', ()=> Report);
+Navigation.registerComponent('PropertyGround.About', () => About);
+Navigation.registerComponent('PropertyGround.Drawer', () => Drawer);
 
 
   const navigatorStyle = {
@@ -72,13 +76,13 @@ Navigation.startSingleScreenApp({
     title: 'Inspections',
     navigatorStyle
   },
-  // drawer: {
-	// 	left: {
-	// 		screen: 'Snappar.Drawer'
-	// 	},
-  //   style: {
-  //     drawerShadow: 'NO'
-  //   },
-  //   disableOpenGesture: true,
-	// }
+  drawer: {
+		left: {
+			screen: 'PropertyGround.Drawer'
+		},
+    style: {
+      drawerShadow: 'NO'
+    },
+    disableOpenGesture: true,
+	}
 });

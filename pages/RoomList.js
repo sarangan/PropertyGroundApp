@@ -201,20 +201,19 @@ export default class RoomList extends Component{
       for(let i =0, l = properties.length; i < l ; i++){
 
         if(properties[i].property_id == this.state.property_id ){
-
-          let data_property = properties[i];
-          data_property.sync = 2; // 1 is is not yet sync  2 is sync start  3 is sync finished
-          data_property.locked = 1; // 1 is locked  0 not locked
-
-          properties[i] = data_property;
+          properties[i].sync = 2; // 1 is is not yet sync  2 is sync start  3 is sync finished
+          properties[i].locked = 1; // 1 is locked  0 not locked
 
           console.log('synced proeprty......');
           console.log(properties[i]);
-
           break;
-
         }
+
       }
+
+        AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
+          this.sync_spin();
+        });
 
 
 

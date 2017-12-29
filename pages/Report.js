@@ -177,6 +177,7 @@ export default class Report extends Component{
        'PropertyGround',
        'Failed to process this action!'
       );
+      return 0;
     }
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
