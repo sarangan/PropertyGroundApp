@@ -75,6 +75,7 @@ export default class Sync {
                    this.postData(formData).then( response =>{
 
                      if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
+
                        // we got status 1, update the storage
                        this.update_property_info( i, properties );
 
@@ -114,7 +115,7 @@ export default class Sync {
                 let master_data = data[this.property_id];
 
                 for(let i =0, l = master_data.length; i < l ; i++){
-                  console.log(master_data[i].sync);
+                  //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
 
                     let formData = new FormData();
@@ -416,9 +417,6 @@ export default class Sync {
 
               console.log('Starting PHOTOS');
 
-
-
-
               let data = JSON.parse(value);
 
               if(data.hasOwnProperty(this.property_id)){
@@ -452,6 +450,8 @@ export default class Sync {
 
                             this.postData(formData, 'uploadfile').then( response =>{
 
+                              console.log('uploaded server PHOTOS');
+
                               if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                                 // we got status 1, update the storage
                                 this.update_photos( i, sub_key, master_key, data );
@@ -472,7 +472,7 @@ export default class Sync {
               }
 
 
-              
+
               break;
             }
 
@@ -541,10 +541,12 @@ export default class Sync {
     console.log('Sync finished PROPERTY');
     //console.log(properties[index]);
 
-    await AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties) );
+    await AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties) ); //TODO
+
+    console.log('calling UI actions');
 
     //update the front end
-    SyncActions.syncFinished(this.property_id);
+    SyncActions.syncFinished(this.property_id); //TODO
 
   }
 
@@ -766,7 +768,7 @@ export default class Sync {
 
     sub_item_photos[index].sync = 2;
 
-    console.log('updated PHOTOS');
+    console.log('updated storage PHOTOS');
 
     console.log(sub_item_photos[index]);
 
