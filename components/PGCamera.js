@@ -19,8 +19,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-//import Camera from 'react-native-camera';
-import { RNCamera } from 'react-native-camera';
+import Camera from 'react-native-camera';
 import ImagePicker from 'react-native-image-crop-picker';
 
 const SCREENWIDTH = Dimensions.get('window').width;
@@ -33,9 +32,9 @@ export default class PGCamera extends Component{
 
     this.state = {
       isBackCamera: true,
-      cameraType : RNCamera.Constants.Type.back,
+      cameraType : Camera.constants.Type.back,
       flash: 1, // 1 auto, 2 flash off, 3 flash on
-      flashMode: RNCamera.Constants.FlashMode.off,
+      flashMode: Camera.constants.FlashMode.off,
       imagePath: '',
       spinValue: new Animated.Value(0),
       startCapture: false,
@@ -46,12 +45,12 @@ export default class PGCamera extends Component{
   }
 
 
-  snapPhoto = async function(){
+  snapPhoto(){
 
     const options = {};
      //options.location = ...
 
-      /*this.camera.capture({metadata: options})
+      this.camera.capture({metadata: options})
         .then(
          (data) => {
            console.log(data);
@@ -77,28 +76,6 @@ export default class PGCamera extends Component{
         .catch( (err) =>{
          console.error(err);
         });
-        */
-
-        if (this.camera) {
-          this.camera.takePictureAsync().then(data => {
-            console.log('data: ', data);
-
-            this.setState({
-              imagePath: data.uri,
-              spinValue: new Animated.Value(0),
-              startCapture: false
-            }, ()=>{
-              // call the method TODO
-              this.props.capture(this.state.imagePath);
-
-              let lastestPhotos = this.state.lastestPhotos;
-              lastestPhotos.push(this.state.imagePath);
-              this.setState({
-                lastestPhotos
-              });
-
-          });
-        }
 
   }
 
@@ -173,17 +150,17 @@ export default class PGCamera extends Component{
     if(this.state.isBackCamera == true){
       this.setState({
         isBackCamera : false,
-        cameraType: RNCamera.Constants.Type.front,
+        cameraType: Camera.constants.Type.front,
         flash : 1,
-        flashMode: RNCamera.Constants.FlashMode.off
+        flashMode: Camera.constants.FlashMode.off
       });
     }
     else{
       this.setState({
         isBackCamera : true,
-        cameraType: RNCamera.Constants.Type.back,
+        cameraType: Camera.constants.Type.back,
         flash : 1,
-        flashMode: RNCamera.Constants.FlashMode.off
+        flashMode: Camera.constants.FlashMode.off
       });
     }
 
@@ -203,28 +180,28 @@ export default class PGCamera extends Component{
      case 1: {
        this.setState({
         flash : next_flash,
-        flashMode: RNCamera.Constants.FlashMode.off
+        flashMode: Camera.constants.FlashMode.off
        });
        break;
      }
      case 2: {
        this.setState({
         flash : next_flash,
-        flashMode: RNCamera.Constants.FlashMode.on
+        flashMode: Camera.constants.FlashMode.on
        });
        break;
      }
      case 3: {
        this.setState({
         flash : next_flash,
-        flashMode: RNCamera.Constants.FlashMode.auto
+        flashMode: Camera.constants.FlashMode.auto
        });
        break;
      }
      default: {
        this.setState({
         flash : 1,
-        flashMode: RNCamera.Constants.FlashMode.off
+        flashMode: Camera.constants.FlashMode.off
        });
        break;
      }
@@ -335,11 +312,13 @@ export default class PGCamera extends Component{
      }
 
     return(
-      <RNCamera
-        ref={ref => {
-          this.camera = ref;
+      <Camera
+        ref={(cam) => {
+          this.camera = cam;
         }}
         style={styles.cameraPreview}
+        aspect={Camera.constants.Aspect.fill}
+        captureTarget={Camera.constants.CaptureTarget.disk}
         type={this.state.cameraType}
         flashMode={this.state.flashMode}
         captureQuality={Camera.constants.CaptureQuality.high}
@@ -392,7 +371,7 @@ export default class PGCamera extends Component{
 
        </View>
 
-      </RNCamera>
+      </Camera>
     )
 
   }
