@@ -16,7 +16,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  AsyncStorage,
+  AsyncStorage
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -94,7 +94,7 @@ export default class GeneralComment extends Component{
 
   }
 
-  //get the meter feedback
+  //get the general feedback
   //get the whichever item details
   getDetails = () =>{
 
@@ -237,7 +237,6 @@ export default class GeneralComment extends Component{
         </ScrollView>
 
         <MessageBarAlert ref='alert' />
-
       </View>
     );
   }

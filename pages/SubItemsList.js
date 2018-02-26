@@ -15,6 +15,7 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
+  ImageBackground,
   Alert
 } from 'react-native';
 import Prompt from 'react-native-prompt';
@@ -57,7 +58,9 @@ export default class SubItemsList extends Component{
       prop_master_name: this.props.prop_master_name,
       promptVisible: false,
       promptVisibleCopy: false,
-      photos: []
+      photos: [],
+      generalComment: '',
+      generalAudios: []
     };
 
     this.property_subitem_feedback = {};
@@ -132,6 +135,81 @@ export default class SubItemsList extends Component{
     });
 
 
+
+
+
+  }
+
+
+  //get the whichever item details
+  async getGeneralCommentDetails(prop_subitem_id){
+
+    if(this.state.property_id && prop_subitem_id){
+
+        try {
+            const result = await AsyncStorage.getItem(TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL);
+            if (result !== null){
+              let property_sub_feedback_general = JSON.parse(result) || {};
+
+              if(property_sub_feedback_general.hasOwnProperty(this.state.property_id) ){
+
+                let feedbacks = property_sub_feedback_general[this.state.property_id];
+
+                if(feedbacks.hasOwnProperty(prop_subitem_id) ){
+                    return feedbacks[prop_subitem_id].comment;
+                }
+
+              }
+
+            }
+          } catch (error) {
+            // Error retrieving data
+          }
+
+    }
+
+  }
+
+
+  //gernal audios
+  async getGeneralAudioDetails(item){
+
+    if(this.state.property_id && item.prop_subitem_id ){
+
+      try {
+
+        const result = await AsyncStorage.getItem(TableKeys.PROPERTY_SUB_VOICE_GENERAL);
+
+        if (result !== null){
+
+          let audios = JSON.parse(result) || {};
+
+          if(audios.hasOwnProperty(this.state.property_id) ){
+
+            let property_audios = audios[this.state.property_id];
+
+            if(property_audios.hasOwnProperty(item.prop_master_id) ){
+
+              let master_audios = property_audios[item.prop_master_id];
+
+              if(master_audios.hasOwnProperty(item.prop_subitem_id) ){
+
+                return master_audios[item.prop_subitem_id];
+
+              }
+
+            }
+
+          }
+
+        }
+
+      } catch (error) {
+        // Error retrieving data
+      }
+
+    }
+
   }
 
   getSubItemsList =()=>{
@@ -156,7 +234,43 @@ export default class SubItemsList extends Component{
             loading: false,
             subitems: sub_items,
             refreshing: false,
+          }, ()=>{
+
+            for(let i=0, l = this.state.subitems.length; i < l; i++){
+
+              if( this.state.subitems[i].type == 'GENERAL'){
+
+                // get the comment
+                this.getGeneralCommentDetails(this.state.subitems[i].prop_subitem_id).then( response =>{
+
+                  this.setState({
+                    generalComment: response
+                  });
+
+                });
+
+                  // get the audios
+
+                  this.getGeneralAudioDetails(this.state.subitems[i]).then( response =>{
+
+                    this.setState({
+                      generalAudios: response
+                    });
+
+                  });
+
+
+                break;
+              }
+
+
+            }
+
+
+
           });
+
+
         }
         else{
 
@@ -672,6 +786,51 @@ export default class SubItemsList extends Component{
 
   }
 
+  //get general photos count
+  getGeneralPhotosCount = (prop_subitem_id) =>{
+
+    let photos_tag = null;
+
+    if(this.state.photos.hasOwnProperty(prop_subitem_id)){
+      let num_photos  = this.state.photos[prop_subitem_id].length;
+
+      if(num_photos){
+        photos_tag = <View style={{position: 'absolute', top: -17, right: -17, backgroundColor: '#CF0A2C', borderRadius: 10, padding:3 }}><Text style={{color: '#ffffff', fontSize: 12, numberOfLines: 1,  allowFontScaling: true, fontWeight: '700' }}>{num_photos}</Text></View>
+      }
+
+    }
+
+    return photos_tag;
+  }
+
+  // get general audio check
+  getGeneralAudioCheck = (item) =>{
+
+    let audio_check = null;
+
+    if(this.state.generalAudios && this.state.generalAudios.length > 0){
+      
+      audio_check = <View style={{position: 'absolute', top: -17, right: -17, backgroundColor: '#239D60', borderRadius: 10, padding:2, paddingLeft: 4, paddingRight: 4 }}><Text style={{color: '#ffffff', fontSize: 12, numberOfLines: 1,  allowFontScaling: true, fontWeight: '700' }}>✓</Text></View>
+
+    }
+
+    return audio_check;
+
+  }
+
+  // get general comment check
+  getGeneralCommentCheck = (item) =>{
+
+    let comment_check = null;
+
+       if(this.state.generalComment){
+
+         comment_check = <View style={{position: 'absolute', top: -17, right: -17, backgroundColor: '#239D60', borderRadius: 10, padding:2, paddingLeft: 4, paddingRight: 4 }}><Text style={{color: '#ffffff', fontSize: 12, numberOfLines: 1,  allowFontScaling: true, fontWeight: '700' }}>✓</Text></View>
+       }
+
+       return comment_check;
+  }
+
   renderFooter = () => {
     if (!this.state.loading) return null;
 
@@ -776,22 +935,29 @@ export default class SubItemsList extends Component{
                 {item.type == 'GENERAL' &&
                   <View style={styles.roundBoxWrapper}>
                       <TouchableHighlight style={styles.roundBox} underlayColor='transparent'  onPress={()=>this.openGenComment(item)}>
-                        <Image
+                        <ImageBackground
                           source={require('../images/gen_chat.png')}
                           style = {styles.genIcons}
-                        />
+                        >
+                        {this.getGeneralCommentCheck(item)}
+                        </ImageBackground>
                       </TouchableHighlight>
                       <TouchableHighlight style={styles.roundBox} underlayColor='transparent' onPress={()=>this.openGenPhotos(item)}>
-                        <Image
+                        <ImageBackground
                           source={require('../images/gen_camera.png')}
                           style = {styles.genIcons}
-                        />
+                        >
+                          {this.getGeneralPhotosCount(item.prop_subitem_id)}
+                        </ImageBackground>
+
                       </TouchableHighlight>
                       <TouchableHighlight underlayColor='transparent' style={styles.roundBox} onPress={()=>this.openGenAudio(item)} >
-                        <Image
+                        <ImageBackground
                           source={require('../images/gen_voice.png')}
                           style = {styles.genIcons}
-                        />
+                        >
+                          {this.getGeneralAudioCheck(item)}
+                        </ImageBackground>
                       </TouchableHighlight>
                   </View>
                 }

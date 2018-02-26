@@ -18,7 +18,8 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
-  Switch
+  Switch,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -366,6 +367,7 @@ export default class GeneralCondition extends Component{
     let _keyExtractor = (item, index) => index;
     return(
       <View>
+      <KeyboardAvoidingView behavior="position">
         <FlatList
           contentContainerStyle={styles.list}
           data={this.state.conditionsList}
@@ -390,6 +392,7 @@ export default class GeneralCondition extends Component{
             />
           </View>
         }
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -420,7 +423,8 @@ const styles = StyleSheet.create({
   list: {
     justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    width: SCREENWIDTH,
+    paddingBottom: 30
   },
   modalWrapper:{
     flex: 1,

@@ -18,7 +18,8 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  Linking
+  Linking,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -237,6 +238,8 @@ export default class Login extends Component{
 
   render(){
     return(
+      <KeyboardAvoidingView
+      behavior="position">
       <ScrollView>
       <View style={styles.fill}>
 
@@ -283,6 +286,7 @@ export default class Login extends Component{
 
       </View>
       </ScrollView>
+    </KeyboardAvoidingView>
     );
   }
 }

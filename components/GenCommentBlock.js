@@ -1,6 +1,5 @@
 /**
  * Sanppar React Native App
- * https://sph.com.sg
  * @sara
  * general comment box
  */

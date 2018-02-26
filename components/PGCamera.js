@@ -321,13 +321,13 @@ export default class PGCamera extends Component{
         captureTarget={Camera.constants.CaptureTarget.disk}
         type={this.state.cameraType}
         flashMode={this.state.flashMode}
-        captureQuality={Camera.constants.CaptureQuality.medium}
-        //onFocusChanged={() => {}}
-        //  onFocusChanged={() => {}}
-          onZoomChanged={() => {}}
-       //   defaultTouchToFocus
-       //defaultOnFocusComponent={true}
-       //mirrorImage={false}
+        captureQuality={Camera.constants.CaptureQuality.high}
+        onZoomChanged={(e) => {
+        	//console.log('zoomed!');
+        }}
+        onFocusChanged={(e) =>{
+        }}
+
       >
         <View style={styles.camActionTopBar}>
           <TouchableWithoutFeedback style={styles.camActionItem} onPress={this.handleSwitchFlash.bind(this)}>
