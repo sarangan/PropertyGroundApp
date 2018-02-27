@@ -12,7 +12,8 @@ import {
   Dimensions,
 	Linking,
   AsyncStorage,
-	Alert
+	Alert,
+	ScrollView
 } from 'react-native';
 
 import {homeNavigator} from '../pages/Inspections';
@@ -226,6 +227,7 @@ export default class Drawer extends Component {
 		return (
 
         <View style={styles.container}>
+					<ScrollView>
 
 
           <View style={styles.drawerList}>
@@ -255,6 +257,7 @@ export default class Drawer extends Component {
 
 					</View>
 
+					</ScrollView>
 
         </View>
 
