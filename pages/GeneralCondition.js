@@ -19,7 +19,8 @@ import {
   ActivityIndicator,
   Image,
   Switch,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ScrollView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -366,8 +367,11 @@ export default class GeneralCondition extends Component{
   renderList=()=>{
     let _keyExtractor = (item, index) => index;
     return(
-      <View>
-      <KeyboardAvoidingView behavior="position">
+
+
+
+      <View style={{flex: 1 }}>
+
         <FlatList
           contentContainerStyle={styles.list}
           data={this.state.conditionsList}
@@ -381,6 +385,7 @@ export default class GeneralCondition extends Component{
           onRefresh={this.handleRefresh}
         />
 
+
         { this.state.open_modal &&
           <View style={styles.modalWrapper}>
             <FilterPicker
@@ -392,21 +397,28 @@ export default class GeneralCondition extends Component{
             />
           </View>
         }
-        </KeyboardAvoidingView>
-      </View>
+
+        </View>
+
+
     );
   }
 
   render(){
 
     return(
-      <View style={styles.fill}>
-        {
-          this.renderList()
-        }
-        <MessageBarAlert ref='alert' />
 
-      </View>
+        <View style={styles.fill}>
+          <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={-20}>
+            <Text style={styles.divTxt}>General Conditions</Text>
+            {
+              this.renderList()
+            }
+            <MessageBarAlert ref='alert' />
+          </KeyboardAvoidingView>
+
+        </View>
+
     );
   }
 }
@@ -418,13 +430,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9F9F9'
+    backgroundColor: '#F9F9F9',
+    paddingBottom: 40
   },
   list: {
     justifyContent: 'center',
     flexDirection: 'column',
     width: SCREENWIDTH,
-    paddingBottom: 30
+    paddingBottom: 60
   },
   modalWrapper:{
     flex: 1,
@@ -437,6 +450,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
   },
-
+  divTxt:{
+    backgroundColor: "#F7F7F9",
+    color: "#81C5D3",
+    fontSize: 15,
+    fontWeight: "600",
+    width: SCREENWIDTH,
+    textAlign: "left",
+    padding: 15,
+  },
 
 });

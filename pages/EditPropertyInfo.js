@@ -16,8 +16,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  AsyncStorage,
-  KeyboardAvoidingView
+  AsyncStorage
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -433,9 +432,6 @@ export default class EditPropertyInfo extends Component{
 
       <View style={styles.fill}>
 
-      <KeyboardAvoidingView
-      behavior="position">
-
         <ScrollView>
           <Text style={styles.divTxt}>Property details</Text>
 
@@ -572,7 +568,6 @@ export default class EditPropertyInfo extends Component{
         }
 
         <MessageBarAlert ref='alert' />
-        </KeyboardAvoidingView>
 
       </View>
 
