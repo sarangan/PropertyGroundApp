@@ -1,8 +1,7 @@
 /**
  * PG React Native App
- * https://sph.com.sg
  * @sara
- * Inspections page
+ * roomlist page
  */
 import React, {Component} from 'react';
 import {
@@ -851,8 +850,8 @@ export default class RoomList extends Component{
           overflow: 'hidden',
           flexDirection: 'column',
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
+          // justifyContent: 'center',
+          // alignItems: 'center',
           height: this.state.height }}>
           {
             this.state.meterlist.map( (item, i) =>{
@@ -888,8 +887,8 @@ export default class RoomList extends Component{
           overflow: 'hidden',
           flexDirection: 'column',
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
+          // justifyContent: 'center',
+          // alignItems: 'center',
           height: this.state.sig_height }}>
           {
             this.state.singantes_list.map( (item, i) =>{
@@ -1122,14 +1121,16 @@ export default class RoomList extends Component{
                   {this.state.imgErr == true && this.state.property.image_url == '' &&
                     <Image
                       source={require('../images/property.png')}
-                      style = {{ width: SCREENWIDTH,
+                      style = {{
+                        width: SCREENWIDTH,
                         height: PARALLAX_HEADER_HEIGHT }}
                     />
                   }
 
                   <View style={{position: 'absolute',
                             top: 0,
-                            width: SCREENWIDTH,
+                            //width: SCREENWIDTH,
+                            width: '100%',
                             backgroundColor: 'rgba(0,0,0,.1)',
                             height: PARALLAX_HEADER_HEIGHT}}/>
 
@@ -1140,7 +1141,7 @@ export default class RoomList extends Component{
 
             renderForeground={() => (
               <View key="parallax-header" style={ styles.parallaxHeader }>
-                <Text style={{width: SCREENWIDTH, position: 'absolute', padding: 10, left: '0%', bottom: '16%', fontWeight: '700', fontSize: 13, color:"#e1e1e1", backgroundColor: 'rgba(129, 197, 211, 0.4)'}}>
+                <Text style={{ width: '100%', position: 'absolute', padding: 10, left: '0%', bottom: '16%', fontWeight: '700', fontSize: 13, color:"#e1e1e1", backgroundColor: 'rgba(129, 197, 211, 0.4)'}}>
                   {this.state.property.address_1}
                 </Text>
                 {this.renderActionBar()}
@@ -1157,7 +1158,7 @@ export default class RoomList extends Component{
             )}
 
             >
-            <View style={{ alignItems: 'flex-start', flex: 1 }}>
+            <View style={{  flex: 1, }}>
 
 
               {this.renderList()}
@@ -1167,7 +1168,7 @@ export default class RoomList extends Component{
         </ParallaxScrollView>
 
         <Prompt
-            title="Copy room"
+            title="Add new room"
             placeholder="Enter your room name here"
             defaultValue={'copy of room'}
             visible={this.state.promptVisibleCopy}
@@ -1186,20 +1187,21 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9'
   },
   list: {
-    justifyContent: 'center',
+    flex: 1,
+    //justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   rowWrapper:{
     padding: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
   },
   listContainer:{
@@ -1255,7 +1257,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     alignItems: 'center',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     height: 40,
     backgroundColor: '#F9F9F9',
     paddingLeft: 20,

@@ -809,7 +809,7 @@ export default class SubItemsList extends Component{
     let audio_check = null;
 
     if(this.state.generalAudios && this.state.generalAudios.length > 0){
-      
+
       audio_check = <View style={{position: 'absolute', top: -17, right: -17, backgroundColor: '#239D60', borderRadius: 10, padding:2, paddingLeft: 4, paddingRight: 4 }}><Text style={{color: '#ffffff', fontSize: 12, numberOfLines: 1,  allowFontScaling: true, fontWeight: '700' }}>✓</Text></View>
 
     }
@@ -1026,21 +1026,21 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9',
     paddingBottom: 40
   },
   list: {
-    justifyContent: 'center',
+    //justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   rowWrapper:{
     padding: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
   },
   listContainer:{
@@ -1099,12 +1099,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FDFDFD',
     borderTopWidth: 1,
     borderTopColor: '#FDFDFD',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     height: 50,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center'
+    alignItems: 'center',
+    width: '100%'
   },
   actionBar:{
     flex: 1,
@@ -1112,7 +1113,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     flexWrap: 'wrap',
     alignItems: 'center',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     height: 40,
     backgroundColor: '#F9F9F9'
   },

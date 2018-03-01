@@ -249,21 +249,21 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9',
     paddingBottom: 40
   },
   list: {
     justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   rowWrapper:{
     padding: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
   },
   title:{

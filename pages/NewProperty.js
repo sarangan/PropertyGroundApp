@@ -725,7 +725,7 @@ export default class NewProperty extends Component{
           <Text style={styles.divTxt}>Report details</Text>
 
           <TouchableHighlight underlayColor='transparent' onPress={this.handleOpenReportTypeModal}>
-            <View style={{flex: 1, width: SCREENWIDTH - 25, alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'nowrap'}}>
+            <View style={{flex: 1, marginRight: 25, alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'nowrap'}}>
               <Text style={ [styles.selectTxt, {color: (this.state.changeColor? "#333333" : "#A9ACBC") } ] }>{this.state.default_report_type}</Text>
               <Image source={require('../images/dropdown.png')} style={styles.dropdown_img}/>
             </View>
@@ -743,8 +743,8 @@ export default class NewProperty extends Component{
           /> */}
 
           <DatePicker
-              style={{width: SCREENWIDTH - 20, borderWidth: 0, marginTop: 5,
-              marginBottom : 5,}}
+              style={{ borderWidth: 0, marginTop: 5,
+              marginBottom : 5, width: '95%'}}
               date={this.state.report_date}
               mode="date"
               placeholder="Select Report date"
@@ -825,15 +825,15 @@ export default class NewProperty extends Component{
 const styles = StyleSheet.create({
   fill:{
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center'
+    //justifyContent: 'flex-start',
+    //alignItems: 'center'
   },
   divTxt:{
     backgroundColor: "#F7F7F9",
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 10,
   },
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
     paddingLeft: 25,
     paddingRight: 25,
     backgroundColor: '#FFFFFF',
-    width: SCREENWIDTH - 10,
+    //width: SCREENWIDTH - 10,
     marginTop: 10,
     fontSize: 15,
   },
@@ -860,7 +860,7 @@ const styles = StyleSheet.create({
   modalWrapper:{
     flex: 1,
     flexDirection: 'row',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FCFCFD',
     padding: 0,
     margin: 0,

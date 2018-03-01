@@ -1,6 +1,5 @@
 /**
  * PG React Native App
- * https://sph.com.sg
  * @sara
  * General comment
  */
@@ -16,7 +15,8 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  AsyncStorage
+  AsyncStorage,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -219,24 +219,22 @@ export default class GeneralComment extends Component{
 
     return(
       <View style={styles.fill}>
-        <ScrollView>
-
+      <KeyboardAvoidingView behavior="position">
           <Text style={styles.divTxt}>Comment</Text>
 
           <TextInput
-            style={[styles.txtInput, {height: SCREENHEIGHT - 200}]}
+            style={styles.txtInput}
             onChangeText={(text) => this.setState({comment:text, startEdit: true})}
             placeholder="Any comments?"
             placeholderTextColor="#A9ACBC"
             multiline = {true}
-            numberOfLines = {15}
+            numberOfLines = {10}
             value={this.state.comment}
             underlineColorAndroid='transparent'
           />
 
-        </ScrollView>
-
         <MessageBarAlert ref='alert' />
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -247,25 +245,31 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center'
+    //alignItems: 'flex-start'
+    //alignItems: 'center'
   },
   divTxt:{
     backgroundColor: "#F7F7F9",
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 10,
+    flex: 1,
+    maxHeight: 40
+
+    //width: '100%'
   },
   txtInput:{
-    height: 45,
+    //height: 45,
     paddingLeft: 10,
     paddingRight: 10,
     backgroundColor: '#FFFFFF',
-    width: SCREENWIDTH - 10,
+    //width: SCREENWIDTH - 10,
     marginTop: 10,
     fontSize: 15,
+    height: '60%',
   },
   selectTxt:{
     height: 45,
@@ -276,7 +280,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#e1e5ea',
     fontSize: 15,
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
+
   },
   divider:{
     marginLeft: 25,

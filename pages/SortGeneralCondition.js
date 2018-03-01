@@ -259,8 +259,8 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9'
   },
   list: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     // flexDirection: 'column',
     paddingLeft: 10,
     paddingRight: 10,
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   rowWrapper:{
     padding: 10,

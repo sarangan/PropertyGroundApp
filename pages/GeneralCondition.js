@@ -370,7 +370,7 @@ export default class GeneralCondition extends Component{
 
 
 
-      <View style={{flex: 1 }}>
+      <View style={{flex: 1 , width: '100%' }}>
 
         <FlatList
           contentContainerStyle={styles.list}
@@ -428,21 +428,26 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9',
-    paddingBottom: 40
+    paddingBottom: 40,
+
   },
   list: {
-    justifyContent: 'center',
+    flex: 0,
+    //alignSelf: 'stretch',
+    //justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH,
-    paddingBottom: 60
+    //width: SCREENWIDTH,
+    paddingBottom: 60,
   },
   modalWrapper:{
     flex: 1,
     flexDirection: 'row',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FCFCFD',
     padding: 0,
     margin: 0,
@@ -455,7 +460,7 @@ const styles = StyleSheet.create({
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 15,
   },

@@ -17,7 +17,8 @@ import {
   ActivityIndicator,
   AsyncStorage,
   FlatList,
-  Switch
+  Switch,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -36,7 +37,7 @@ var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 const GRIDWIDTH = Dimensions.get('window').width / 3;
-GRIDWIDTH = GRIDWIDTH - 5;
+GRIDWIDTH = 120;//GRIDWIDTH - 5;
 
 export default class SingleItem extends Component{
 
@@ -601,6 +602,9 @@ export default class SingleItem extends Component{
     return(
 
       <View style={styles.fill}>
+
+        <KeyboardAvoidingView behavior="position">
+
         <ScrollView>
           <Text style={styles.divTxt}>Condition</Text>
 
@@ -685,6 +689,7 @@ export default class SingleItem extends Component{
 
         <MessageBarAlert ref='alert' />
 
+        </KeyboardAvoidingView>
       </View>
 
     );
@@ -717,14 +722,14 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center'
+    //alignItems: 'center'
   },
   divTxt:{
     backgroundColor: "#F7F7F9",
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 10,
   },
@@ -734,7 +739,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     backgroundColor: "#F7F7F9",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     padding: 10,
   },
   photoTxt:{

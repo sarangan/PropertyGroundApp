@@ -431,7 +431,8 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     //backgroundColor: '#ffffff',
     paddingBottom: 15,
-    width: SCREENWIDTH
+    width: '100%'
+    //width: SCREENWIDTH
   },
   camActionItem:{
     flex: 0,

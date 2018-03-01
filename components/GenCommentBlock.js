@@ -111,18 +111,21 @@ export default class GenCommentBlock extends Component {
 
 const styles = StyleSheet.create({
   rowWrapper:{
+    flex:1,
     padding: 10,
     paddingTop: 15,
     paddingBottom: 15,
     paddingRight: 12,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
+    width: '100%',
     backgroundColor: '#FFFFFF'
   },
   listContainer:{
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    width: '100%',
   },
   title:{
     fontSize: 15,
@@ -140,8 +143,9 @@ const styles = StyleSheet.create({
     height: 20
   },
   dropdownWrapper:{
-    flex: 1,
+    flex: 0,
     width: SCREENWIDTH - 85,
+    //width: '50%',
     borderTopColor: '#F8F8FA',
     borderTopWidth: 1,
     alignItems: 'center',
@@ -154,7 +158,7 @@ const styles = StyleSheet.create({
   modalWrapper:{
     flex: 1,
     flexDirection: 'row',
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FCFCFD',
     padding: 0,
     margin: 0,
@@ -164,10 +168,11 @@ const styles = StyleSheet.create({
   },
   txtInput:{
     height: 80,
+    alignSelf: 'stretch',
     // paddingLeft: 10,
     // paddingRight: 10,
     backgroundColor: '#F6F6F8',
-    width: SCREENWIDTH - 20,
+    //width: SCREENWIDTH - 20,
     //marginTop: 10,
     fontSize: 15,
     borderTopColor: '#F4F4F6',

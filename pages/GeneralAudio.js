@@ -382,14 +382,14 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center'
+    //alignItems: 'center'
   },
   divTxt:{
     backgroundColor: "#F7F7F9",
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 10,
   },

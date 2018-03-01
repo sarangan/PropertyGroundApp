@@ -407,7 +407,7 @@ export default class Inspections extends Component{
 
   renderEmptyData = () =>{
     return(
-      <View style={{ flex: 1, width: SCREENWIDTH,  alignContent:'center', alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }} >
+      <View style={{ flex: 1, alignContent:'center', alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }} >
         <Image style={{ width: 80, height: 80, marginTop: SCREENHEIGHT / 3 }} source={require('../images/nodata.png')} />
       </View>
     );
@@ -569,22 +569,24 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9'
   },
   rowWrapper:{
+    flex: 1,
+    alignSelf: 'stretch',
     paddingLeft: 5,
     paddingRight: 0,
     paddingTop: 5,
     paddingBottom: 5,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
   },
   list: {
     justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   card: {
 		backgroundColor: '#FFFFFF',

@@ -619,14 +619,14 @@ export default class Report extends Component{
                     style={{  height: 1, flex: 1, backgroundColor: '#E6E7E7', marginTop: 5, marginBottom: 5}}
                   />
 
-                  <View style={{ flex:1, flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start',  }}>
 
                       <View style={{  flex: 0, flexDirection: 'column' }}>
                         <Text style={styles.subTitle}>Date</Text>
                         <Text style={styles.subText}>{this.state.property.mb_createdAt}</Text>
                       </View>
 
-                      <View style={{  flex: 0, flexDirection: 'column' }}>
+                      <View style={{  flex: 0, flexDirection: 'column', marginLeft: 120 }}>
                         <Text style={styles.subTitle}>Report Type</Text>
                         <Text style={styles.subText}>{this.state.property.report_type}</Text>
                       </View>
@@ -833,20 +833,21 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: '#F9F9F9'
   },
   list: {
-    justifyContent: 'center',
+    flex: 1,
+    //justifyContent: 'center',
     flexDirection: 'column',
-    width: SCREENWIDTH
+    //width: SCREENWIDTH
   },
   rowWrapper:{
     // padding: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     backgroundColor: '#FFFFFF'
   },
   contentWrapper:{

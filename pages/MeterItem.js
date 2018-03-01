@@ -18,7 +18,8 @@ import {
   ActivityIndicator,
   AsyncStorage,
   FlatList,
-  Switch
+  Switch,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -37,7 +38,7 @@ var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 const GRIDWIDTH = Dimensions.get('window').width / 3;
-GRIDWIDTH = GRIDWIDTH - 5;
+GRIDWIDTH = 120; //GRIDWIDTH - 5;
 
 export default class MeterItem extends Component{
 
@@ -494,7 +495,8 @@ export default class MeterItem extends Component{
           borderTopWidth: 0,
           justifyContent: 'center',
           alignSelf: 'center',
-          alignContent: 'center'
+          alignContent: 'center',
+          // /width: SCREENWIDTH
           //marginTop: 20,
         }}
       >
@@ -550,6 +552,7 @@ export default class MeterItem extends Component{
     let _keyExtractor = (item, index) => index;
     return(
 
+            
             <View style={styles.camWrapper}>
               <FlatList
                 contentContainerStyle={styles.listGrid}
@@ -562,6 +565,7 @@ export default class MeterItem extends Component{
                 extraData={this.state}
                 horizontal={false}
                 ListEmptyComponent={this.renderEmptyData}
+                numColumns={3}
               />
 
             </View>
@@ -578,6 +582,8 @@ export default class MeterItem extends Component{
   renderFormx = () =>{
     return(
       <View style={styles.fill}>
+        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={-60}>
+
         <ScrollView>
           <Text style={styles.divTxt}>Meter reading</Text>
 
@@ -640,12 +646,16 @@ export default class MeterItem extends Component{
 
         <MessageBarAlert ref='alert' />
 
-          <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
-          <Image
-            source={require('../images/gen_camera.png')}
-            style = {styles.genIcons}
-          />
-        </TouchableHighlight>
+
+
+        </KeyboardAvoidingView>
+
+        <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
+        <Image
+          source={require('../images/gen_camera.png')}
+          style = {styles.genIcons}
+        />
+      </TouchableHighlight>
 
       </View>
     );
@@ -674,7 +684,7 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center'
+    //alignItems: 'center'
   },
   photoDivTxt:{
     flex: 1,
@@ -682,7 +692,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     backgroundColor: "#F7F7F9",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     padding: 10,
   },
   photoTxt:{
@@ -699,7 +709,7 @@ const styles = StyleSheet.create({
     color: "#81C5D3",
     fontSize: 15,
     fontWeight: "600",
-    width: SCREENWIDTH,
+    //width: SCREENWIDTH,
     textAlign: "left",
     padding: 10,
   },
@@ -733,7 +743,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-
   },
   camera_img:{
     width: 120,
@@ -771,16 +780,25 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginBottom: 10
   },
-  listGrid: {
+  /*listGrid: {
    justifyContent: 'flex-start',
    flexDirection: 'row',
    //flexWrap: 'wrap',
    alignContent: 'flex-start',
    alignSelf: 'flex-start',
   },
+  */
+  listGrid: {
+   justifyContent: 'flex-start',
+   flexDirection: 'column',
+   //flexDirection: 'row',
+   //flexWrap: 'wrap',
+   alignContent: 'flex-start',
+   alignSelf: 'flex-start',
+  },
   rowContainer: {
-     justifyContent: 'center',
-     alignItems: 'center',
+     justifyContent: 'flex-start',
+     //alignItems: 'flex-start',
      padding: 5,
      backgroundColor: '#FFFFFF',
      marginRight: 5,

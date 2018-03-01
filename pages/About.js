@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 40,
     //backgroundColor: '#FF2B2A',
-    width: SCREENWIDTH,
-    height: SCREENHEIGHT,
+    //width: SCREENWIDTH,
+    //height: SCREENHEIGHT,
     backgroundColor: 'transparent',
   },
   aboutBg:{
