@@ -24,6 +24,7 @@ import auth from '../keys/auth';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
+const VERSION = "1.0";
 
 export default class Drawer extends Component {
 	constructor(props) {
@@ -40,19 +41,19 @@ export default class Drawer extends Component {
         {
           name: 'Privacy Policy',
           type: 'URL',
-					action: 'http://www.propertyground.com/',
+					action: 'http://www.propertyground.com/privacy-policy/',
 					icon: require('../images/menu_privacy.png')
         },
         {
           name: 'Terms and Conditions',
 					type: 'URL',
-					action: 'http://www.propertyground.com/',
+					action: 'http://www.propertyground.com/terms-of-service/',
 					icon: require('../images/menu_terms.png')
         },
 				{
           name: 'Help',
-          type: 'URL',
-					action: 'http://www.propertyground.com/',
+          type: 'PAGE',
+					action: 'HELP',
 					icon: require('../images/menu_help.png')
         },
         {
@@ -244,7 +245,7 @@ export default class Drawer extends Component {
 
 							<Image style={styles.pgLogo} source={require('../images/pg_logo.png')} />
 							<Text style={styles._version}>
-	              Version 1.0
+	              {`Version ${VERSION}`}
 	            </Text>
 
 	          </View>

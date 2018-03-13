@@ -119,10 +119,22 @@ export default class Inspections extends Component{
   }
 
   componentWillMount() {
+
+    AsyncStorage.getItem(AppKeys.SHOWGUIDE, (err, result) => {
+      console.log('show guide');
+      console.log(result);
+      if(result){
+        //user already saw it
+      }
+      else{
+        this.showGuide();
+      }
+    });
+
     SyncStore.on("change", this.getSyncStatus);
   }
 
-  componentWillUnmount () {
+  componentWillUnmount(){
     SyncStore.removeListener("change", this.getSyncStatus);
   }
 
@@ -136,6 +148,19 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
+
+  }
+
+  showGuide = () =>{
+
+    this.props.navigator.showModal({
+       screen: "PropertyGround.Guide",
+       title: '',
+       animationType: 'slide-up',
+       navigatorStyle:{
+         navBarHidden: true,
+       },
+   });
 
   }
 

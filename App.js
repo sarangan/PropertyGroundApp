@@ -25,6 +25,7 @@ import Signaturepad from './components/Signaturepad';
 import GeneralAudio from './pages/GeneralAudio';
 import Report from './pages/Report';
 import About from './pages/About';
+import Guide from './pages/Guide';
 import Drawer from './components/Drawer';
 
 
@@ -47,6 +48,7 @@ Navigation.registerComponent('PropertyGround.Signaturepad', ()=> Signaturepad);
 Navigation.registerComponent('PropertyGround.GeneralAudio', ()=> GeneralAudio);
 Navigation.registerComponent('PropertyGround.Report', ()=> Report);
 Navigation.registerComponent('PropertyGround.About', () => About);
+Navigation.registerComponent('PropertyGround.Guide', () => Guide);
 Navigation.registerComponent('PropertyGround.Drawer', () => Drawer);
 
 
