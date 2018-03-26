@@ -141,7 +141,8 @@ export default class ForgetPassword extends Component{
                   this.showErr('Someting went wrong when resetting your password');
                 }
 
-              }else{
+              }
+              else{
                 this.showErr('Someting went wrong when resetting your password');
               }
 

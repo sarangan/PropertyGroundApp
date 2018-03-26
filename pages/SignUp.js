@@ -158,11 +158,11 @@ export default class SignUp extends Component {
             console.log("registration success ");
             console.log(responseJson);
 
-            if(responseJson.hasOwnProperty('status') ){
-
               this.setState({
                 startSending: false,
               }, ()=>{
+
+                if(responseJson.hasOwnProperty('status') ){
 
                 if(responseJson['status'] == 1){
                   //success
@@ -187,20 +187,20 @@ export default class SignUp extends Component {
                     }
                   });
 
-
-
                 }
                 else {
                   this.showErr(responseJson.text);
                 }
 
-              })
+
+              }
+              else{
+                this.showErr('Someting went wrong');
+              }
+
+            });
 
 
-            }
-            else{
-              this.showErr('Someting went wrong');
-            }
 
           });
 
