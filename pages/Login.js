@@ -118,9 +118,53 @@ export default class Login extends Component{
 
   // open react website
   openPgWeb = (action) =>{
-    let url = encodeURI(action);
+    // let url = encodeURI(action);
+    // Linking.openURL(url).catch(err => console.error('An error occurred', err));
 
-    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+    switch (action) {
+      case 'SIGNUP':
+        this.props.navigator.showModal({
+            screen: "PropertyGround.SignUp",
+            title: 'Sign up',
+            animationType: 'slide-up',
+            navigatorStyle:{
+              navBarTextColor: 'white',
+              navBarButtonColor: 'white',
+              statusBarTextColorScheme: 'light',
+              navBarBackgroundColor: '#00BDDB',
+              navBarBlur: false,
+              screenBackgroundColor: '#FFFFFF',
+              navBarTransparent: false,
+            },
+            passProps: {
+             }
+        });
+
+        break;
+      case 'FORGOTPASSWORD':
+
+        this.props.navigator.showModal({
+            screen: "PropertyGround.ForgetPassword",
+            title: 'Forgot password',
+            animationType: 'slide-up',
+            navigatorStyle:{
+              navBarTextColor: 'white',
+              navBarButtonColor: 'white',
+              statusBarTextColorScheme: 'light',
+              navBarBackgroundColor: '#00BDDB',
+              navBarBlur: false,
+              screenBackgroundColor: '#FFFFFF',
+              navBarTransparent: false,
+            },
+            passProps: {
+             }
+        });
+
+        break;
+      default:
+    }
+
+
   }
 
   doLogin=()=>{
@@ -249,22 +293,18 @@ export default class Login extends Component{
         <TextInput
           style={styles.txtInput}
           onChangeText={(text) => this.setState({username:text})}
-          returnKeyType="done"
           placeholder="Enter your email"
           placeholderTextColor="#757575"
           clearButtonMode="while-editing"
-          onSubmitEditing={this.doLogin}
           keyboardType="email-address"
           underlineColorAndroid='transparent'
         />
         <TextInput
           style={styles.txtInput}
           onChangeText={(text) => this.setState({password:text})}
-          returnKeyType="done"
           placeholder="Enter password"
           placeholderTextColor="#757575"
           clearButtonMode="while-editing"
-          onSubmitEditing={this.doLogin}
           secureTextEntry= {true}
           underlineColorAndroid='transparent'
         />
@@ -280,8 +320,8 @@ export default class Login extends Component{
 
 
         <View style={styles.otherActionsBtnWrapper}>
-          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('http://propertyground.co.uk/') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
-          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('http://propertyground.co.uk/') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
+          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('SIGNUP') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
+          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('FORGOTPASSWORD') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
         </View>
 
       </View>
@@ -341,18 +381,20 @@ const styles = StyleSheet.create({
   },
   otherActionsBtnWrapper:{
     flex: 1,
-    flexDirection: "column",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    width: '85%'
     // position: "absolute",
     // bottom: 0,
     // left: 0,
-    padding: 20,
-    width: SCREENWIDTH - 50
+    //padding: 20,
+    //width: SCREENWIDTH - 50
   },
   otherActionsBtn:{
-    color: "#333333",
-     marginTop: 20,
+    color: "#00BDDB",
+    marginTop: 20,
+    fontSize: 16
     // marginRight: 20
   }
 

@@ -56,12 +56,12 @@ export default class Drawer extends Component {
 					action: 'HELP',
 					icon: require('../images/menu_help.png')
         },
-        {
-          name: 'Pricing',
-          type: 'URL',
-					action: 'http://propertyground.co.uk/pay/',
-					icon: require('../images/menu_payment.png')
-        },
+        // {
+        //   name: 'Pricing',
+        //   type: 'URL',
+				// 	action: 'http://propertyground.co.uk/pay/',
+				// 	icon: require('../images/menu_payment.png')
+        // },
         {
           name: 'Contact us',
           type: 'MAIL',

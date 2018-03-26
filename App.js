@@ -7,6 +7,8 @@
 import { Navigation } from 'react-native-navigation';
 
 import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import ForgetPassword from './pages/ForgetPassword';
 import Inspections from './pages/Inspections';
 import NewProperty from './pages/NewProperty';
 import AddRoomList from './pages/AddRoomList';
@@ -30,6 +32,8 @@ import Drawer from './components/Drawer';
 
 
 Navigation.registerComponent('PropertyGround.Login', () => Login);
+Navigation.registerComponent('PropertyGround.SignUp', () => SignUp);
+Navigation.registerComponent('PropertyGround.ForgetPassword', () => ForgetPassword);
 Navigation.registerComponent('PropertyGround.Inspections', () => Inspections);
 Navigation.registerComponent('PropertyGround.NewProperty', () => NewProperty);
 Navigation.registerComponent('PropertyGround.AddRoomList', () => AddRoomList);
