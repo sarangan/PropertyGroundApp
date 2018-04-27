@@ -26,6 +26,7 @@ import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
 import config from '../keys/config';
 import auth from '../keys/auth';
+import helper from '../helper/helper';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -48,6 +49,7 @@ export default class Login extends Component{
   //getting company template
   getCompanyTemplate(token){
 
+    /*
     fetch(
         config.ENDPOINT_URL + 'company/getTemplate',
         {
@@ -113,7 +115,9 @@ export default class Login extends Component{
       console.error(error);
     });
 
+    */
 
+    helper.syncTemplate(token);
   }
 
   // open react website
@@ -163,6 +167,7 @@ export default class Login extends Component{
         break;
       default:
     }
+
 
 
   }

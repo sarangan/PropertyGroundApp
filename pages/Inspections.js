@@ -135,7 +135,9 @@ export default class Inspections extends Component{
   }
 
   componentWillUnmount(){
+    console.log('unmonting now')
     SyncStore.removeListener("change", this.getSyncStatus);
+    clearInterval(this._interval);
   }
 
 
@@ -148,6 +150,8 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
+
+
 
   }
 
@@ -167,14 +171,22 @@ export default class Inspections extends Component{
   //checking sync
   checkSync = () =>{
 
+      let nosync = false;
+
       for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
         // console.log(this.state.master_properties[i].property_id);
         // console.log(this.state.master_properties[i].sync);
 
         if(this.state.master_properties[i].sync == 2){
+          nosync = true;
           helper.synSrv(this.state.master_properties[i]);
         }
+      }
+
+      if(!nosync){
+        console.log('clearing interval');
+        clearInterval(this._interval);
       }
 
   }
@@ -187,6 +199,7 @@ export default class Inspections extends Component{
    console.log('synced finihsed from ui thread');
    console.log(property_id);
    this.getProperties(true);
+   clearInterval(this._interval);
 
  }
 
@@ -229,8 +242,23 @@ export default class Inspections extends Component{
                 refreshing: false
               }, ()=>{
 
-                if(!nosync){
-                  this.checkSync();
+                nosync = false;
+                for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+                  if(this.state.master_properties[i].sync == 2){
+                    nosync = true;
+                    break;
+                  }
+                }
+                console.log("going to start process");
+                console.log(nosync);
+
+                if(nosync){
+
+                  this._interval = setInterval(() => {
+                    this.checkSync();
+                  }, 60000);
+
                 }
 
               });
@@ -568,13 +596,9 @@ export default class Inspections extends Component{
           ListFooterComponent={this.renderFooter}
           ItemSeparatorComponent={this.renderSeparator}
           extraData={this.state}
-          //ListHeaderComponent={this.renderHeader}
-          //onEndReached={this.handleLoadMore}
-          //onEndReachedThreshold={0.5}
           refreshing={this.state.refreshing}
           onRefresh={this.handleRefresh}
           ListEmptyComponent={this.renderEmptyData}
-          //horizontal={false}
         />
 
         <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.addNewProperty()}>

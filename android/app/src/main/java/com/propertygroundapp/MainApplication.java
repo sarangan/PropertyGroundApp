@@ -3,6 +3,8 @@ package com.propertygroundapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.reactnative.camera.RNCameraPackage;
+import com.rnim.rn.audio.ReactNativeAudioPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.rnfs.RNFSPackage;
 import com.reactnativerecordsound.ReactNativeRecordSoundPackager;
@@ -32,6 +34,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNCameraPackage(),
+            new ReactNativeAudioPackage(),
             new OrientationPackage(),
             new RNFSPackage(),
             new ReactNativeRecordSoundPackager(),

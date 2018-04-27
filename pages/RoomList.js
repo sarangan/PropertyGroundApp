@@ -197,14 +197,19 @@ export default class RoomList extends Component{
       console.log('get property details');
       let properties = JSON.parse(result) || [];
 
+      let property = {};
+
       for(let i =0, l = properties.length; i < l ; i++){
 
         if(properties[i].property_id == this.state.property_id ){
           properties[i].sync = 2; // 1 is is not yet sync  2 is sync start  3 is sync finished
           properties[i].locked = 1; // 1 is locked  0 not locked
 
+          property = properties[i]
+
           console.log('synced proeprty......');
           console.log(properties[i]);
+
           break;
         }
 
@@ -212,6 +217,7 @@ export default class RoomList extends Component{
 
         AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
           this.sync_spin();
+          helper.synSrv(property);
         });
 
 

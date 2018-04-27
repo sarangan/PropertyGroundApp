@@ -1,6 +1,5 @@
 /**
- * Sanppar React Native App
- * https://sph.com.sg
+ * PropertyGround React Native App
  * @sara
  * Camera
  */
@@ -19,7 +18,9 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import Camera from 'react-native-camera';
+
+import { RNCamera } from 'react-native-camera';
+
 import ImagePicker from 'react-native-image-crop-picker';
 
 const SCREENWIDTH = Dimensions.get('window').width;
@@ -32,9 +33,9 @@ export default class PGCamera extends Component{
 
     this.state = {
       isBackCamera: true,
-      cameraType : Camera.constants.Type.back,
+      cameraType : RNCamera.Constants.Type.back,
       flash: 1, // 1 auto, 2 flash off, 3 flash on
-      flashMode: Camera.constants.FlashMode.off,
+      flashMode: RNCamera.Constants.FlashMode.off,
       imagePath: '',
       spinValue: new Animated.Value(0),
       startCapture: false,
@@ -45,12 +46,35 @@ export default class PGCamera extends Component{
   }
 
 
-  snapPhoto(){
+  snapPhoto = async function(){
 
-    const options = {};
+
+
+    if(this.camera){
+      const options = {quality: 0.5 };
+      const data = await this.camera.takePictureAsync(options);
+      console.log(data);
+      this.setState({
+        imagePath: data.uri,
+        spinValue: new Animated.Value(0),
+        startCapture: false
+      }, ()=>{
+        // call the method TODO
+        this.props.capture(this.state.imagePath);
+
+        let lastestPhotos = this.state.lastestPhotos;
+        lastestPhotos.push(this.state.imagePath);
+        this.setState({
+          lastestPhotos
+        });
+
+      });
+
+    }
+
      //options.location = ...
 
-      this.camera.capture({metadata: options})
+      /*this.camera.capture({metadata: options})
         .then(
          (data) => {
            console.log(data);
@@ -76,6 +100,8 @@ export default class PGCamera extends Component{
         .catch( (err) =>{
          console.error(err);
         });
+        */
+
 
   }
 
@@ -312,22 +338,14 @@ export default class PGCamera extends Component{
      }
 
     return(
-      <Camera
+      <RNCamera
         ref={(cam) => {
           this.camera = cam;
         }}
         style={styles.cameraPreview}
-        aspect={Camera.constants.Aspect.fill}
-        captureTarget={Camera.constants.CaptureTarget.disk}
         type={this.state.cameraType}
         flashMode={this.state.flashMode}
-        captureQuality={Camera.constants.CaptureQuality.high}
-        onZoomChanged={(e) => {
-        	//console.log('zoomed!');
-        }}
-        onFocusChanged={(e) =>{
-        }}
-
+        
       >
         <View style={styles.camActionTopBar}>
           <TouchableWithoutFeedback style={styles.camActionItem} onPress={this.handleSwitchFlash.bind(this)}>
@@ -343,8 +361,8 @@ export default class PGCamera extends Component{
 
           <View style={{backgroundColor: 'rgba(0,189,219, 0.28)', flex: 0, marginBottom: 5, flexDirection: 'row', }}>
             <ScrollView horizontal={true}>
-            {this.getLastestPhotos()}
-          </ScrollView>
+              {this.getLastestPhotos()}
+            </ScrollView>
           </View>
 
           <View style={styles.camActionBar}>
@@ -371,7 +389,7 @@ export default class PGCamera extends Component{
 
        </View>
 
-      </Camera>
+      </RNCamera>
     )
 
   }

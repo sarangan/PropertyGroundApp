@@ -51,7 +51,7 @@ export default class Sync {
 
           switch (key) {
 
-            case TableKeys.PROPERTY_INFO: {
+            case TableKeys.PROPERTY_INFO: { //>
 
               console.log('Starting PROPERTY_INFO');
 
@@ -73,6 +73,8 @@ export default class Sync {
                    formData.append("table", TableKeys.PROPERTY_INFO);
 
                    this.postData(formData).then( response =>{
+
+                     console.log('Ending PROPERTY_INFO');
 
                      if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
 
@@ -103,7 +105,7 @@ export default class Sync {
               break;
             }
 
-            case TableKeys.PROPERTY_MASTERITEM_LINK: {
+            case TableKeys.PROPERTY_MASTERITEM_LINK: {//>
 
 
               console.log('Starting PROPERTY_MASTERITEM_LINK');
@@ -123,6 +125,8 @@ export default class Sync {
                     formData.append("table", TableKeys.PROPERTY_MASTERITEM_LINK);
 
                     this.postData(formData).then( response =>{
+
+                      console.log('Ending PROPERTY_MASTERITEM_LINK');
 
                        if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                            // we got status 1, update the storage
@@ -145,7 +149,7 @@ export default class Sync {
               break;
             }
 
-            case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+            case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {//>
 
 
               console.log('Starting PROPERTY_GENERAL_CONDITION_LINK');
@@ -164,6 +168,8 @@ export default class Sync {
 
                     this.postData(formData).then( response =>{
 
+                      console.log('Ending PROPERTY_GENERAL_CONDITION_LINK');
+
                       if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                          // we got status 1, update the storage
                          this.update_general_item_link( general_data[i], data );
@@ -181,7 +187,7 @@ export default class Sync {
               break;
             }
 
-            case TableKeys.PROPERTY_METER_LINK:{
+            case TableKeys.PROPERTY_METER_LINK:{//>
 
 
 
@@ -203,6 +209,8 @@ export default class Sync {
 
                     this.postData(formData).then( response =>{
 
+                      console.log('Ending PROPERTY_METER_LINK');
+
                       if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                          // we got status 1, update the storage
                          this.update_meter_item_link( meter_data[i], data );
@@ -222,7 +230,7 @@ export default class Sync {
             }
 
 
-            case TableKeys.PROPERTY_FEEDBACK: {
+            case TableKeys.PROPERTY_FEEDBACK: {//>
 
               console.log('Starting PROPERTY_FEEDBACK');
 
@@ -244,6 +252,8 @@ export default class Sync {
 
                             this.postData(formData).then( response =>{
 
+                              console.log('Ending PROPERTY_FEEDBACK');
+
                               if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                                  // we got status 1, update the storage
                                  this.update_feedback_item_link( key, data );
@@ -264,7 +274,7 @@ export default class Sync {
               break;
             }
 
-            case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+            case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {//>
 
 
               console.log('Starting PROPERTY_FEEDBACK');
@@ -287,6 +297,7 @@ export default class Sync {
 
 
                         this.postData(formData).then( response =>{
+                          console.log('Ending PROPERTY_FEEDBACK');
 
                           if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                              // we got status 1, update the storage
@@ -309,7 +320,7 @@ export default class Sync {
             }
 
 
-            case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
+            case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {//>
 
 
 
@@ -351,6 +362,8 @@ export default class Sync {
 
                             this.postData(formData, 'uploadvoice').then( response =>{
 
+                              console.log('Ending PROPERTY_SUB_VOICE_GENERAL');
+
                               if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                                  // we got status 1, update the storage
                                  this.update_voice_item_link( i, sub_key, master_key, data );
@@ -378,7 +391,7 @@ export default class Sync {
               break;
             }
 
-            case TableKeys.SIGNATURES : {
+            case TableKeys.SIGNATURES : {//>
 
               console.log('Starting SIGNATURES');
 
@@ -395,6 +408,8 @@ export default class Sync {
                   formData.append("table", TableKeys.SIGNATURES);
 
                   this.postData(formData).then( response =>{
+
+                    console.log('Ending SIGNATURES');
 
                     if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                        // we got status 1, update the storage
@@ -413,7 +428,7 @@ export default class Sync {
             }
 
 
-            case TableKeys.PHOTOS : {
+            case TableKeys.PHOTOS : {//>
 
               console.log('Starting PHOTOS');
 
@@ -449,6 +464,8 @@ export default class Sync {
 
 
                             this.postData(formData, 'uploadfile').then( response =>{
+
+                              console.log('Ending PHOTOS');
 
                               console.log('uploaded server PHOTOS');
 
@@ -507,24 +524,35 @@ export default class Sync {
         for(let i =0, l = properties.length; i < l ; i++){
           if(properties[i].property_id == this.property_id && properties[i].sync == 2){
 
-            console.log(properties[i]);
-
             let formData = new FormData();
             formData.append("property_id", this.property_id);
             formData.append("description", properties[i].description);
             formData.append("mb_createdAt", properties[i].mb_createdAt);
 
             this.postData(formData, 'finishSync').then( response =>{
+
+              // properties[i].sync = 3;
+              // AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), ()=>{
+              //   SyncActions.syncFinished(this.property_id);
+              // });
+
             });
 
-            this.finishedSync( i, properties);
-
-
-            break;
 
           }
 
+          if(properties[i].property_id == this.property_id){
+
+            this.recheckTbls(i, properties);
+          }
+
+
         }
+
+
+        //this.finishedSync( i, properties); //TODO
+
+
 
 
       }
@@ -547,6 +575,233 @@ export default class Sync {
 
     //update the front end
     SyncActions.syncFinished(this.property_id); //TODO
+
+  }
+
+  //re check all the tables
+  recheckTbls(__index, __properties){
+
+
+    AsyncStorage.getAllKeys((err, keys) => {
+      AsyncStorage.multiGet(keys, (err, stores) => {
+
+        let allSynced = true;
+
+        stores.map((result, i, store) => {
+          //get at each store's key/value so you can work with it
+          let key = store[i][0];
+          let value = store[i][1];
+
+          switch (key) {
+
+            
+            case TableKeys.PROPERTY_INFO: {
+
+              let properties = JSON.parse(value);
+              for(let i =0, l = properties.length; i < l ; i++){
+                if(properties[i].property_id == this.property_id && properties[i].sync == 1){
+                  allSynced = false;
+                }
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_MASTERITEM_LINK: {
+
+              let data = JSON.parse(value);
+              if(data.hasOwnProperty(this.property_id)){
+                let master_data = data[this.property_id];
+                for(let i =0, l = master_data.length; i < l ; i++){
+                  //console.log(master_data[i].sync);
+                  if(master_data[i].sync == 1){
+                    allSynced = false;
+                    break;
+                  }
+                }
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+
+              let data = JSON.parse(value);
+              if(data.hasOwnProperty(this.property_id)){
+                let general_data = data[this.property_id];
+                for(let i =0, l = general_data.length; i < l ; i++){
+                  if(general_data[i].sync == 1){
+                    allSynced = false;
+                    break;
+                  }
+                }
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_METER_LINK:{
+
+              let data = JSON.parse(value);
+
+              if(data.hasOwnProperty(this.property_id)){
+
+                let meter_data = data[this.property_id];
+                for(let i =0, l = meter_data.length; i < l; i++){
+                  if(meter_data[i].sync == 1){
+                    allSynced = false;
+                    break;
+                  }
+                }
+
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_FEEDBACK: {
+
+              let data = JSON.parse(value);
+              if(data.hasOwnProperty(this.property_id)){
+
+                let feedback_data = data[this.property_id];
+
+                for(let key in feedback_data){
+                    if(feedback_data.hasOwnProperty(key)) {
+                        if(feedback_data[key].sync == 1){
+                          allSynced = false;
+                          break;
+                        }
+                    }
+                }
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+
+              let data = JSON.parse(value);
+              if(data.hasOwnProperty(this.property_id)){
+
+                let feedback_data = data[this.property_id];
+
+                for(let key in feedback_data){
+                    if(feedback_data.hasOwnProperty(key)) {
+
+                      if(feedback_data[key].sync == 1){
+                        allSynced = false;
+                        break;
+                      }
+
+                    }
+                }
+
+              }
+              break;
+            }
+
+            case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
+
+              let data = JSON.parse(value);
+              if(data.hasOwnProperty(this.property_id)){
+
+                let property_voice = data[this.property_id];
+
+                for(let master_key in property_voice){
+                  if(property_voice.hasOwnProperty(master_key)){
+
+                    let master_item_voice =  property_voice[master_key];
+
+                    for(let sub_key in master_item_voice){
+                      if(master_item_voice.hasOwnProperty(sub_key) ){
+
+                        let sub_item_voice =  master_item_voice[sub_key];
+
+                        for(let i =0, l = sub_item_voice.length; i < l; i++){
+                          if(sub_item_voice[i].sync == 1){
+                            allSynced = false;
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              break;
+            }
+
+            case TableKeys.SIGNATURES : {
+
+              let data = JSON.parse(value);
+
+              if(data.hasOwnProperty(this.property_id)){
+
+                let signs = data[this.property_id];
+
+                if(signs.sync == 1){
+                  allSynced = false;
+                }
+
+              }
+
+              break;
+            }
+
+            case TableKeys.PHOTOS : {
+
+              let data = JSON.parse(value);
+
+              if(data.hasOwnProperty(this.property_id)){
+
+                let property_photos = data[this.property_id];
+
+                for(let master_key in property_photos){
+                  if(property_photos.hasOwnProperty(master_key)){
+
+                    let master_item_photos =  property_photos[master_key];
+
+                    for(let sub_key in master_item_photos){
+                      if(master_item_photos.hasOwnProperty(sub_key) ){
+
+                        let sub_item_photos =  master_item_photos[sub_key];
+
+                        for(let i =0, l = sub_item_photos.length; i < l; i++){
+                          if(sub_item_photos[i].sync == 1){
+                            allSynced = false;
+                            break;
+                          }
+                        }
+
+                      }
+                    }
+                  }
+                }
+              }
+              break;
+            }
+
+
+          }//end switch
+
+        }); //end of map
+
+        //check here
+
+        console.log('I AM GOING TO FINSIH THIS MAN');
+        console.log(allSynced);
+
+        if(allSynced){
+
+          console.log('calling UI actions');
+          //update the front end
+          __properties[__index].sync = 3;
+          AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+            SyncActions.syncFinished(this.property_id);
+          });
+
+        }
+
+
+      });
+
+    });
 
   }
 
@@ -747,7 +1002,7 @@ export default class Sync {
   async update_signs(data){
 
     let sign = data[this.property_id];
-    sign.sync = 1;
+    sign.sync = 2;
 
     console.log('updated SIGNATURES');
 
@@ -800,6 +1055,7 @@ export default class Sync {
   // this will wait for response from server
   async postData(formData, endpoint = 'syncmob' ){
 
+
     let response = await fetch(
         config.ENDPOINT_URL + 'property/'+ endpoint,
         {
@@ -817,9 +1073,9 @@ export default class Sync {
 
     let responseJson = await response.json();
 
-    // console.log('responseJson');
-    // console.log(responseJson);
-    // console.log('--------------------');
+    console.log('responseJson');
+    console.log(responseJson);
+    console.log('--------------------');
 
 
     return responseJson;

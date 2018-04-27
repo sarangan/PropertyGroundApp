@@ -24,7 +24,7 @@ import auth from '../keys/auth';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
-const VERSION = "1.0";
+const VERSION = "1.1";
 
 export default class Drawer extends Component {
 	constructor(props) {
@@ -37,6 +37,12 @@ export default class Drawer extends Component {
           type: 'PAGE',
 					action: 'ABOUT',
 					icon: require('../images/menu_about.png')
+        },
+				{
+          name: 'Settings',
+          type: 'PAGE',
+					action: 'SETTINGS',
+					icon: require('../images/menu_settings.png')
         },
         {
           name: 'Privacy Policy',
@@ -56,12 +62,7 @@ export default class Drawer extends Component {
 					action: 'HELP',
 					icon: require('../images/menu_help.png')
         },
-        // {
-        //   name: 'Pricing',
-        //   type: 'URL',
-				// 	action: 'http://propertyground.co.uk/pay/',
-				// 	icon: require('../images/menu_payment.png')
-        // },
+
         {
           name: 'Contact us',
           type: 'MAIL',
@@ -132,6 +133,15 @@ export default class Drawer extends Component {
 	           }
 	      });
 
+			}
+			else if(menu.action == "SETTINGS"){
+				homeNavigator.push({
+	        screen: 'PropertyGround.Settings',
+	        title: 'Settings',
+	        animated: true,
+	        //animationType: 'fade',
+	        passProps: { },
+	      });
 			}
 
 		}

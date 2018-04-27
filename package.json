@@ -15,7 +15,7 @@
 		"react-native": "^0.51.0",
 		"react-native-audio-player-recorder": "^2.0.0",
 		"react-native-audio-toolkit": "^1.0.6",
-		"react-native-camera": "git+https://github.com/lwansbrough/react-native-camera.git",
+		"react-native-camera": "^1.1.1",
 		"react-native-datepicker": "^1.6.0",
 		"react-native-fs": "^2.9.2",
 		"react-native-image-crop-picker": "^0.17.3",

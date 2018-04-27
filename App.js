@@ -28,6 +28,7 @@ import GeneralAudio from './pages/GeneralAudio';
 import Report from './pages/Report';
 import About from './pages/About';
 import Guide from './pages/Guide';
+import Settings from './pages/Settings';
 import Drawer from './components/Drawer';
 
 
@@ -53,6 +54,7 @@ Navigation.registerComponent('PropertyGround.GeneralAudio', ()=> GeneralAudio);
 Navigation.registerComponent('PropertyGround.Report', ()=> Report);
 Navigation.registerComponent('PropertyGround.About', () => About);
 Navigation.registerComponent('PropertyGround.Guide', () => Guide);
+Navigation.registerComponent('PropertyGround.Settings', () => Settings);
 Navigation.registerComponent('PropertyGround.Drawer', () => Drawer);
 
 
