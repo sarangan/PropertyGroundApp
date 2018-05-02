@@ -16,7 +16,7 @@ export default class Sync {
 
   syncCheck(){
 
-      if(this.property.sync == 2){
+      if(this.property.sync == 2 || this.property.sync == 3 ){ //TODO
         console.log('proeprty status syncing found' , this.property_id);
         this.syncing();
       }
@@ -130,13 +130,73 @@ export default class Sync {
 
                        if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                            // we got status 1, update the storage
-                           console.log('status update')
+                           console.log('status update master')
                           this.update_master_item_link( master_data[i], data );
-                          this.get_property_subitem_link(stores, master_data[i].prop_master_id);
+                          //this.get_property_subitem_link(stores, master_data[i].prop_master_id);
                        }
 
                     });
 
+
+
+                  }
+
+                }
+
+              }
+
+
+              break;
+            }
+
+            case TableKeys.PROPERTY_SUBITEM_LINK :{ //> //TODO
+
+              console.log('Starting PROPERTY_SUBITEM_LINK');
+
+              let data = JSON.parse(value);
+
+              console.log('see the sub items man');
+              //console.log(data);
+
+              for( let key in data){
+
+                let sub_item_details = data[key];
+
+                let prop_master_id = key;
+
+                for(let i =0, l < sub_item_details.length; i < l ; i++){
+
+                  if(sub_item_details[i].property_id == this.property_id ){ // we got this prop sub item
+                    //console.log(sub_item_details[i]);
+
+
+                    let sub_items = sub_item_details[i];
+
+
+                    for(let i =0, l = sub_items.length; i < l ; i++){
+                      if(sub_items[i].sync == 1){
+
+                        console.log('going to update PROPERTY_SUBITEM_LINK');
+                        //console.log(sub_items[i]);
+
+                        let formData = new FormData();
+                        formData.append("data", JSON.stringify(sub_items[i]) );
+                        formData.append("table", TableKeys.PROPERTY_SUBITEM_LINK);
+
+                        this.postData(formData).then( response =>{
+
+                          if(response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
+                            // we got status 1, update the storage
+                            console.log('updated PROPERTY_SUBITEM_LINK');
+                            this.update_storage_sub_items_link( sub_items[i], data, prop_master_id );
+                          }
+
+                        });
+
+
+                      }
+
+                    }
 
 
                   }
@@ -469,7 +529,7 @@ export default class Sync {
 
                               console.log('uploaded server PHOTOS');
 
-                              if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
+                              if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
                                 // we got status 1, update the storage
                                 this.update_photos( i, sub_key, master_key, data );
                              }
@@ -594,7 +654,7 @@ export default class Sync {
 
           switch (key) {
 
-            
+
             case TableKeys.PROPERTY_INFO: {
 
               let properties = JSON.parse(value);
