@@ -84,8 +84,6 @@ export default class Report extends Component{
       this.getConditionsList();
     }
 
-
-
   }
 
   componentWillUnmount () {
@@ -214,6 +212,55 @@ export default class Report extends Component{
 
     });
 
+
+  }
+
+  //hard unlock the property
+  hardUnlock = () =>{
+
+    let sync = 1;
+
+
+    AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
+      console.log('get property details');
+      let properties = JSON.parse(result) || [];
+
+      for(let i =0, l = properties.length; i < l ; i++){
+
+        if(properties[i].property_id == this.state.property_id ){
+
+          let data_property = properties[i];
+          data_property.sync =  sync; // 1 is is not yet sync  2 is sync start  3 is sync finished
+          data_property.locked = 0 ; // 1 is locked  0 not locked
+
+          properties[i] = data_property;
+
+          this.setState({
+            locked: 0,
+            sync
+          }, ()=>{
+            this.getData();
+            this.getConditionsList();
+          });
+
+          Alert.alert(
+           'PropertyGround',
+           'Property unlocked!'
+          );
+
+          break;
+
+        }
+      }
+
+      AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
+        //saved proprty
+        console.log("saved property tbl");
+
+      });
+
+
+    });
 
   }
 
@@ -532,8 +579,8 @@ export default class Report extends Component{
 
   getSigns  = (room_item) =>{
 
-      console.log('tanel url');
-      console.log(this.state.signs['tenant_url']);
+      //console.log('tanel url');
+      //console.log(this.state.signs['tenant_url']);
 
       return(
 
@@ -692,7 +739,7 @@ export default class Report extends Component{
           </TouchableHighlight>
 
           <TouchableHighlight  underlayColor="transparent" style={styles.actionBarItem} onPress={()=>this.doUnlock()}
-            >
+            onLongPress={()=>this.hardUnlock()}>
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
               <Text style={styles.actionBarTxt}>{(this.state.locked == 1 ? 'Unlock' : 'Lock')}</Text>
               {this.state.locked == 1 &&

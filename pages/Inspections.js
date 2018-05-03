@@ -178,18 +178,40 @@ export default class Inspections extends Component{
         // console.log(this.state.master_properties[i].property_id);
         // console.log(this.state.master_properties[i].sync);
 
-        if(this.state.master_properties[i].sync == 2 || this.state.master_properties[i].sync == 3){
+        if(this.state.master_properties[i].sync == 2 ){
           nosync = true;
           helper.synSrv(this.state.master_properties[i]);
         }
       }
 
       if(!nosync){
-        console.log('clearing interval');
+        //console.log('clearing interval');
         //clearInterval(this._interval); //TODO
       }
 
   }
+
+
+  checkSynced = () =>{
+
+    let nosync = false;
+
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+      if(this.state.master_properties[i].sync == 2 ){
+        nosync = true;
+        helper.checkSynSrv( i , this.state.master_properties);
+      }
+    }
+
+    if(!nosync){
+      //console.log('clearing interval');
+      clearInterval(this._interval); //TODO
+    }
+
+  }
+
+
 
   //get synced status
   getSyncStatus(){
@@ -245,7 +267,7 @@ export default class Inspections extends Component{
                 nosync = false;
                 for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
-                  if(this.state.master_properties[i].sync == 2 || this.state.master_properties[i].sync == 3){
+                  if(this.state.master_properties[i].sync == 2 ){
                     nosync = true;
                     break;
                   }
@@ -258,6 +280,10 @@ export default class Inspections extends Component{
                   //this._interval = setInterval(() => { //TODO
                     this.checkSync();
                   //}, 60000);
+
+                  this._interval = setInterval(() => { //TODO
+                    this.checkSynced();
+                  }, 60000);
 
                 }
 

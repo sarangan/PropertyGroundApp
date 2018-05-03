@@ -16,7 +16,7 @@ export default class Sync {
 
   syncCheck(){
 
-      if(this.property.sync == 2 || this.property.sync == 3 ){ //TODO
+      if(this.property.sync == 2 ){
         console.log('proeprty status syncing found' , this.property_id);
         this.syncing();
       }
@@ -155,25 +155,20 @@ export default class Sync {
 
               let data = JSON.parse(value);
 
-              console.log('see the sub items man');
+              //console.log('see the sub items man');
               //console.log(data);
 
               for( let key in data){
 
-                let sub_item_details = data[key];
+                let sub_items = data[key];
 
                 let prop_master_id = key;
 
-                for(let i =0, l < sub_item_details.length; i < l ; i++){
+                for(let i =0, l = sub_items.length; i < l ; i++){
 
-                  if(sub_item_details[i].property_id == this.property_id ){ // we got this prop sub item
+                  if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
                     //console.log(sub_item_details[i]);
 
-
-                    let sub_items = sub_item_details[i];
-
-
-                    for(let i =0, l = sub_items.length; i < l ; i++){
                       if(sub_items[i].sync == 1){
 
                         console.log('going to update PROPERTY_SUBITEM_LINK');
@@ -196,7 +191,7 @@ export default class Sync {
 
                       }
 
-                    }
+
 
 
                   }
@@ -641,6 +636,7 @@ export default class Sync {
   //re check all the tables
   recheckTbls(__index, __properties){
 
+    console.log('Re-check tables again');
 
     AsyncStorage.getAllKeys((err, keys) => {
       AsyncStorage.multiGet(keys, (err, stores) => {
@@ -660,6 +656,7 @@ export default class Sync {
               let properties = JSON.parse(value);
               for(let i =0, l = properties.length; i < l ; i++){
                 if(properties[i].property_id == this.property_id && properties[i].sync == 1){
+                  console.log('re-check PROPERTY_INFO FAIL');
                   allSynced = false;
                 }
               }
@@ -674,11 +671,38 @@ export default class Sync {
                 for(let i =0, l = master_data.length; i < l ; i++){
                   //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
+                    console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
                     allSynced = false;
                     break;
                   }
                 }
               }
+              break;
+            }
+
+            case TableKeys.PROPERTY_SUBITEM_LINK:{
+
+              let data = JSON.parse(value);
+
+              mainloop: for( let key in data){
+
+                let sub_items = data[key];
+
+                for(let i =0, l = sub_items.length; i < l ; i++){
+
+                  if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
+                    //console.log(sub_item_details[i]);
+                      if(sub_items[i].sync == 1){
+                        console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
+                        allSynced = false;
+                        break mainloop;
+                      }
+                  }
+
+                }
+
+              }
+
               break;
             }
 
@@ -689,6 +713,7 @@ export default class Sync {
                 let general_data = data[this.property_id];
                 for(let i =0, l = general_data.length; i < l ; i++){
                   if(general_data[i].sync == 1){
+                    console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -706,6 +731,7 @@ export default class Sync {
                 let meter_data = data[this.property_id];
                 for(let i =0, l = meter_data.length; i < l; i++){
                   if(meter_data[i].sync == 1){
+                    console.log('re-check PROPERTY_METER_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -725,6 +751,7 @@ export default class Sync {
                 for(let key in feedback_data){
                     if(feedback_data.hasOwnProperty(key)) {
                         if(feedback_data[key].sync == 1){
+                          console.log('re-check PROPERTY_FEEDBACK FAIL');
                           allSynced = false;
                           break;
                         }
@@ -745,6 +772,7 @@ export default class Sync {
                     if(feedback_data.hasOwnProperty(key)) {
 
                       if(feedback_data[key].sync == 1){
+                        console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
                         allSynced = false;
                         break;
                       }
@@ -775,6 +803,7 @@ export default class Sync {
 
                         for(let i =0, l = sub_item_voice.length; i < l; i++){
                           if(sub_item_voice[i].sync == 1){
+                            console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
                             allSynced = false;
                             break;
                           }
@@ -796,6 +825,7 @@ export default class Sync {
                 let signs = data[this.property_id];
 
                 if(signs.sync == 1){
+                  console.log('re-check SIGNATURES FAIL');
                   allSynced = false;
                 }
 
@@ -824,6 +854,8 @@ export default class Sync {
 
                         for(let i =0, l = sub_item_photos.length; i < l; i++){
                           if(sub_item_photos[i].sync == 1){
+                            console.log(sub_item_photos[i]);
+                            console.log('re-check PHOTOS FAIL');
                             allSynced = false;
                             break;
                           }
@@ -966,6 +998,7 @@ export default class Sync {
 
         sub_items[i].sync = 2;
         console.log('updated storage PROPERTY_SUBITEM_LINK');
+        console.log(sub_items[i]);
 
         await AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(data) );
 
@@ -1087,6 +1120,8 @@ export default class Sync {
 
     console.log(sub_item_photos[index]);
 
+    //console.log(data);
+
     await AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(data) );
 
   }
@@ -1115,30 +1150,37 @@ export default class Sync {
   // this will wait for response from server
   async postData(formData, endpoint = 'syncmob' ){
 
+    try{
+        let response = await fetch(
+            config.ENDPOINT_URL + 'property/'+ endpoint,
+            {
+            method: 'POST',
+            headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'multipart/form-data',
+                      'Origin': '',
+                      'Host': 'propertyground.co.uk',
+                      'timeout': 10 * 60,
+                      'Authorization': auth.AUTHTOKEN
+            },
+            body: formData
+        });
 
-    let response = await fetch(
-        config.ENDPOINT_URL + 'property/'+ endpoint,
-        {
-        method: 'POST',
-        headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'multipart/form-data',
-                  'Origin': '',
-                  'Host': 'propertyground.co.uk',
-                  'timeout': 10 * 60,
-                  'Authorization': auth.AUTHTOKEN
-        },
-        body: formData
-    });
+          let responseJson = await response.json();
+          console.log('responseJson');
+          console.log(responseJson);
+          console.log('--------------------');
 
-    let responseJson = await response.json();
+          return responseJson;
+    }
+    catch(err){
+      console.log('responseJson ERROR!');
+      console.log(err);
 
-    console.log('responseJson');
-    console.log(responseJson);
-    console.log('--------------------');
+    }
 
 
-    return responseJson;
+
 
   }
 

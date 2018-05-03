@@ -46,6 +46,40 @@ let helper = {
     );
 
   },
+  checkSynSrv: function(index, properties){
+
+    function handleFirstConnectivityChange(connectionInfo) {
+      console.log('First change, type: ' + connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType);
+
+      AsyncStorage.getItem( AppKeys.NET_SETTINGS, (err, result) => {
+        console.log(result);
+
+        let use_data = !!JSON.parse(result) || false;
+
+        console.log('use data !!!', use_data);
+
+        if(connectionInfo.type.toLowerCase() ==  'wifi' || use_data === true){
+          // okay to sync
+          const sync = new Sync(properties[index]);
+          sync.recheckTbls(index, properties);
+        }
+
+        NetInfo.removeEventListener(
+          'connectionChange',
+          handleFirstConnectivityChange
+        );
+
+
+      });
+
+    }
+
+    NetInfo.addEventListener(
+      'connectionChange',
+      handleFirstConnectivityChange
+    );
+
+  },
   syncTemplate: function(token){
 
     if(typeof token == 'undefined'){
