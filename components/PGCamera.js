@@ -176,17 +176,17 @@ export default class PGCamera extends Component{
     if(this.state.isBackCamera == true){
       this.setState({
         isBackCamera : false,
-        cameraType: Camera.constants.Type.front,
+        cameraType: RNCamera.Constants.Type.front,
         flash : 1,
-        flashMode: Camera.constants.FlashMode.off
+        flashMode: RNCamera.Constants.FlashMode.off
       });
     }
     else{
       this.setState({
         isBackCamera : true,
-        cameraType: Camera.constants.Type.back,
+        cameraType: RNCamera.Constants.Type.back,
         flash : 1,
-        flashMode: Camera.constants.FlashMode.off
+        flashMode: RNCamera.Constants.FlashMode.off
       });
     }
 
@@ -206,28 +206,28 @@ export default class PGCamera extends Component{
      case 1: {
        this.setState({
         flash : next_flash,
-        flashMode: Camera.constants.FlashMode.off
+        flashMode: RNCamera.Constants.FlashMode.off
        });
        break;
      }
      case 2: {
        this.setState({
         flash : next_flash,
-        flashMode: Camera.constants.FlashMode.on
+        flashMode: RNCamera.Constants.FlashMode.on
        });
        break;
      }
      case 3: {
        this.setState({
         flash : next_flash,
-        flashMode: Camera.constants.FlashMode.auto
+        flashMode: RNCamera.Constants.FlashMode.auto
        });
        break;
      }
      default: {
        this.setState({
         flash : 1,
-        flashMode: Camera.constants.FlashMode.off
+        flashMode: RNCamera.Constants.FlashMode.off
        });
        break;
      }
@@ -345,7 +345,7 @@ export default class PGCamera extends Component{
         style={styles.cameraPreview}
         type={this.state.cameraType}
         flashMode={this.state.flashMode}
-        
+
       >
         <View style={styles.camActionTopBar}>
           <TouchableWithoutFeedback style={styles.camActionItem} onPress={this.handleSwitchFlash.bind(this)}>
