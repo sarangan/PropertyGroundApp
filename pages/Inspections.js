@@ -59,10 +59,14 @@ export default class Inspections extends Component{
       master_properties: [],
       loading: false,
       refreshing: false,
+      // totalData: {},
+      // updatedData: {}
 
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
+    // this.getTotalData = this.getTotalData.bind(this);
+    // this.getUpdatedData = this.getUpdatedData.bind(this);
   }
 
 
@@ -132,11 +136,15 @@ export default class Inspections extends Component{
     });
 
     SyncStore.on("change", this.getSyncStatus);
+    // SyncStore.on("change", this.getTotalData);
+    // SyncStore.on("chnage", this.getUpdatedData);
   }
 
   componentWillUnmount(){
     console.log('unmonting now')
     SyncStore.removeListener("change", this.getSyncStatus);
+    // SyncStore.removeListener("change", this.getTotalData);
+    // SyncStore.removeListener("change", this.getUpdatedData);
     clearInterval(this._interval);
   }
 
@@ -150,8 +158,6 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
-
-
 
   }
 
@@ -186,7 +192,7 @@ export default class Inspections extends Component{
 
       if(!nosync){
         //console.log('clearing interval');
-        //clearInterval(this._interval); //TODO
+        clearInterval(this._interval); //TODO
       }
 
   }
@@ -221,9 +227,37 @@ export default class Inspections extends Component{
    console.log('synced finihsed from ui thread');
    console.log(property_id);
    this.getProperties(true);
-   clearInterval(this._interval);
+   //clearInterval(this._interval);
 
  }
+
+  //get total_numbers
+  //  getTotalData(){
+  //
+  //   let total_data = SyncStore.getTotalData();
+  //
+  //   let temp_total_data = this.state.totalData;
+  //   temp_total_data[total_data.property_id] = total_data.total;
+  //
+  //   this.setState({
+  //     totalData : temp_total_data
+  //   });
+  //
+  // }
+
+  //get total_numbers
+  //  getUpdatedData(){
+  //
+  //    let updated_data = SyncStore.getUpdatedData();
+  //
+  //    let temp_updated_data = this.state.updatedData;
+  //    temp_updated_data[updated_data.property_id] = updated_data.updated_count;
+  //
+  //    this.setState({
+  //      updatedData : temp_updated_data
+  //    });
+  //
+  // }
 
 
   getProperties =(nosync = false)=>{
@@ -277,13 +311,15 @@ export default class Inspections extends Component{
 
                 if(nosync){
 
-                  //this._interval = setInterval(() => { //TODO
+                  this._interval = setInterval(() => { //TODO
                     this.checkSync();
-                  //}, 60000);
+                  }, 60000);
 
+                  /*
                   this._interval = setInterval(() => { //TODO
                     this.checkSynced();
                   }, 60000);
+                  */
 
                 }
 
@@ -550,6 +586,34 @@ export default class Inspections extends Component{
     return lock;
 
   }
+
+
+  // getTotalUpdatedText = (property_id) =>{
+  //
+  //   let sync = 0;
+  //   let totoal_updated_text = '';
+  //   console.log("#########");
+  //   console.log(this.state.totalData);
+  //   console.log(this.state.updatedData);
+  //
+  //   for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+  //
+  //     if(property_id == this.state.master_properties[i].property_id ){
+  //       sync = this.state.master_properties[i].sync;
+  //
+  //       if(sync == 2){
+  //         totoal_updated_text =  '-' + this.state.updatedData[property_id] + '/' + this.state.totalData[property_id]
+  //       }
+  //
+  //       break;
+  //     }
+  //
+  //   }
+  //
+  //   return totoal_updated_text;
+  //
+  //
+  // }
 
 
 
