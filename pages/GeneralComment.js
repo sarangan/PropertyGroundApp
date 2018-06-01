@@ -43,7 +43,7 @@ export default class GeneralComment extends Component{
      ],
       leftButtons:[
         {
-          title: 'Cancel',
+          title: 'Back',
           id: 'cancel'
         }
       ]

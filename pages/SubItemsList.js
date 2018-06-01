@@ -236,6 +236,23 @@ export default class SubItemsList extends Component{
             refreshing: false,
           }, ()=>{
 
+            let temp_subitems = [];
+            for(let i=0, l = this.state.subitems.length; i < l; i++){
+              if( this.state.subitems[i].type == 'GENERAL'){
+                temp_subitems.push(this.state.subitems[i]);
+              }
+            }
+
+            for(let i=0, l = this.state.subitems.length; i < l; i++){
+              if( this.state.subitems[i].type != 'GENERAL'){
+                temp_subitems.push(this.state.subitems[i]);
+              }
+            }
+
+            this.setState({
+              subitems: temp_subitems
+            });
+
             for(let i=0, l = this.state.subitems.length; i < l; i++){
 
               if( this.state.subitems[i].type == 'GENERAL'){

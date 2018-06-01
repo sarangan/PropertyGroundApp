@@ -45,6 +45,12 @@ export default class GeneralPhoto extends Component{
          id: 'close'
        }
      ],
+     leftButtons: [
+        {
+          title: 'Back',
+          id: 'close'
+        }
+      ],
 
    };
 

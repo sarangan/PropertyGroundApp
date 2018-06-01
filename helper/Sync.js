@@ -319,10 +319,12 @@ export default class Sync {
 
                    let image_url = properties[i].image_url;
 
-                   delete properties[i].image_url;
+                   let dummy_properties = {...properties[i]};
+
+                   delete dummy_properties.image_url; // not to update the server image url
 
                    let formData = new FormData();
-                   formData.append("data", JSON.stringify(properties[i]) );
+                   formData.append("data", JSON.stringify(dummy_properties) );
                    formData.append("table", TableKeys.PROPERTY_INFO);
 
                    this.postData(formData).then( response =>{
@@ -823,6 +825,7 @@ export default class Sync {
         let properties = JSON.parse(value);
 
         for(let i =0, l = properties.length; i < l ; i++){
+          /*
           if(properties[i].property_id == this.property_id && properties[i].sync == 2){
 
             let formData = new FormData();
@@ -839,8 +842,8 @@ export default class Sync {
 
             });
 
-
           }
+          */
 
           if(properties[i].property_id == this.property_id){
 
@@ -852,8 +855,6 @@ export default class Sync {
 
 
         //this.finishedSync( i, properties); //TODO
-
-
 
 
       }
@@ -1129,10 +1130,36 @@ export default class Sync {
 
           console.log('calling UI actions');
           //update the front end
-          __properties[__index].sync = 3;
-          AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+
+          if(__properties[__index].sync == 2){
+
+            if(__properties[__index].property_id == this.property_id && __properties[__index].sync == 2){
+
+              let formData = new FormData();
+              formData.append("property_id", this.property_id);
+              formData.append("description", __properties[__index].description);
+              formData.append("mb_createdAt", __properties[__index].mb_createdAt);
+
+              this.postData(formData, 'finishSync').then( response =>{
+                // properties[i].sync = 3;
+                // AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), ()=>{
+                //   SyncActions.syncFinished(this.property_id);
+                // });
+              });
+
+              __properties[__index].sync = 3;
+              AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+                SyncActions.syncFinished(this.property_id);
+              });
+
+
+            }
+
+
+          }
+          else if(__properties[__index].sync == 3){
             SyncActions.syncFinished(this.property_id);
-          });
+          }
 
         }
 

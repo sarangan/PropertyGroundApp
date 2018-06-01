@@ -203,7 +203,8 @@ export default class NewProperty extends Component{
           mb_createdAt: new Date().toLocaleDateString(),
           sync: 1
         };
-        properties.push(data_property);
+        //properties.push(data_property);
+        properties.unshift(data_property);
 
         AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), () => {
           //saved proprty
@@ -228,7 +229,8 @@ export default class NewProperty extends Component{
               mb_createdAt: new Date().toLocaleDateString(),
               sync: 1
             };
-            properties_info.push(data_property_info);
+            //properties_info.push(data_property_info);
+            properties_info.unshift(data_property_info);
 
             //----------------create sync table-----------------------
             AsyncStorage.getItem(TableKeys.SYNC, (err, result) => {

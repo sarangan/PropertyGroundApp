@@ -811,10 +811,11 @@ export default class Report extends Component{
 
                 <View key="background">
 
-                  {this.state.property.image_url !== '' &&
+                  {this.state.property.image_url != '' &&
                     <Image source={{uri: this.state.property.image_url,
                                   width: SCREENWIDTH,
                                 height: PARALLAX_HEADER_HEIGHT}}
+                                
                     />
                   }
 
