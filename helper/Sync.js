@@ -1142,15 +1142,16 @@ export default class Sync {
               formData.append("mb_createdAt", __properties[__index].mb_createdAt);
 
               this.postData(formData, 'finishSync').then( response =>{
-                // properties[i].sync = 3;
-                // AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties), ()=>{
-                //   SyncActions.syncFinished(this.property_id);
-                // });
-              });
 
-              __properties[__index].sync = 3;
-              AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
-                SyncActions.syncFinished(this.property_id);
+                if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
+
+                  __properties[__index].sync = 3;
+                  AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+                    SyncActions.syncFinished(this.property_id);
+                  });
+
+                }
+
               });
 
 
