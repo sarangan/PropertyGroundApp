@@ -24,7 +24,7 @@ import auth from '../keys/auth';
 
 import helper from '../helper/helper';
 import Simage from "../components/Simage";
-
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -84,8 +84,6 @@ export default class SingleReportItem extends Component{
                 description: feedbacks[this.state.item_id].description == '1'? 'Yes': 'No',
                 comment: feedbacks[this.state.item_id].comment,
               });
-
-
 
             }
 
@@ -210,7 +208,7 @@ export default class SingleReportItem extends Component{
     <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)} >
         <View style={styles.rowContainer}>
            <Simage
-            source={item.img_url}
+            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
             style={styles.gridImg}
           >
           </Simage>

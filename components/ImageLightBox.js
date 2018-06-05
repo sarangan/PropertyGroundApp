@@ -1,6 +1,5 @@
 /**
  * PropertyGround React Native App
- * https://sph.com.sg
  * @sara
  * Image light box to show larger image
  */
@@ -19,6 +18,7 @@ import {
 import TImage from 'react-native-transformable-image';
 import Swiper from 'react-native-swiper';
 import TableKeys from '../keys/tableKeys';
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -116,7 +116,7 @@ export default class ImageLightBox extends Component {
             <View style={styles.container} key={i}>
 
               <TImage
-                source={{ uri: img}}
+                source={{ uri: RNFS.DocumentDirectoryPath + '/' + img}}
                 style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
               >
               </TImage>

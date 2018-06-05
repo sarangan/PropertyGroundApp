@@ -30,6 +30,15 @@ export default class SyncImg extends Component{
 
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+  
+    if(nextProps.sync != this.props.sync){
+      return true;
+    }
+    return false;
+
+  }
+
   sync_spin() {
 
     this.state.sync_spinValue.setValue(0)
@@ -50,7 +59,7 @@ export default class SyncImg extends Component{
     const spin = this.state.sync_spinValue.interpolate({
        inputRange: [0, 1],
        outputRange: ['0deg', '360deg']
-     })
+     });
 
      if(this.props.sync == 2){
        return (

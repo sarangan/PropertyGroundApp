@@ -33,6 +33,8 @@ var ImagePicker = require('react-native-image-picker');
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
+var RNFS = require('react-native-fs');
+
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 
@@ -388,6 +390,7 @@ export default class EditPropertyInfo extends Component{
         skipBackup: true,
         path: 'images'
       },
+      mediaType: 'photo',
       //allowsEditing: true
     };
 
@@ -405,8 +408,17 @@ export default class EditPropertyInfo extends Component{
         }
         else {
 
-          this.setState({
-            image_url: response.uri//'data:image/jpeg;base64,' + response.data //response.uri
+          let fileExt =  response.uri.substring( response.uri.indexOf('.') + 1 ,  response.uri.length) || 'jpg';
+          let filename = helper.generateUid() + '.' +  fileExt;
+
+          let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
+
+          RNFS.copyFile(response.uri ,  docPath).then(()=>{
+
+            this.setState({
+              image_url: filename//response.uri
+            });
+
           });
 
         }
@@ -420,7 +432,7 @@ export default class EditPropertyInfo extends Component{
     let img = <Image source={require('../images/camera.png')} style={styles.camera_img}/>;
     if(this.state.image_url){
 
-      img = <Image source={{ uri: this.state.image_url }} style={{width: SCREENWIDTH, height: SCREENWIDTH * 0.75, resizeMode: 'cover'}} />
+      img = <Image source={{ uri: RNFS.DocumentDirectoryPath + '/' + this.state.image_url }} style={{width: SCREENWIDTH, height: SCREENWIDTH * 0.75, resizeMode: 'cover'}} />
     }
 
     return (img);

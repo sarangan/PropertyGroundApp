@@ -6,6 +6,7 @@ import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
 import config from '../keys/config';
 import auth from '../keys/auth';
+var RNFS = require('react-native-fs');
 
 export default class Sync {
 
@@ -339,7 +340,7 @@ export default class Sync {
                        if(image_url){
                          let formDataUpload = new FormData();
                          formDataUpload.append("property_id", this.property_id );
-                         formDataUpload.append('photo', {uri: image_url , type: 'image/jpg', name: 'image.jpg'});
+                         formDataUpload.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + image_url , type: 'image/jpg', name: 'image.jpg'});
 
                          let response = this.postData(formDataUpload, 'uploadpropertyimg');
 
@@ -660,7 +661,7 @@ export default class Sync {
                             formData.append("parent_id", sub_item_voice[i].parent_id );
                             formData.append("voice_name", sub_item_voice[i].voice_name );
                             formData.append("mb_createdAt", sub_item_voice[i].mb_createdAt);
-                            formData.append('voice', {uri: sub_item_voice[i].voice_url , type: 'video/mp4', name: 'voice.mp4'});
+                            formData.append('voice', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_voice[i].file_name , type: 'video/mp4', name: 'voice.mp4'});
 
 
                             this.postData(formData, 'uploadvoice').then( response =>{
@@ -763,7 +764,7 @@ export default class Sync {
                             formData.append("parent_id", sub_item_photos[i].parent_id );
                             formData.append("type", sub_item_photos[i].type );
                             formData.append("mb_createdAt", sub_item_photos[i].mb_createdAt );
-                            formData.append('photo', {uri: sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
+                            formData.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
 
 
                             this.postData(formData, 'uploadfile').then( response =>{
@@ -1461,7 +1462,7 @@ export default class Sync {
 
 
     //this.updated_data_count += 1;
-    //SyncActions.updatedDataCount(this.property_id, this.updated_data_count);
+    //SyncActions.updatedDataCount(this.property_id, 1);
 
 
   }

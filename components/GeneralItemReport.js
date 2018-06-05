@@ -23,6 +23,7 @@ import config from '../keys/config';
 import auth from '../keys/auth';
 
 import helper from '../helper/helper';
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -222,7 +223,7 @@ export default class GeneralItemReport extends Component{
     <TouchableHighlight style={{margin: 0, flex: 0}}  underlayColor='transparent' aspectRatio={1}  onPress={()=>this.openImage(item)} >
         <View style={styles.rowContainer}>
            <Simage
-            source={item.img_url}
+            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
             style={styles.gridImg}
           >
           </Simage>

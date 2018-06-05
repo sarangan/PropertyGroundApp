@@ -35,7 +35,7 @@ import Prompt from 'react-native-prompt';
 import SyncImg from '../components/SyncImg';
 import SingleReportItem from '../components/SingleReportItem';
 import SubItemsReportList from '../components/SubItemsReportList';
-
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -812,10 +812,10 @@ export default class Report extends Component{
                 <View key="background">
 
                   {this.state.property.image_url != '' &&
-                    <Image source={{uri: this.state.property.image_url,
+                    <Image source={{uri: RNFS.DocumentDirectoryPath + '/' +  this.state.property.image_url,
                                   width: SCREENWIDTH,
                                 height: PARALLAX_HEADER_HEIGHT}}
-                                
+
                     />
                   }
 

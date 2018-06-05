@@ -65,8 +65,8 @@ export default class Inspections extends Component{
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
-    // this.getTotalData = this.getTotalData.bind(this);
-    // this.getUpdatedData = this.getUpdatedData.bind(this);
+    //this.getTotalData = this.getTotalData.bind(this);
+    //this.getUpdatedData = this.getUpdatedData.bind(this);
   }
 
 
@@ -250,12 +250,12 @@ export default class Inspections extends Component{
   //
   //    let updated_data = SyncStore.getUpdatedData();
   //
-  //    let temp_updated_data = this.state.updatedData;
-  //    temp_updated_data[updated_data.property_id] = updated_data.updated_count;
-  //
-  //    this.setState({
-  //      updatedData : temp_updated_data
-  //    });
+  //    // let temp_updated_data = this.state.updatedData;
+  //    // temp_updated_data[updated_data.property_id] = updated_data.updated_count;
+  //    //
+  //    // this.setState({
+  //    //   updatedData : temp_updated_data
+  //    // });
   //
   // }
 
@@ -567,6 +567,8 @@ export default class Inspections extends Component{
 
     }
 
+    console.log('sync', sync);
+
     return sync;
 
   }
@@ -656,10 +658,10 @@ export default class Inspections extends Component{
                   <View style={styles.cardNumbers}>
                     <View style={styles.cardStar}>
                       <Text style={styles.cardStarRatings}>{item.mb_createdAt}</Text>
-                      <Text style={[styles.cardStarRatings, {color: '#FF5C5C'}]}>{this.getLockText(item.property_id) == 1? 'Locked' : ''}</Text>
+                      <Text style={[styles.cardStarRatings, {backgroundColor: '#b8b0b0', color: '#ffffff'}]}>{this.getLockText(item.property_id) == 1? ' Locked ' : ''}</Text>
                       <View style={{flex:0, justifyContent: 'flex-start', flexDirection: 'row'}}>
-                        <SyncImg sync={this.findSyncStatus(item.property_id)}/>
-                        <Text style={[styles.cardStarRatings, {color: '#40A798'}]}>{this.getSyncText(item.property_id)}</Text>
+                        <SyncImg sync={this.findSyncStatus(item.property_id)} key={item.property_id}/>
+                        <Text style={[styles.cardStarRatings, {color: '#0b8457'}]}>{this.getSyncText(item.property_id)}</Text>
                       </View>
                     </View>
                   </View>

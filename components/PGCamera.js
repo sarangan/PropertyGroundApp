@@ -22,9 +22,14 @@ import {
 import { RNCamera } from 'react-native-camera';
 
 import ImagePicker from 'react-native-image-crop-picker';
+import helper from '../helper/helper';
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
+
+
+
 
 export default class PGCamera extends Component{
 
@@ -48,27 +53,48 @@ export default class PGCamera extends Component{
 
   snapPhoto = async function(){
 
-
-
     if(this.camera){
       const options = {quality: 0.5 };
       const data = await this.camera.takePictureAsync(options);
+      //console.log(RNFS.DocumentDirectoryPath);
       console.log(data);
-      this.setState({
-        imagePath: data.uri,
-        spinValue: new Animated.Value(0),
-        startCapture: false
-      }, ()=>{
-        // call the method TODO
-        this.props.capture(this.state.imagePath);
 
-        let lastestPhotos = this.state.lastestPhotos;
-        lastestPhotos.push(this.state.imagePath);
-        this.setState({
-          lastestPhotos
-        });
+      let fileExt =  data.uri.substring( data.uri.indexOf('.') + 1 ,  data.uri.length) || 'jpg';
+      let filename = helper.generateUid() + '.' +  fileExt;
+      //console.log(filename);
 
+      let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
+
+      RNFS.moveFile(data.uri ,  docPath).then(()=>{
+
+          // moved to document dir
+          this.setState({
+            imagePath: filename, //data.uri,
+            spinValue: new Animated.Value(0),
+            startCapture: false
+          }, ()=>{
+            // call the method TODO
+
+
+
+            this.props.capture(this.state.imagePath);
+
+            let lastestPhotos = this.state.lastestPhotos;
+            lastestPhotos.push(this.state.imagePath);
+            this.setState({
+              lastestPhotos
+            });
+
+          });
+
+
+
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
+
+
 
     }
 
@@ -152,17 +178,30 @@ export default class PGCamera extends Component{
     }, error => console.log(error));*/
 
     ImagePicker.openPicker({
-      multiple: true
+      multiple: true,
+      cropping: false,
+      mediaType: 'photo'
     }).then(images => {
       console.log(images);
       if(Array.isArray(images)){
         images.map((img) =>{
-           this.props.capture(img.path);
-           let lastestPhotos = this.state.lastestPhotos;
-           lastestPhotos.push(img.path);
-           this.setState({
-             lastestPhotos
-           });
+
+          let fileExt =  img.path.substring( img.path.indexOf('.') + 1 ,  img.path.length) || 'jpg';
+          let filename = helper.generateUid() + '.' +  fileExt;
+
+          let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
+
+          RNFS.copyFile(img.path ,  docPath).then(()=>{
+
+            //this.props.capture(img.path);
+            this.props.capture(filename);
+            let lastestPhotos = this.state.lastestPhotos;
+            lastestPhotos.push(filename);
+            this.setState({
+              lastestPhotos
+            });
+
+          });
 
         });
       }
@@ -278,9 +317,9 @@ export default class PGCamera extends Component{
     let photos = [];
     this.state.lastestPhotos.map((photo, index) =>{
       photos.push(
-        <View style={{flex: 0 }}>
+        <View style={{flex: 0 }} key={index}>
           <TouchableHighlight underlayColor="transparent" onPress={()=>this.openImage(photo, index)}>
-            <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri: photo }} />
+            <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri:  RNFS.DocumentDirectoryPath + '/' + photo }} />
           </TouchableHighlight>
           <TouchableHighlight underlayColor="transparent" onPress={()=>this.deleteImg(index)} style={{flex: 0, position: 'absolute', top: 3, right: 3}}>
             <Image style={{width: 17, height: 17, resizeMode: 'cover'}} source={require('../images/delete_photo.png')} />

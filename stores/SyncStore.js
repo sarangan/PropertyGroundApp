@@ -47,11 +47,11 @@ class SyncStore extends EventEmitter {
       //   console.log(action.data.updated_count);
       //   console.log(action.data.property_id);
       //
-      //
       //   this.updatedData =  {
       //     property_id: action.data.property_id,
       //     updated_count: action.data.updated_count
       //   };
+      //
       //   this.emit("change");
       //   break;
       //

@@ -33,6 +33,7 @@ import PGCamera from "../components/PGCamera";
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -316,7 +317,7 @@ export default class SingleItem extends Component{
   }
 
   snapPhoto = (photo_url) =>{
-    //console.log(photo_url);
+    console.log(photo_url);
 
     AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
       let photos = JSON.parse(result) || {};
@@ -565,7 +566,7 @@ export default class SingleItem extends Component{
       onLongPress={()=>this.makeItSelect(item)}>
         <View style={styles.rowContainer}>
            <Simage
-            source={item.img_url}
+            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
             style={styles.gridImg}
           >
             {this.getSelectImage(item)}

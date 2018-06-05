@@ -20,7 +20,8 @@ import {
   Switch,
   Animated,
   Easing,
-  Alert
+  Alert,
+  ScrollView
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -34,6 +35,7 @@ import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import Prompt from 'react-native-prompt';
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -821,6 +823,12 @@ export default class RoomList extends Component{
              LayoutAnimation.spring();
              this.setState({
                sig_height: 140
+             },()=>{
+
+               //this.scrolllist.scrollToEnd({animated: true});
+
+               //this.scrolllist.scrollToOffset({x: 0, y: 500 });
+
              });
 
            });
@@ -975,8 +983,6 @@ export default class RoomList extends Component{
 
   _renderItem = ({item}) => (
 
-
-
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.openLink(item)}>
 
           <View style={styles.rowWrapper}>
@@ -1068,6 +1074,7 @@ export default class RoomList extends Component{
     let _keyExtractor = (item, index) => index;
     return(
       <FlatList
+        //ref={ ( ref ) => this.scrolllist = ref }
         contentContainerStyle={styles.list}
         data={this.state.roomlist}
         keyExtractor={_keyExtractor}
@@ -1098,9 +1105,7 @@ export default class RoomList extends Component{
 
     return(
       <View style={styles.fill}>
-
         <ParallaxScrollView
-
             headerBackgroundColor="#F9F9F9"
             backgroundColor="#F9F9F9"
             stickyHeaderHeight={ STICKY_HEADER_HEIGHT }
@@ -1114,7 +1119,7 @@ export default class RoomList extends Component{
                 <View key="background">
 
                   {this.state.property.image_url !== '' &&
-                    <Image source={{uri: this.state.property.image_url,
+                    <Image source={{uri: RNFS.DocumentDirectoryPath + '/' + this.state.property.image_url,
                                   width: SCREENWIDTH,
                                 height: PARALLAX_HEADER_HEIGHT}}
                     />
@@ -1164,7 +1169,7 @@ export default class RoomList extends Component{
             )}
 
             >
-            <View style={{  flex: 1, }}>
+            <View style={{  flex: 1, }} >
 
 
               {this.renderList()}
@@ -1183,7 +1188,8 @@ export default class RoomList extends Component{
 
         <MessageBarAlert ref='alert' />
 
-      </View>
+
+    </View>
     );
   }
 }

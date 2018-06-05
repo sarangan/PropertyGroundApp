@@ -32,6 +32,7 @@ var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 
+
 export default class GeneralComment extends Component{
 
   static navigatorButtons = {
@@ -214,7 +215,6 @@ export default class GeneralComment extends Component{
   }
 
 
-
   render(){
 
     return(
@@ -228,6 +228,7 @@ export default class GeneralComment extends Component{
             placeholder="Any comments?"
             placeholderTextColor="#A9ACBC"
             multiline = {true}
+            editable = {true}
             numberOfLines = {10}
             value={this.state.comment}
             underlineColorAndroid='transparent'
@@ -245,6 +246,7 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     justifyContent: 'flex-start',
+    backgroundColor: "#F7F7F9",
     //alignItems: 'flex-start'
     //alignItems: 'center'
   },
@@ -265,6 +267,7 @@ const styles = StyleSheet.create({
     //height: 45,
     paddingLeft: 10,
     paddingRight: 10,
+    paddingTop: 10,
     backgroundColor: '#FFFFFF',
     //width: SCREENWIDTH - 10,
     marginTop: 10,

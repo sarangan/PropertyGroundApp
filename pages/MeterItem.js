@@ -1,8 +1,7 @@
 /**
  * Sanppar React Native App
- * https://sph.com.sg
  * @sara
- * Singlew item page
+ * meter item page
  */
 import React, {Component} from 'react';
 import {
@@ -34,6 +33,7 @@ import PGCamera from "../components/PGCamera";
 
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
+var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -538,7 +538,7 @@ export default class MeterItem extends Component{
       onLongPress={()=>this.makeItSelect(item)}>
         <View style={styles.rowContainer}>
            <Simage
-            source={item.img_url}
+            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
             style={styles.gridImg}
           >
             {this.getSelectImage(item)}
@@ -552,7 +552,7 @@ export default class MeterItem extends Component{
     let _keyExtractor = (item, index) => index;
     return(
 
-            
+
             <View style={styles.camWrapper}>
               <FlatList
                 contentContainerStyle={styles.listGrid}
