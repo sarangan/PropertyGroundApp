@@ -31,7 +31,7 @@ export default class SyncImg extends Component{
   }
 
   shouldComponentUpdate(nextProps, nextState){
-  
+
     if(nextProps.sync != this.props.sync){
       return true;
     }

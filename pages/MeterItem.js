@@ -582,7 +582,7 @@ export default class MeterItem extends Component{
   renderFormx = () =>{
     return(
       <View style={styles.fill}>
-        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={-60}>
+        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={-160}>
 
         <ScrollView>
           <Text style={styles.divTxt}>Meter reading</Text>

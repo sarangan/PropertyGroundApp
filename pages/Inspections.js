@@ -16,6 +16,9 @@ import {
   Image
 } from 'react-native';
 
+import BackgroundTask from 'react-native-background-task'
+import queueFactory from 'react-native-queue';
+
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
 import config from '../keys/config';
@@ -30,6 +33,31 @@ const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 
 export let homeNavigator = null; // to use in drawer
+
+
+BackgroundTask.define(async () => {
+
+  // Init queue
+  queue = await queueFactory();
+
+  // Register job worker
+  queue.addWorker('background-example', async (id, payload) => {
+    //queue is running man
+    //Image.prefetch(payload.imageUrl);
+    console.log('i am from queue man', payload);
+
+    await AsyncStorage.setItem('lukeData', 'Luke Skywalker arbitrary data loaded!');
+
+  });
+
+  await queue.start(25000); // Run queue for at most 25 seconds.
+
+  BackgroundTask.finish();
+
+});
+
+
+
 
 export default class Inspections extends Component{
 
@@ -59,6 +87,7 @@ export default class Inspections extends Component{
       master_properties: [],
       loading: false,
       refreshing: false,
+       queue: null,
       // totalData: {},
       // updatedData: {}
 
@@ -67,6 +96,32 @@ export default class Inspections extends Component{
     this.getSyncStatus = this.getSyncStatus.bind(this);
     //this.getTotalData = this.getTotalData.bind(this);
     //this.getUpdatedData = this.getUpdatedData.bind(this);
+
+    // queueFactory()
+    //   .then(queue => {
+    //     this.setState({queue});
+    //   });
+
+      this.init();
+  }
+
+  async init() {
+
+    const queue = await queueFactory();
+
+    // Add the worker.
+    queue.addWorker('background-example', async (id, payload) => {
+      // Worker has to be defined before related jobs can be added to queue.
+      // Since this example is only concerned with OS background task worker execution,
+      // We will make this a dummy function in this context.
+      console.log(id);
+    });
+
+    // Attach initialized queue to state.
+    this.setState({
+      queue
+    });
+
   }
 
 
@@ -124,9 +179,16 @@ export default class Inspections extends Component{
 
   componentWillMount() {
 
-    AsyncStorage.getItem(AppKeys.SHOWGUIDE, (err, result) => {
-      console.log('show guide');
+    AsyncStorage.getItem('@MyApp:key', (err, result) => {
+      console.log('values man #######');
       console.log(result);
+    });
+
+
+
+    AsyncStorage.getItem(AppKeys.SHOWGUIDE, (err, result) => {
+      //console.log('show guide');
+      //console.log(result);
       if(result){
         //user already saw it
       }
@@ -159,9 +221,27 @@ export default class Inspections extends Component{
 
     this.getProperties();
 
+    BackgroundTask.schedule(); // Schedule the task to run every ~15 min if app is closed.
+
+  }
+
+  //create sync jobs
+  createSyncJobs = () =>{
+
+    console.log('###########-creating Q')
+
+    this.state.queue.createJob(
+      'background-example',
+      { imageUrl: 'https://i.imgur.com/kPkQTic.jpg' }, //data
+      { //attempts: 1,
+        timeout: 15000 },
+      false
+    );
+
   }
 
   showGuide = () =>{
+
 
     this.props.navigator.showModal({
        screen: "PropertyGround.Guide",
@@ -177,6 +257,7 @@ export default class Inspections extends Component{
   //checking sync
   checkSync = () =>{
 
+
       let nosync = false;
 
       for(let i =0, l = this.state.master_properties.length; i < l ; i++){
@@ -187,6 +268,7 @@ export default class Inspections extends Component{
         if(this.state.master_properties[i].sync == 2 ){
           nosync = true;
           helper.synSrv(this.state.master_properties[i]);
+          //this.createSyncJobs();
         }
       }
 
@@ -289,7 +371,7 @@ export default class Inspections extends Component{
 
               let master_properties = JSON.parse(result) || [];
 
-              console.log(master_properties);
+              //console.log(master_properties);
 
               this.setState({
                 properties: properties_info,
@@ -309,7 +391,10 @@ export default class Inspections extends Component{
                 console.log("going to start process");
                 console.log(nosync);
 
+
                 if(nosync){
+
+                  this.createSyncJobs();
 
                   this._interval = setInterval(() => { //TODO
                     this.checkSync();
@@ -351,7 +436,7 @@ export default class Inspections extends Component{
 
       }
       else{
-        console.log("no login yet ");
+        //console.log("no login yet ");
 
         this.props.navigator.showModal({
 	          screen: "PropertyGround.Login",
@@ -567,7 +652,7 @@ export default class Inspections extends Component{
 
     }
 
-    console.log('sync', sync);
+    console.log(sync);
 
     return sync;
 

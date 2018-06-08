@@ -3,6 +3,8 @@ package com.propertygroundapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.jamesisaac.rnbackgroundtask.BackgroundTaskPackage;
+import io.realm.react.RealmReactPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.rnim.rn.audio.ReactNativeAudioPackage;
 import com.github.yamill.orientation.OrientationPackage;
@@ -34,6 +36,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new BackgroundTaskPackage(),
+            new RealmReactPackage(),
             new RNCameraPackage(),
             new ReactNativeAudioPackage(),
             new OrientationPackage(),
@@ -62,5 +66,6 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
+    BackgroundTaskPackage.useContext(this);
   }
 }

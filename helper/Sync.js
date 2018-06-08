@@ -316,7 +316,7 @@ export default class Sync {
 
                  if(properties[i].property_id == this.property_id && properties[i].sync == 1){
 
-                   console.log(properties[i]);
+                   //console.log(properties[i]);
 
                    let image_url = properties[i].image_url;
 
@@ -464,6 +464,7 @@ export default class Sync {
 
 
               //console.log('Starting PROPERTY_GENERAL_CONDITION_LINK');
+
               let data = JSON.parse(value);
 
               if(data.hasOwnProperty(this.property_id)){
@@ -732,75 +733,89 @@ export default class Sync {
             }
 
 
-            case TableKeys.PHOTOS : {//>
+            case TableKeys.PHOTOS : {// indent to send photos at last because its big process
+              //console.log('skip photos first loop');
 
-              console.log('Starting PHOTOS');
-
-              let data = JSON.parse(value);
-
-              if(data.hasOwnProperty(this.property_id)){
-
-                let property_photos = data[this.property_id];
-
-                for(let master_key in property_photos){
-                  if(property_photos.hasOwnProperty(master_key)){
-
-                    let master_item_photos =  property_photos[master_key];
-
-                    for(let sub_key in master_item_photos){
-                      if(master_item_photos.hasOwnProperty(sub_key) ){
-
-                        let sub_item_photos =  master_item_photos[sub_key];
-
-                        //console.log(sub_item_photos);
-
-                        for(let i =0, l = sub_item_photos.length; i < l; i++){
-                          if(sub_item_photos[i].sync == 1){
-
-                            let formData = new FormData();
-                            formData.append("property_id", this.property_id );
-                            formData.append("photo_id", sub_item_photos[i].photo_id );
-                            formData.append("item_id", sub_item_photos[i].item_id );
-                            formData.append("parent_id", sub_item_photos[i].parent_id );
-                            formData.append("type", sub_item_photos[i].type );
-                            formData.append("mb_createdAt", sub_item_photos[i].mb_createdAt );
-                            formData.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
+              break;
+            }
 
 
-                            this.postData(formData, 'uploadfile').then( response =>{
-
-                              //console.log('Ending PHOTOS');
-
-                              console.log('uploaded server PHOTOS');
-
-                              if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
-                                // we got status 1, update the storage
-                                this.update_photos( i, sub_key, master_key, data );
-                             }
-
-                           });
+          }// switch end
 
 
+        });
 
-                          }
+        stores.map((result, i, store) => {
+          //get at each store's key/value so you can work with it
+          let key = store[i][0];
+          let value = store[i][1];
+
+          if(key == TableKeys.PHOTOS ){
+
+            console.log('Starting PHOTOS');
+
+            let data = JSON.parse(value);
+
+            if(data.hasOwnProperty(this.property_id)){
+
+              let property_photos = data[this.property_id];
+
+              for(let master_key in property_photos){
+                if(property_photos.hasOwnProperty(master_key)){
+
+                  let master_item_photos =  property_photos[master_key];
+
+                  for(let sub_key in master_item_photos){
+                    if(master_item_photos.hasOwnProperty(sub_key) ){
+
+                      let sub_item_photos =  master_item_photos[sub_key];
+
+                      //console.log(sub_item_photos);
+
+                      for(let i =0, l = sub_item_photos.length; i < l; i++){
+                        if(sub_item_photos[i].sync == 1){
+
+                          let formData = new FormData();
+                          formData.append("property_id", this.property_id );
+                          formData.append("photo_id", sub_item_photos[i].photo_id );
+                          formData.append("item_id", sub_item_photos[i].item_id );
+                          formData.append("parent_id", sub_item_photos[i].parent_id );
+                          formData.append("type", sub_item_photos[i].type );
+                          formData.append("mb_createdAt", sub_item_photos[i].mb_createdAt );
+                          formData.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
+
+
+                          this.postData(formData, 'uploadfile').then( response =>{
+
+                            //console.log('Ending PHOTOS');
+
+                            console.log('uploaded server PHOTOS');
+
+                            if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
+                              // we got status 1, update the storage
+                              this.update_photos( i, sub_key, master_key, data );
+                           }
+
+                         });
+
+
+
                         }
-
                       }
+
                     }
                   }
                 }
-
               }
 
-
-
-              break;
             }
 
 
           }
 
         });
+
+
 
         this.checkPropertySync(stores);
 
@@ -1425,7 +1440,7 @@ export default class Sync {
   // this will wait for response from server
   async postData(formData, endpoint = 'syncmob' ){
 
-    try{
+    /*try{
         let response = await fetch(
             config.ENDPOINT_URL + 'property/'+ endpoint,
             {
@@ -1459,12 +1474,13 @@ export default class Sync {
     catch(err){
       console.log('responseJson ERROR!');
       console.log(err);
-    }
+    }*/
 
 
     //this.updated_data_count += 1;
     //SyncActions.updatedDataCount(this.property_id, 1);
 
+    return ({ status : 2})
 
   }
 
