@@ -41,250 +41,474 @@ export default class Sync {
     this.getAllData();
   }
 
-  getTotalNumbers(){
+  getTotalItems(property_id){
 
     console.log('get total numbers');
 
     let total_data = 0;
 
-    AsyncStorage.getAllKeys((err, keys) => {
-      AsyncStorage.multiGet(keys, (err, stores) => {
+    return new Promise( function(resolve,reject){
 
-        let allSynced = true;
+      AsyncStorage.getAllKeys((err, keys) => {
+        AsyncStorage.multiGet(keys, (err, stores) => {
 
-        stores.map((result, i, store) => {
-          //get at each store's key/value so you can work with it
-          let key = store[i][0];
-          let value = store[i][1];
+          let allSynced = true;
 
-          switch (key) {
+          stores.map((result, i, store) => {
+            //get at each store's key/value so you can work with it
+            let key = store[i][0];
+            let value = store[i][1];
+
+            switch (key) {
 
 
-            case TableKeys.PROPERTY_INFO: {
+              case TableKeys.PROPERTY_INFO: {
 
-              let properties = JSON.parse(value);
-              for(let i =0, l = properties.length; i < l ; i++){
-                if(properties[i].property_id == this.property_id && properties[i].sync == 1){
-                  //console.log('count PROPERTY_INFO FAIL');
-                  total_data += 1;
-                }
-              }
-              break;
-            }
-
-            case TableKeys.PROPERTY_MASTERITEM_LINK: {
-
-              let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
-                let master_data = data[this.property_id];
-                for(let i =0, l = master_data.length; i < l ; i++){
-                  //console.log(master_data[i].sync);
-                  if(master_data[i].sync == 1){
-                    //console.log('count PROPERTY_MASTERITEM_LINK FAIL');
+                let properties = JSON.parse(value);
+                for(let i =0, l = properties.length; i < l ; i++){
+                  if(properties[i].property_id == property_id){
+                    //console.log('count PROPERTY_INFO FAIL');
                     total_data += 1;
                   }
                 }
+                break;
               }
-              break;
-            }
 
-            case TableKeys.PROPERTY_SUBITEM_LINK:{
+              case TableKeys.PROPERTY_MASTERITEM_LINK: {
 
-              let data = JSON.parse(value);
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let master_data = data[property_id];
+                  for(let i =0, l = master_data.length; i < l ; i++){
+                      total_data += 1;
+                  }
+                }
+                break;
+              }
 
-              for( let key in data){
+              case TableKeys.PROPERTY_SUBITEM_LINK:{
 
-                let sub_items = data[key];
+                let data = JSON.parse(value);
 
-                for(let i =0, l = sub_items.length; i < l ; i++){
+                for( let key in data){
 
-                  if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
-                    //console.log(sub_item_details[i]);
-                      if(sub_items[i].sync == 1){
-                        //console.log('count PROPERTY_SUBITEM_LINK FAIL');
+                  let sub_items = data[key];
+
+                  for(let i =0, l = sub_items.length; i < l ; i++){
+
+                    if(sub_items[i].property_id == property_id ){ // we got this prop sub item
                         total_data += 1;
+                    }
 
+                  }
+
+                }
+
+                break;
+              }
+
+              case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let general_data = data[property_id];
+                  for(let i =0, l = general_data.length; i < l ; i++){
+                      total_data += 1;
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_METER_LINK:{
+
+                let data = JSON.parse(value);
+
+                if(data.hasOwnProperty(property_id)){
+
+                  let meter_data = data[property_id];
+                  for(let i =0, l = meter_data.length; i < l; i++){
+                      total_data += 1;
+                  }
+
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_FEEDBACK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+                          total_data += 1;
+                      }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+                          total_data += 1;
                       }
                   }
 
                 }
-
+                break;
               }
 
-              break;
-            }
+              case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
 
-            case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
 
-              let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
-                let general_data = data[this.property_id];
-                for(let i =0, l = general_data.length; i < l ; i++){
-                  if(general_data[i].sync == 1){
-                    //console.log('count PROPERTY_GENERAL_CONDITION_LINK FAIL');
-                    total_data += 1;
+                  let property_voice = data[property_id];
 
+                  for(let master_key in property_voice){
+                    if(property_voice.hasOwnProperty(master_key)){
+
+                      let master_item_voice =  property_voice[master_key];
+
+                      for(let sub_key in master_item_voice){
+                        if(master_item_voice.hasOwnProperty(sub_key) ){
+
+                          let sub_item_voice =  master_item_voice[sub_key];
+
+                          for(let i =0, l = sub_item_voice.length; i < l; i++){
+                              total_data += 1;
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                break;
               }
-              break;
-            }
 
-            case TableKeys.PROPERTY_METER_LINK:{
+              case TableKeys.SIGNATURES : {
 
-              let data = JSON.parse(value);
+                let data = JSON.parse(value);
 
-              if(data.hasOwnProperty(this.property_id)){
+                if(data.hasOwnProperty(property_id)){
 
-                let meter_data = data[this.property_id];
-                for(let i =0, l = meter_data.length; i < l; i++){
-                  if(meter_data[i].sync == 1){
-                    //console.log('count PROPERTY_METER_LINK FAIL');
-                    total_data += 1;
+                  let signs = data[property_id];
+                  total_data += 1;
 
-                  }
                 }
 
+                break;
               }
-              break;
-            }
 
-            case TableKeys.PROPERTY_FEEDBACK: {
+              case TableKeys.PHOTOS : {
 
-              let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
+                let data = JSON.parse(value);
 
-                let feedback_data = data[this.property_id];
+                if(data.hasOwnProperty(property_id)){
 
-                for(let key in feedback_data){
-                    if(feedback_data.hasOwnProperty(key)) {
-                        if(feedback_data[key].sync == 1){
-                          //console.log('count PROPERTY_FEEDBACK FAIL');
+                  let property_photos = data[property_id];
+
+                  for(let master_key in property_photos){
+                    if(property_photos.hasOwnProperty(master_key)){
+
+                      let master_item_photos =  property_photos[master_key];
+
+                      for(let sub_key in master_item_photos){
+                        if(master_item_photos.hasOwnProperty(sub_key) ){
+
+                          let sub_item_photos =  master_item_photos[sub_key];
+
+                          for(let i =0, l = sub_item_photos.length; i < l; i++){
+                              total_data += 1;
+                          }
+
+                        }
+                      }
+                    }
+                  }
+                }
+                break;
+              }
+
+
+            }//end switch
+
+          }); //end of map
+
+          //check here
+
+          console.log('TOTAL NUMERS ');
+          console.log(total_data);
+          //SyncActions.totalDataCount(this.property_id, total_data);
+
+          resolve(total_data);
+
+        });
+
+      });
+
+    });// promise
+
+  }
+
+  getNonUpdatedNumbers(property_id){
+
+    console.log('get updated numbers');
+
+    let total_data = 0;
+
+    return new Promise( function(resolve,reject){
+
+      AsyncStorage.getAllKeys((err, keys) => {
+        AsyncStorage.multiGet(keys, (err, stores) => {
+
+          let allSynced = true;
+
+          stores.map((result, i, store) => {
+            //get at each store's key/value so you can work with it
+            let key = store[i][0];
+            let value = store[i][1];
+
+            switch (key) {
+
+
+              case TableKeys.PROPERTY_INFO: {
+
+                let properties = JSON.parse(value);
+                for(let i =0, l = properties.length; i < l ; i++){
+                  if(properties[i].property_id == property_id && properties[i].sync == 1){
+                    //console.log('count PROPERTY_INFO FAIL');
+                    total_data += 1;
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_MASTERITEM_LINK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let master_data = data[property_id];
+                  for(let i =0, l = master_data.length; i < l ; i++){
+                    //console.log(master_data[i].sync);
+                    if(master_data[i].sync == 1){
+                      //console.log('count PROPERTY_MASTERITEM_LINK FAIL');
+                      total_data += 1;
+                    }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUBITEM_LINK:{
+
+                let data = JSON.parse(value);
+
+                for( let key in data){
+
+                  let sub_items = data[key];
+
+                  for(let i =0, l = sub_items.length; i < l ; i++){
+
+                    if(sub_items[i].property_id == property_id ){ // we got this prop sub item
+                      //console.log(sub_item_details[i]);
+                        if(sub_items[i].sync == 1){
+                          //console.log('count PROPERTY_SUBITEM_LINK FAIL');
                           total_data += 1;
 
                         }
                     }
+
+                  }
+
                 }
+
+                break;
               }
-              break;
-            }
 
-            case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+              case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
 
-              let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
-
-                let feedback_data = data[this.property_id];
-
-                for(let key in feedback_data){
-                    if(feedback_data.hasOwnProperty(key)) {
-
-                      if(feedback_data[key].sync == 1){
-                        //console.log('count PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
-                        total_data += 1;
-                      }
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let general_data = data[property_id];
+                  for(let i =0, l = general_data.length; i < l ; i++){
+                    if(general_data[i].sync == 1){
+                      //console.log('count PROPERTY_GENERAL_CONDITION_LINK FAIL');
+                      total_data += 1;
 
                     }
+                  }
                 }
-
+                break;
               }
-              break;
-            }
 
-            case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
+              case TableKeys.PROPERTY_METER_LINK:{
 
-              let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
+                let data = JSON.parse(value);
 
-                let property_voice = data[this.property_id];
+                if(data.hasOwnProperty(property_id)){
 
-                for(let master_key in property_voice){
-                  if(property_voice.hasOwnProperty(master_key)){
+                  let meter_data = data[property_id];
+                  for(let i =0, l = meter_data.length; i < l; i++){
+                    if(meter_data[i].sync == 1){
+                      //console.log('count PROPERTY_METER_LINK FAIL');
+                      total_data += 1;
 
-                    let master_item_voice =  property_voice[master_key];
+                    }
+                  }
 
-                    for(let sub_key in master_item_voice){
-                      if(master_item_voice.hasOwnProperty(sub_key) ){
+                }
+                break;
+              }
 
-                        let sub_item_voice =  master_item_voice[sub_key];
+              case TableKeys.PROPERTY_FEEDBACK: {
 
-                        for(let i =0, l = sub_item_voice.length; i < l; i++){
-                          if(sub_item_voice[i].sync == 1){
-                            //console.log('count PROPERTY_SUB_VOICE_GENERAL FAIL');
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+                          if(feedback_data[key].sync == 1){
+                            //console.log('count PROPERTY_FEEDBACK FAIL');
                             total_data += 1;
+
+                          }
+                      }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+
+                        if(feedback_data[key].sync == 1){
+                          //console.log('count PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
+                          total_data += 1;
+                        }
+
+                      }
+                  }
+
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let property_voice = data[property_id];
+
+                  for(let master_key in property_voice){
+                    if(property_voice.hasOwnProperty(master_key)){
+
+                      let master_item_voice =  property_voice[master_key];
+
+                      for(let sub_key in master_item_voice){
+                        if(master_item_voice.hasOwnProperty(sub_key) ){
+
+                          let sub_item_voice =  master_item_voice[sub_key];
+
+                          for(let i =0, l = sub_item_voice.length; i < l; i++){
+                            if(sub_item_voice[i].sync == 1){
+                              //console.log('count PROPERTY_SUB_VOICE_GENERAL FAIL');
+                              total_data += 1;
+                            }
                           }
                         }
                       }
                     }
                   }
                 }
+                break;
               }
-              break;
-            }
 
-            case TableKeys.SIGNATURES : {
+              case TableKeys.SIGNATURES : {
 
-              let data = JSON.parse(value);
+                let data = JSON.parse(value);
 
-              if(data.hasOwnProperty(this.property_id)){
+                if(data.hasOwnProperty(property_id)){
 
-                let signs = data[this.property_id];
+                  let signs = data[property_id];
 
-                if(signs.sync == 1){
-                  //console.log('count SIGNATURES FAIL');
-                  total_data += 1;
+                  if(signs.sync == 1){
+                    //console.log('count SIGNATURES FAIL');
+                    total_data += 1;
+                  }
+
                 }
 
+                break;
               }
 
-              break;
-            }
+              case TableKeys.PHOTOS : {
 
-            case TableKeys.PHOTOS : {
+                let data = JSON.parse(value);
 
-              let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
 
-              if(data.hasOwnProperty(this.property_id)){
+                  let property_photos = data[property_id];
 
-                let property_photos = data[this.property_id];
+                  for(let master_key in property_photos){
+                    if(property_photos.hasOwnProperty(master_key)){
 
-                for(let master_key in property_photos){
-                  if(property_photos.hasOwnProperty(master_key)){
+                      let master_item_photos =  property_photos[master_key];
 
-                    let master_item_photos =  property_photos[master_key];
+                      for(let sub_key in master_item_photos){
+                        if(master_item_photos.hasOwnProperty(sub_key) ){
 
-                    for(let sub_key in master_item_photos){
-                      if(master_item_photos.hasOwnProperty(sub_key) ){
+                          let sub_item_photos =  master_item_photos[sub_key];
 
-                        let sub_item_photos =  master_item_photos[sub_key];
-
-                        for(let i =0, l = sub_item_photos.length; i < l; i++){
-                          if(sub_item_photos[i].sync == 1){
-                            //console.log(sub_item_photos[i]);
-                            //console.log('count PHOTOS FAIL');
-                            total_data += 1;
+                          for(let i =0, l = sub_item_photos.length; i < l; i++){
+                            if(sub_item_photos[i].sync == 1){
+                              //console.log(sub_item_photos[i]);
+                              //console.log('count PHOTOS FAIL');
+                              total_data += 1;
+                            }
                           }
-                        }
 
+                        }
                       }
                     }
                   }
                 }
+                break;
               }
-              break;
-            }
 
 
-          }//end switch
+            }//end switch
 
-        }); //end of map
+          }); //end of map
 
-        //check here
+          //check here
 
-        console.log('TOTAL NUMERS ');
-        console.log(total_data);
-        SyncActions.totalDataCount(this.property_id, total_data);
+          console.log('Non UPDATED NUMERS ');
+          console.log(total_data);
 
+          resolve(total_data);
+
+
+        });
 
       });
 

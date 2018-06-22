@@ -13,7 +13,8 @@ import {
   FlatList,
   TouchableHighlight,
   ActivityIndicator,
-  Image
+  Image,
+  Alert
 } from 'react-native';
 
 import BackgroundTask from 'react-native-background-task'
@@ -26,6 +27,7 @@ import auth from '../keys/auth';
 
 import helper from '../helper/helper';
 import SyncImg from '../components/SyncImg';
+import Sync from '../helper/Sync';
 
 import SyncStore from "../stores/SyncStore";
 
@@ -46,11 +48,11 @@ BackgroundTask.define(async () => {
     //Image.prefetch(payload.imageUrl);
     console.log('i am from queue man', payload);
 
-    await AsyncStorage.setItem('lukeData', 'Luke Skywalker arbitrary data loaded!');
+    await AsyncStorage.setItem('lukeData', 'Luke Skywalker arbitrary data loaded man!');
 
   });
 
-  await queue.start(25000); // Run queue for at most 25 seconds.
+   await queue.start(20000);
 
   BackgroundTask.finish();
 
@@ -148,7 +150,16 @@ export default class Inspections extends Component{
         //     },
         // });
 
-        this.addNewProperty();
+        //this.addNewProperty(); //TODO check background BackgroundTask
+        this.checkBackgroundStatus();
+        AsyncStorage.getItem('lukeData', (err, result) => {
+          console.log('values man #######');
+          console.log(result);
+          Alert.alert(
+            'Alert Title',
+            result);
+        });
+
 
       }
       else if( event.id == 'refresh' ){
@@ -166,6 +177,24 @@ export default class Inspections extends Component{
     }
   }
 
+
+  async checkBackgroundStatus(){
+    const status = await BackgroundTask.statusAsync()
+
+    if (status.available) {
+      // Everything's fine
+      return
+    }
+
+    const reason = status.unavailableReason
+    if (reason === BackgroundTask.UNAVAILABLE_DENIED) {
+      Alert.alert('Denied', 'Please enable background "Background App Refresh" for this app')
+    } else if (reason === BackgroundTask.UNAVAILABLE_RESTRICTED) {
+      Alert.alert('Restricted', 'Background tasks are restricted on your device')
+    }
+
+  }
+
   addNewProperty =() =>{
     this.props.navigator.push({
       screen: 'PropertyGround.NewProperty',
@@ -179,7 +208,7 @@ export default class Inspections extends Component{
 
   componentWillMount() {
 
-    AsyncStorage.getItem('@MyApp:key', (err, result) => {
+    AsyncStorage.getItem('lukeData', (err, result) => {
       console.log('values man #######');
       console.log(result);
     });
@@ -234,14 +263,13 @@ export default class Inspections extends Component{
       'background-example',
       { imageUrl: 'https://i.imgur.com/kPkQTic.jpg' }, //data
       { //attempts: 1,
-        timeout: 15000 },
+        timeout: 5000 },
       false
     );
 
   }
 
   showGuide = () =>{
-
 
     this.props.navigator.showModal({
        screen: "PropertyGround.Guide",
@@ -268,8 +296,18 @@ export default class Inspections extends Component{
         if(this.state.master_properties[i].sync == 2 ){
           nosync = true;
           helper.synSrv(this.state.master_properties[i]);
-          //this.createSyncJobs();
+
+          let master_properties = this.state.master_properties;
+          const sync = new Sync(master_properties);
+          sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
+            master_properties[i].total_updated_items = total;
+            this.setState({
+              master_properties
+            });
+          });
+
         }
+
       }
 
       if(!nosync){
@@ -313,34 +351,6 @@ export default class Inspections extends Component{
 
  }
 
-  //get total_numbers
-  //  getTotalData(){
-  //
-  //   let total_data = SyncStore.getTotalData();
-  //
-  //   let temp_total_data = this.state.totalData;
-  //   temp_total_data[total_data.property_id] = total_data.total;
-  //
-  //   this.setState({
-  //     totalData : temp_total_data
-  //   });
-  //
-  // }
-
-  //get total_numbers
-  //  getUpdatedData(){
-  //
-  //    let updated_data = SyncStore.getUpdatedData();
-  //
-  //    // let temp_updated_data = this.state.updatedData;
-  //    // temp_updated_data[updated_data.property_id] = updated_data.updated_count;
-  //    //
-  //    // this.setState({
-  //    //   updatedData : temp_updated_data
-  //    // });
-  //
-  // }
-
 
   getProperties =(nosync = false)=>{
 
@@ -380,21 +390,31 @@ export default class Inspections extends Component{
                 refreshing: false
               }, ()=>{
 
+
                 nosync = false;
                 for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
                   if(this.state.master_properties[i].sync == 2 ){
                     nosync = true;
-                    break;
                   }
+
+                  let master_properties = this.state.master_properties;
+                  const sync = new Sync(master_properties);
+                  sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+                    master_properties[i].total_items = total;
+                    this.setState({
+                      master_properties
+                    });
+                  });
+
+
                 }
                 console.log("going to start process");
                 console.log(nosync);
 
-
                 if(nosync){
 
-                  this.createSyncJobs();
+                  //this.createSyncJobs();
 
                   this._interval = setInterval(() => { //TODO
                     this.checkSync();
@@ -675,32 +695,36 @@ export default class Inspections extends Component{
   }
 
 
-  // getTotalUpdatedText = (property_id) =>{
-  //
-  //   let sync = 0;
-  //   let totoal_updated_text = '';
-  //   console.log("#########");
-  //   console.log(this.state.totalData);
-  //   console.log(this.state.updatedData);
-  //
-  //   for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-  //
-  //     if(property_id == this.state.master_properties[i].property_id ){
-  //       sync = this.state.master_properties[i].sync;
-  //
-  //       if(sync == 2){
-  //         totoal_updated_text =  '-' + this.state.updatedData[property_id] + '/' + this.state.totalData[property_id]
-  //       }
-  //
-  //       break;
-  //     }
-  //
-  //   }
-  //
-  //   return totoal_updated_text;
-  //
-  //
-  // }
+  getTotalItem = (property_id) =>{
+
+    let total = 0;
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+      if(property_id == this.state.master_properties[i].property_id ){
+        total = this.state.master_properties[i].total_items;
+      }
+    }
+    return total;
+
+  }
+
+  getTotalUpdatedItem = (property_id) =>{
+
+    let total = 0;
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+      if(property_id == this.state.master_properties[i].property_id ){
+        total = Number(this.state.master_properties[i].total_items) - Number(this.state.master_properties[i].total_updated_items);
+      }
+    }
+
+    if(isNaN(total)){
+      total = 0;
+    }
+
+    return total;
+
+  }
 
 
 
@@ -747,6 +771,9 @@ export default class Inspections extends Component{
                       <View style={{flex:0, justifyContent: 'flex-start', flexDirection: 'row'}}>
                         <SyncImg sync={this.findSyncStatus(item.property_id)} key={item.property_id}/>
                         <Text style={[styles.cardStarRatings, {color: '#0b8457'}]}>{this.getSyncText(item.property_id)}</Text>
+                        {this.findSyncStatus(item.property_id) == 2 &&
+                        <Text style={styles.numbers_text}>{this.getTotalUpdatedItem(item.property_id)} / {this.getTotalItem(item.property_id)}</Text>
+                        }
                       </View>
                     </View>
                   </View>
@@ -896,5 +923,10 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignSelf: 'center',
   },
+  numbers_text: {
+    color: '#AEB1C0',
+    fontSize: 10,
+    marginLeft: 3
+	},
 
 });
