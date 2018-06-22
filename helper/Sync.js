@@ -13,7 +13,6 @@ export default class Sync {
   constructor(property) {
     this.property = property;
     this.property_id = property.property_id;
-    this.updated_data_count = 0;
   }
 
   syncCheck(){
@@ -41,7 +40,7 @@ export default class Sync {
     this.getAllData();
   }
 
-  getTotalItems(property_id){
+  static getTotalItems(property_id){
 
     console.log('get total numbers');
 
@@ -260,7 +259,7 @@ export default class Sync {
 
   }
 
-  getNonUpdatedNumbers(property_id){
+  static getNonUpdatedNumbers(property_id){
 
     console.log('get updated numbers');
 
@@ -1664,7 +1663,7 @@ export default class Sync {
   // this will wait for response from server
   async postData(formData, endpoint = 'syncmob' ){
 
-    /*try{
+    try{
         let response = await fetch(
             config.ENDPOINT_URL + 'property/'+ endpoint,
             {
@@ -1685,8 +1684,6 @@ export default class Sync {
           console.log(responseJson);
           console.log('--------------------');
 
-          //this.updated_data_count += 1;
-          //SyncActions.totalDataCount(this.property_id, this.updated_data_count);
 
           if(responseJson.status == 400){
             console.log("i get response status 400");
@@ -1698,13 +1695,8 @@ export default class Sync {
     catch(err){
       console.log('responseJson ERROR!');
       console.log(err);
-    }*/
+    }
 
-
-    //this.updated_data_count += 1;
-    //SyncActions.updatedDataCount(this.property_id, 1);
-
-    return ({ status : 2})
 
   }
 

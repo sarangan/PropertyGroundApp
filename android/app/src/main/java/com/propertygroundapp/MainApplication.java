@@ -3,8 +3,7 @@ package com.propertygroundapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.jamesisaac.rnbackgroundtask.BackgroundTaskPackage;
-import io.realm.react.RealmReactPackage;
+import com.corbt.keepawake.KCKeepAwakePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.rnim.rn.audio.ReactNativeAudioPackage;
 import com.github.yamill.orientation.OrientationPackage;
@@ -36,8 +35,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new BackgroundTaskPackage(),
-            new RealmReactPackage(),
+            new KCKeepAwakePackage(),
             new RNCameraPackage(),
             new ReactNativeAudioPackage(),
             new OrientationPackage(),

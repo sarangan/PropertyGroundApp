@@ -17,8 +17,7 @@ import {
   Alert
 } from 'react-native';
 
-import BackgroundTask from 'react-native-background-task'
-import queueFactory from 'react-native-queue';
+import KeepAwake from 'react-native-keep-awake';
 
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
@@ -35,31 +34,6 @@ const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
 
 export let homeNavigator = null; // to use in drawer
-
-
-BackgroundTask.define(async () => {
-
-  // Init queue
-  queue = await queueFactory();
-
-  // Register job worker
-  queue.addWorker('background-example', async (id, payload) => {
-    //queue is running man
-    //Image.prefetch(payload.imageUrl);
-    console.log('i am from queue man', payload);
-
-    await AsyncStorage.setItem('lukeData', 'Luke Skywalker arbitrary data loaded man!');
-
-  });
-
-   await queue.start(20000);
-
-  BackgroundTask.finish();
-
-});
-
-
-
 
 export default class Inspections extends Component{
 
@@ -88,42 +62,10 @@ export default class Inspections extends Component{
       properties : [],
       master_properties: [],
       loading: false,
-      refreshing: false,
-       queue: null,
-      // totalData: {},
-      // updatedData: {}
-
+      refreshing: false
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
-    //this.getTotalData = this.getTotalData.bind(this);
-    //this.getUpdatedData = this.getUpdatedData.bind(this);
-
-    // queueFactory()
-    //   .then(queue => {
-    //     this.setState({queue});
-    //   });
-
-      this.init();
-  }
-
-  async init() {
-
-    const queue = await queueFactory();
-
-    // Add the worker.
-    queue.addWorker('background-example', async (id, payload) => {
-      // Worker has to be defined before related jobs can be added to queue.
-      // Since this example is only concerned with OS background task worker execution,
-      // We will make this a dummy function in this context.
-      console.log(id);
-    });
-
-    // Attach initialized queue to state.
-    this.setState({
-      queue
-    });
-
   }
 
 
@@ -133,33 +75,7 @@ export default class Inspections extends Component{
 
       if (event.id == 'property') {
 
-        // this.props.navigator.showModal({
-        //     screen: "PropertyGround.NewProperty",
-        //     title: 'Add new property',
-        //     animationType: 'slide-up',
-        //     navigatorStyle:{
-        //       navBarTextColor: 'white',
-        //       navBarButtonColor: 'white',
-        //       statusBarTextColorScheme: 'light',
-        //       navBarBackgroundColor: '#00BDDB',
-        //       navBarBlur: false,
-        //       screenBackgroundColor: '#FFFFFF',
-        //       navBarTransparent: false,
-        //     },
-        //     passProps: {
-        //     },
-        // });
-
-        //this.addNewProperty(); //TODO check background BackgroundTask
-        this.checkBackgroundStatus();
-        AsyncStorage.getItem('lukeData', (err, result) => {
-          console.log('values man #######');
-          console.log(result);
-          Alert.alert(
-            'Alert Title',
-            result);
-        });
-
+        this.addNewProperty();
 
       }
       else if( event.id == 'refresh' ){
@@ -177,24 +93,6 @@ export default class Inspections extends Component{
     }
   }
 
-
-  async checkBackgroundStatus(){
-    const status = await BackgroundTask.statusAsync()
-
-    if (status.available) {
-      // Everything's fine
-      return
-    }
-
-    const reason = status.unavailableReason
-    if (reason === BackgroundTask.UNAVAILABLE_DENIED) {
-      Alert.alert('Denied', 'Please enable background "Background App Refresh" for this app')
-    } else if (reason === BackgroundTask.UNAVAILABLE_RESTRICTED) {
-      Alert.alert('Restricted', 'Background tasks are restricted on your device')
-    }
-
-  }
-
   addNewProperty =() =>{
     this.props.navigator.push({
       screen: 'PropertyGround.NewProperty',
@@ -208,13 +106,6 @@ export default class Inspections extends Component{
 
   componentWillMount() {
 
-    AsyncStorage.getItem('lukeData', (err, result) => {
-      console.log('values man #######');
-      console.log(result);
-    });
-
-
-
     AsyncStorage.getItem(AppKeys.SHOWGUIDE, (err, result) => {
       //console.log('show guide');
       //console.log(result);
@@ -227,15 +118,11 @@ export default class Inspections extends Component{
     });
 
     SyncStore.on("change", this.getSyncStatus);
-    // SyncStore.on("change", this.getTotalData);
-    // SyncStore.on("chnage", this.getUpdatedData);
   }
 
   componentWillUnmount(){
     console.log('unmonting now')
     SyncStore.removeListener("change", this.getSyncStatus);
-    // SyncStore.removeListener("change", this.getTotalData);
-    // SyncStore.removeListener("change", this.getUpdatedData);
     clearInterval(this._interval);
   }
 
@@ -249,24 +136,6 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
-
-    BackgroundTask.schedule(); // Schedule the task to run every ~15 min if app is closed.
-
-  }
-
-  //create sync jobs
-  createSyncJobs = () =>{
-
-    console.log('###########-creating Q')
-
-    this.state.queue.createJob(
-      'background-example',
-      { imageUrl: 'https://i.imgur.com/kPkQTic.jpg' }, //data
-      { //attempts: 1,
-        timeout: 5000 },
-      false
-    );
-
   }
 
   showGuide = () =>{
@@ -298,8 +167,7 @@ export default class Inspections extends Component{
           helper.synSrv(this.state.master_properties[i]);
 
           let master_properties = this.state.master_properties;
-          const sync = new Sync(master_properties);
-          sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
+          Sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
             master_properties[i].total_updated_items = total;
             this.setState({
               master_properties
@@ -311,8 +179,12 @@ export default class Inspections extends Component{
       }
 
       if(!nosync){
+        KeepAwake.deactivate();
         //console.log('clearing interval');
         clearInterval(this._interval); //TODO
+      }
+      else{
+        KeepAwake.activate();
       }
 
   }
@@ -399,8 +271,7 @@ export default class Inspections extends Component{
                   }
 
                   let master_properties = this.state.master_properties;
-                  const sync = new Sync(master_properties);
-                  sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+                  Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
                     master_properties[i].total_items = total;
                     this.setState({
                       master_properties
@@ -413,18 +284,10 @@ export default class Inspections extends Component{
                 console.log(nosync);
 
                 if(nosync){
-
-                  //this.createSyncJobs();
-
+                  KeepAwake.activate();
                   this._interval = setInterval(() => { //TODO
                     this.checkSync();
-                  }, 60000);
-
-                  /*
-                  this._interval = setInterval(() => { //TODO
-                    this.checkSynced();
-                  }, 60000);
-                  */
+                  }, 30000);
 
                 }
 
@@ -769,7 +632,7 @@ export default class Inspections extends Component{
                       <Text style={styles.cardStarRatings}>{item.mb_createdAt}</Text>
                       <Text style={[styles.cardStarRatings, {backgroundColor: '#b8b0b0', color: '#ffffff'}]}>{this.getLockText(item.property_id) == 1? ' Locked ' : ''}</Text>
                       <View style={{flex:0, justifyContent: 'flex-start', flexDirection: 'row'}}>
-                        <SyncImg sync={this.findSyncStatus(item.property_id)} key={item.property_id}/>
+                        <SyncImg sync={this.findSyncStatus(item.property_id)} key={item.property_id + this.findSyncStatus(item.property_id)}/>
                         <Text style={[styles.cardStarRatings, {color: '#0b8457'}]}>{this.getSyncText(item.property_id)}</Text>
                         {this.findSyncStatus(item.property_id) == 2 &&
                         <Text style={styles.numbers_text}>{this.getTotalUpdatedItem(item.property_id)} / {this.getTotalItem(item.property_id)}</Text>
@@ -926,7 +789,8 @@ const styles = StyleSheet.create({
   numbers_text: {
     color: '#AEB1C0',
     fontSize: 10,
-    marginLeft: 3
+    marginLeft: 3,
+    paddingTop: 2
 	},
 
 });

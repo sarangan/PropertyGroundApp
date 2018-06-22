@@ -5,22 +5,11 @@ class SyncStore extends EventEmitter {
   constructor() {
     super();
     this.property_id = '';
-    // this.totalData = {};
-    // this.updatedData = {};
   }
 
   getSyncedProperty(){
     return this.property_id;
   }
-
-  // getTotalData(){
-  //   return this.totalData;
-  // }
-  //
-  // getUpdatedData(){
-  //   return this.updatedData;
-  // }
-
 
   handleActions(action) {
 
@@ -31,31 +20,6 @@ class SyncStore extends EventEmitter {
         this.emit("change");
         break;
       }
-
-      // case "GET_TOTAL":{
-      //   this.totalData = {
-      //     property_id: action.data.property_id,
-      //     total: action.data.total
-      //   };
-      //   this.emit("change");
-      //   break;
-      // }
-      //
-      // case "GET_UPDATED_TOTAL": {
-      //
-      //   console.log("store value");
-      //   console.log(action.data.updated_count);
-      //   console.log(action.data.property_id);
-      //
-      //   this.updatedData =  {
-      //     property_id: action.data.property_id,
-      //     updated_count: action.data.updated_count
-      //   };
-      //
-      //   this.emit("change");
-      //   break;
-      //
-      // }
 
 
     }
