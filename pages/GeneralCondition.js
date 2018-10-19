@@ -126,7 +126,7 @@ export default class GeneralCondition extends Component{
     });
 
     AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
-      let property_general_condition_link = JSON.parse(result) || [];
+      let property_general_condition_link = JSON.parse(result) || {};
 
         if(property_general_condition_link.hasOwnProperty(this.state.property_id) ){
 

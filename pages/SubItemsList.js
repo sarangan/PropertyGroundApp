@@ -219,7 +219,7 @@ export default class SubItemsList extends Component{
     });
 
     AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
-      let property_subitem_link = JSON.parse(result) || [];
+      let property_subitem_link = JSON.parse(result) || {};
 
 
         console.log('getting sub items');

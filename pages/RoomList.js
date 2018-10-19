@@ -33,6 +33,8 @@ import helper from '../helper/helper';
 import NumberControl from '../components/NumberControl';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import Prompt from 'react-native-prompt';
+import KeepAwake from 'react-native-keep-awake';
+
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 var RNFS = require('react-native-fs');
@@ -157,6 +159,14 @@ export default class RoomList extends Component{
 
       for(let i =0, l = master_properties.length; i < l ; i++){
         if(this.state.property_id == master_properties[i].property_id ){
+
+          if( master_properties[i].sync == 2){
+            KeepAwake.activate();
+          }
+          else{
+            KeepAwake.deactivate();
+          }
+
           this.setState({
             master_property: master_properties[i],
           });
@@ -194,6 +204,8 @@ export default class RoomList extends Component{
 
   //set the sync flag
   syncProperty = () =>{
+
+    KeepAwake.activate();
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
       console.log('get property details');

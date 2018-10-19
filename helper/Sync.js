@@ -37,8 +37,286 @@ export default class Sync {
     //this.getTotalNumbers();
 
     console.log('-----------starting sync--------------');
-    this.getAllData();
+    //this.getAllData();
+
+    this.getAllDataAlter();
+
   }
+
+  getAllDataAlter(){
+
+    AsyncStorage.getAllKeys((err, keys) => {
+      AsyncStorage.multiGet(keys, (err, stores) => {
+
+        let formData = new FormData();
+        formData.append("property_id", this.property_id );
+        formData.append("data", JSON.stringify(stores) );
+
+        this.postData(formData, 'syncdata').then( response =>{
+
+          console.log('junk json uploaded');
+
+       });
+
+
+       stores.map((result, i, store) => {
+         //get at each store's key/value so you can work with it
+         let key = store[i][0];
+         let value = store[i][1];
+
+         switch (key) {
+
+           case TableKeys.PROPERTY_INFO: { //>
+
+             //console.log('Starting PROPERTY_INFO');
+
+              let properties = JSON.parse(value);
+              //console.log(properties);
+
+              for(let i =0, l = properties.length; i < l ; i++){
+
+                if(properties[i].property_id == this.property_id && properties[i].sync == 1){
+
+                  //console.log(properties[i]);
+
+                  let image_url = properties[i].image_url;
+
+                  let dummy_properties = {...properties[i]};
+
+                  delete dummy_properties.image_url; // not to update the server image url
+
+                  let formData = new FormData();
+                  formData.append("data", JSON.stringify(dummy_properties) );
+                  formData.append("table", TableKeys.PROPERTY_INFO);
+
+                  this.postData(formData).then( response =>{
+
+                    //console.log('Ending PROPERTY_INFO');
+
+                    if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
+
+                      // we got status 1, update the storage
+                      this.update_property_info( i, properties );
+
+                      if(image_url){
+                        let formDataUpload = new FormData();
+                        formDataUpload.append("property_id", this.property_id );
+                        formDataUpload.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + image_url , type: 'image/jpg', name: 'image.jpg'});
+
+                        let response = this.postData(formDataUpload, 'uploadpropertyimg');
+
+                      }
+
+                    }
+
+
+                  });
+
+
+
+                }
+
+              }
+
+
+             break;
+           }
+
+
+           case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {//>
+
+             //console.log('Starting PROPERTY_SUB_VOICE_GENERAL');
+
+             let data = JSON.parse(value);
+             if(data.hasOwnProperty(this.property_id)){
+
+               let property_voice = data[this.property_id];
+
+               for(let master_key in property_voice){
+                 if(property_voice.hasOwnProperty(master_key)){
+
+                   let master_item_voice =  property_voice[master_key];
+
+
+
+                   for(let sub_key in master_item_voice){
+                     if(master_item_voice.hasOwnProperty(sub_key) ){
+
+                       let sub_item_voice =  master_item_voice[sub_key];
+
+
+
+                       for(let i =0, l = sub_item_voice.length; i < l; i++){
+                         if(sub_item_voice[i].sync == 1){
+
+                           //console.log(sub_item_voice[i]);
+
+                           let formData = new FormData();
+                           formData.append("property_id", this.property_id );
+                           formData.append("prop_sub_feedback_general_id", sub_item_voice[i].prop_sub_feedback_general_id );
+                           formData.append("item_id", sub_item_voice[i].item_id );
+                           formData.append("parent_id", sub_item_voice[i].parent_id );
+                           formData.append("voice_name", sub_item_voice[i].voice_name );
+                           formData.append("mb_createdAt", sub_item_voice[i].mb_createdAt);
+                           formData.append('voice', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_voice[i].file_name , type: 'video/mp4', name: 'voice.mp4'});
+
+
+                           this.postData(formData, 'uploadvoice').then( response =>{
+
+                             //console.log('Ending PROPERTY_SUB_VOICE_GENERAL');
+
+                             if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
+                                // we got status 1, update the storage
+                                this.update_voice_item_link( i, sub_key, master_key, data );
+
+                             }
+
+                           });
+
+
+
+                         }
+
+                       }
+
+                     }
+                   }
+
+                 }
+               }
+
+             }
+
+
+
+             break;
+           }
+
+           case TableKeys.SIGNATURES : {//>
+
+             //console.log('Starting SIGNATURES');
+
+             let data = JSON.parse(value);
+
+             if(data.hasOwnProperty(this.property_id)){
+
+               let signs = data[this.property_id];
+
+               if(signs.sync == 1){
+
+                 let formData = new FormData();
+                 formData.append("data", JSON.stringify(signs));
+                 formData.append("table", TableKeys.SIGNATURES);
+
+                 this.postData(formData).then( response =>{
+
+                   //console.log('Ending SIGNATURES');
+
+                   if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
+                      // we got status 1, update the storage
+                      this.update_signs( data );
+                    }
+
+                 });
+
+
+               }
+
+             }
+
+
+             break;
+           }
+
+
+
+         }// switch end
+
+
+       });
+
+
+       stores.map((result, i, store) => {
+         //get at each store's key/value so you can work with it
+         let key = store[i][0];
+         let value = store[i][1];
+
+         if(key == TableKeys.PHOTOS ){
+
+           console.log('Starting PHOTOS');
+
+           let data = JSON.parse(value);
+
+           if(data.hasOwnProperty(this.property_id)){
+
+             let property_photos = data[this.property_id];
+
+             for(let master_key in property_photos){
+               if(property_photos.hasOwnProperty(master_key)){
+
+                 let master_item_photos =  property_photos[master_key];
+
+                 for(let sub_key in master_item_photos){
+                   if(master_item_photos.hasOwnProperty(sub_key) ){
+
+                     let sub_item_photos =  master_item_photos[sub_key];
+
+                     //console.log(sub_item_photos);
+
+                     for(let i =0, l = sub_item_photos.length; i < l; i++){
+                       if(sub_item_photos[i].sync == 1){
+
+                         let formData = new FormData();
+                         formData.append("property_id", this.property_id );
+                         formData.append("photo_id", sub_item_photos[i].photo_id );
+                         formData.append("item_id", sub_item_photos[i].item_id );
+                         formData.append("parent_id", sub_item_photos[i].parent_id );
+                         formData.append("type", sub_item_photos[i].type );
+                         formData.append("mb_createdAt", sub_item_photos[i].mb_createdAt );
+                         formData.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
+
+
+                         this.postData(formData, 'uploadfile').then( response =>{
+
+                           //console.log('Ending PHOTOS');
+
+                           console.log('uploaded server PHOTOS');
+
+                           if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
+                             // we got status 1, update the storage
+                             this.update_photos( i, sub_key, master_key, data );
+                          }
+
+                        });
+
+
+
+                       }
+                     }
+
+                   }
+                 }
+               }
+             }
+
+           }
+
+
+         }
+
+       });
+
+
+
+
+        this.checkPropertySync(stores);
+
+      });
+    });
+
+  }
+
+
 
   static getTotalItems(property_id){
 
@@ -60,7 +338,7 @@ export default class Sync {
 
             switch (key) {
 
-
+              /*
               case TableKeys.PROPERTY_INFO: {
 
                 let properties = JSON.parse(value);
@@ -207,6 +485,7 @@ export default class Sync {
 
                 break;
               }
+              */
 
               case TableKeys.PHOTOS : {
 
@@ -240,6 +519,7 @@ export default class Sync {
 
 
             }//end switch
+
 
           }); //end of map
 
@@ -279,7 +559,7 @@ export default class Sync {
 
             switch (key) {
 
-
+              /*
               case TableKeys.PROPERTY_INFO: {
 
                 let properties = JSON.parse(value);
@@ -459,6 +739,8 @@ export default class Sync {
 
                 break;
               }
+
+              */
 
               case TableKeys.PHOTOS : {
 
@@ -1119,8 +1401,347 @@ export default class Sync {
 
   }
 
+  recheckSeverTables(){
+
+
+    let formData = new FormData();
+    formData.append("property_id", this.property_id );
+
+      this.postData(formData, 'checksyncdata').then( (response) =>{
+
+        if(response.hasOwnProperty('status') && response.status == 1 ){
+
+          console.log("checking servfer tables!");
+
+
+          let data = response.data;
+          console.log(data);
+
+          for(let key in data){
+
+            if (data.hasOwnProperty(key)) {
+
+              switch (key) {
+
+                case 'property_masteritem_link': {
+
+                  let master_server_data = data[key];
+                  if(master_server_data && Array.isArray(master_server_data) ){
+
+
+                     AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, prop_master_items) =>{
+
+                       prop_master_items = JSON.parse(prop_master_items) || {};
+
+                       if(prop_master_items.hasOwnProperty(this.property_id) ){
+                         let master_items = prop_master_items[this.property_id] || [];
+
+                         for(let i = 0 , l = master_server_data.length; i < l ; i++ ){
+
+                           for(let j = 0 , ll = master_items.length; j < ll ; j++ ){
+
+                             if(master_server_data[i].prop_master_id == master_items[j].prop_master_id && master_items[j].sync == 1){
+
+                               master_items[j].sync = 2;
+
+                             }
+
+                           }
+
+                         }
+
+                         AsyncStorage.setItem(TableKeys.PROPERTY_MASTERITEM_LINK, JSON.stringify(prop_master_items), () => {
+                           console.log('PROPERTY_MASTERITEM_LINK updated');
+                         });
+
+
+
+                       }
+
+
+                     });
+
+
+
+                  }
+
+                  break;
+                } // end case of prop master item link
+
+                case 'property_subitem_link': {
+
+                  let subitem_server_data = data[key];
+                  if(subitem_server_data && Array.isArray(subitem_server_data) ){
+
+                   AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, property_subitem_link) =>{
+
+                     property_subitem_link = JSON.parse(property_subitem_link) || {};
+
+                     for(let master_item_key in property_subitem_link){
+
+                       if(property_subitem_link.hasOwnProperty(master_item_key)){
+
+                         let sub_items_temp = property_subitem_link[master_item_key] || [];
+
+                         for(let i=0, l = sub_items_temp.length; i < l; i++){
+
+                           if( sub_items_temp[i].property_id == this.property_id){
+
+                             let sub_items_server_data = data[key];
+                             if(sub_items_server_data && Array.isArray(sub_items_server_data) ){
+
+                               for(let j = 0 , ll = sub_items_server_data.length; j < ll ; j++ ){
+
+                                 if(sub_items_server_data[j].prop_subitem_id == sub_items_temp[i].prop_subitem_id && sub_items_temp[i].sync == 1){
+
+                                   sub_items_temp[i].sync = 2;
+
+                                 }
+
+                               }
+
+                             }
+
+                           }
+                           else{
+                             break;
+                           }
+
+                         }
+
+                       }
+
+                     }
+
+                     AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(property_subitem_link), ()=>{
+                       console.log('PROPERTY_SUBITEM_LINK updated');
+                     });
+
+
+                   });
+
+
+
+
+
+
+                  }
+
+                } // end of sub item case
+
+                case 'property_general_condition_link': {
+
+                  let server_prop_general_condition = data[key];
+                  if(server_prop_general_condition && Array.isArray(server_prop_general_condition) ){
+
+
+                    AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, property_general_condition_link) =>{
+
+                      property_general_condition_link = JSON.parse(property_general_condition_link) || {};
+
+                      if(property_general_condition_link.hasOwnProperty(this.property_id) ){
+
+                        let gen_list = property_general_condition_link[this.property_id];
+
+                        for(let i = 0 , l = server_prop_general_condition.length; i < l ; i++ ){
+
+                          for(let j=0, ll = gen_list.length; j < ll ; j++){
+
+                            if(server_prop_general_condition[i].prop_general_id == gen_list[j].prop_general_id && gen_list[j].sync == 1){
+
+                              gen_list[j].sync = 2;
+
+                            }
+
+
+                          }
+
+                        }
+
+                        AsyncStorage.setItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, JSON.stringify(property_general_condition_link), ()=>{
+                           console.log('PROPERTY_GENERAL_CONDITION_LINK updated');
+                        } );
+
+
+
+                      }
+
+                    });
+
+
+
+
+                  }
+
+                  break;
+                } //end of prop general condition link
+
+                case 'property_meter_link': {
+
+
+                  let server_prop_meter_link = data[key];
+                  if(server_prop_meter_link && Array.isArray(server_prop_meter_link) ){
+
+
+                    AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, property_meter_link) =>{
+
+                      property_meter_link = JSON.parse(property_meter_link) || {};
+
+                      if(property_meter_link.hasOwnProperty(this.property_id) ){
+
+                        let meterlist = property_meter_link[this.property_id] || [];
+
+                        for(let i = 0 , l = server_prop_meter_link.length; i < l ; i++ ){
+
+                          for(let j=0, ll = meterlist.length; j < ll ; j++){
+
+                            if(server_prop_meter_link[i].prop_meter_id == meterlist[j].prop_meter_id && meterlist[j].sync == 1){
+
+                              meterlist[j].sync = 2;
+
+                            }
+
+
+                          }
+
+                        }
+
+                        AsyncStorage.setItem(TableKeys.PROPERTY_METER_LINK, JSON.stringify(property_meter_link), ()=>{
+                          console.log('PROPERTY_METER_LINK updated');
+                        } );
+
+
+                      }
+
+
+                    });
+
+
+
+
+                  }
+
+                  break;
+
+                } // end of prop meter link
+
+                case 'property_feedback': {
+
+                  let server_prop_feedback = data[key];
+                  if(server_prop_feedback && Array.isArray(server_prop_feedback) ){
+
+
+                    AsyncStorage.getItem(TableKeys.PROPERTY_FEEDBACK, (err, property_subitem_feedback) =>{
+
+                      property_subitem_feedback = JSON.parse(property_subitem_feedback) || {};
+
+                      if (property_subitem_feedback.hasOwnProperty(this.property_id) ){
+                        let feedbacks =  property_subitem_feedback[this.property_id] || [];
+
+
+                        for(let i = 0 , l = server_prop_feedback.length; i < l ; i++ ){
+
+                          for(let j=0, ll = feedbacks.length; j < ll ; j++){
+
+                            if(server_prop_feedback[i].prop_meter_id == feedbacks[j].prop_meter_id && feedbacks[j].sync == 1){
+
+                              feedbacks[j].sync = 2;
+
+                            }
+
+
+                          }
+
+                        }
+
+                        AsyncStorage.setItem(TableKeys.PROPERTY_FEEDBACK, JSON.stringify(property_subitem_feedback), ()=>{
+                          console.log('PROPERTY_FEEDBACK updated');
+                        } );
+
+
+                      }
+
+                    });
+
+
+
+
+                  }
+
+                  break;
+
+                } // end of prop feedback
+
+                case 'property_sub_feedback_general': {
+
+                  let server_prop_feedback_general = data[key];
+                  if(server_prop_feedback_general && Array.isArray(server_prop_feedback_general) ){
+
+
+                    AsyncStorage.getItem(TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL, (err, property_sub_feedback_general) =>{
+
+                      property_sub_feedback_general = JSON.parse(property_sub_feedback_general) || {};
+
+                      if(property_sub_feedback_general.hasOwnProperty(this.property_id) ){
+
+                        let feedbacks_general = property_sub_feedback_general[this.property_id] || [];
+
+                        for(let i = 0 , l = server_prop_feedback_general.length; i < l ; i++ ){
+
+                          for(let j=0, ll = feedbacks_general.length; j < ll ; j++){
+
+                            if(server_prop_feedback_general[i].prop_meter_id == feedbacks_general[j].prop_meter_id && feedbacks_general[j].sync == 1){
+
+                              feedbacks_general[j].sync = 2;
+
+                            }
+
+
+                          }
+
+                        }
+
+                        AsyncStorage.setItem(TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL, JSON.stringify(property_sub_feedback_general), ()=>{
+                          console.log('PROPERTY_SUB_FEEDBACK_GENERAL updated');
+                        } );
+
+
+                      }
+
+                    });
+
+
+
+
+                  }
+                  break;
+
+                }
+
+
+
+
+
+              }// end of switch case
+
+
+
+            }
+
+          }
+
+
+        }
+
+    });
+
+
+  }
+
   //re check all the tables
   recheckTbls(__index, __properties){
+
+    this.recheckSeverTables();
 
     console.log('Re-check tables again');
 
@@ -1154,7 +1775,7 @@ export default class Sync {
               let data = JSON.parse(value);
               if(data.hasOwnProperty(this.property_id)){
                 let master_data = data[this.property_id];
-                for(let i =0, l = master_data.length; i < l ; i++){
+                for(let i = 0, l = master_data.length; i < l ; i++){
                   //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
                     //console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');

@@ -17,12 +17,14 @@ import {
   ScrollView,
   Animated,
   Easing,
+  AsyncStorage
 } from 'react-native';
 
 import { RNCamera } from 'react-native-camera';
 
 import ImagePicker from 'react-native-image-crop-picker';
 import helper from '../helper/helper';
+import AppKeys from '../keys/appKeys';
 var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
@@ -45,8 +47,57 @@ export default class PGCamera extends Component{
       spinValue: new Animated.Value(0),
       startCapture: false,
       lastestPhotos: [],
-      showPhotos: 5
+      showPhotos: 5,
+      quality: 'LOW'
     };
+
+  }
+
+  componentDidMount(){
+
+    AsyncStorage.getItem( AppKeys.CAMERA_SETTINGS, (err, result) => {
+      console.log(result);
+
+      result  = JSON.parse(result);
+
+      if(result !=null){
+        this.setState({
+          quality: result
+        });
+      }
+
+    });
+
+  }
+
+
+  getCameraQty = () =>{
+
+    let qty = 0.2;
+
+    switch (this.state.quality) {
+      case "HIGH":{
+        qty = 1;
+        break;
+      }
+      case "MEDIUM":{
+        qty = 0.5;
+        break;
+      }
+      case "LOW":{
+        qty = 0.2;
+        break;
+      }
+      default:{
+        qty = 0.5;
+        break;
+      }
+
+    }
+
+    console.log("quality ", qty );
+
+    return qty;
 
   }
 
@@ -54,7 +105,7 @@ export default class PGCamera extends Component{
   snapPhoto = async function(){
 
     if(this.camera){
-      const options = {quality: 0.5 };
+      const options = {quality: this.getCameraQty() };
       const data = await this.camera.takePictureAsync(options);
       //console.log(RNFS.DocumentDirectoryPath);
       console.log(data);

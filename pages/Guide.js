@@ -140,11 +140,12 @@ const styles = StyleSheet.create({
   },
   skipBtnTxt:{
     fontSize: 12,
+    //backgroundColor: '#ffffff',
     color: '#333333',
     alignSelf: 'center',
     textAlign: 'center',
     width: 120,
-
+    height: 30,
     borderWidth: 1,
     borderRadius: 5,
     paddingTop: 7,
