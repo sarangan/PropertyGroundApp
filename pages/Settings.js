@@ -136,7 +136,7 @@ export default class Settings extends Component{
 
       <Text style={styles.divTxt}>General</Text>
 
-      <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start', textAlign: 'left'}}>
+      <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
           <Button
                 onPress={()=>this.fetchOnlineSettings()}
                 title="Fetch Online Perferences"
@@ -156,7 +156,7 @@ export default class Settings extends Component{
 
         <Text style={styles.divTxt}>{"Camera Quality - " + this.state.quality }</Text>
 
-        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start', textAlign: 'left'}}>
+        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
             <Button
                   onPress={()=> {this.setState({ open_modal: true }); } }
                   title={"Change quality"}

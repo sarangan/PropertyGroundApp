@@ -1415,7 +1415,7 @@ export default class Sync {
 
 
           let data = response.data;
-          console.log(data);
+          //console.log(data);
 
           for(let key in data){
 
@@ -1636,16 +1636,23 @@ export default class Sync {
                       property_subitem_feedback = JSON.parse(property_subitem_feedback) || {};
 
                       if (property_subitem_feedback.hasOwnProperty(this.property_id) ){
-                        let feedbacks =  property_subitem_feedback[this.property_id] || [];
+                        let feedbacks =  property_subitem_feedback[this.property_id] || {};
 
 
-                        for(let i = 0 , l = server_prop_feedback.length; i < l ; i++ ){
+                        for(let i = 0, l = server_prop_feedback.length; i < l ; i++ ){
 
-                          for(let j=0, ll = feedbacks.length; j < ll ; j++){
+                          //for(let j=0, ll = feedbacks.length; j < ll ; j++){
+                          for(let feedback_key in feedbacks){
+                            if( feedbacks.hasOwnProperty(feedback_key) ){
 
-                            if(server_prop_feedback[i].prop_meter_id == feedbacks[j].prop_meter_id && feedbacks[j].sync == 1){
+                              let feedback = feedbacks[feedback_key];
 
-                              feedbacks[j].sync = 2;
+                              if(server_prop_feedback[i].prop_feedback_id == feedback.prop_feedback_id && feedback.sync == 1){
+
+                                feedback.sync = 2;
+
+                              }
+
 
                             }
 
@@ -1684,20 +1691,24 @@ export default class Sync {
 
                       if(property_sub_feedback_general.hasOwnProperty(this.property_id) ){
 
-                        let feedbacks_general = property_sub_feedback_general[this.property_id] || [];
+                        let feedbacks_general = property_sub_feedback_general[this.property_id] || {};
 
-                        for(let i = 0 , l = server_prop_feedback_general.length; i < l ; i++ ){
+                        for(let i = 0, l = server_prop_feedback_general.length; i < l ; i++ ){
 
-                          for(let j=0, ll = feedbacks_general.length; j < ll ; j++){
+                          for(let feedback_general_key in feedbacks_general){
 
-                            if(server_prop_feedback_general[i].prop_meter_id == feedbacks_general[j].prop_meter_id && feedbacks_general[j].sync == 1){
+                              if( feedbacks_general.hasOwnProperty(feedback_general_key) ){
 
-                              feedbacks_general[j].sync = 2;
+                                let feedback_general_item = feedbacks_general[feedback_general_key];
 
-                            }
+                                if(server_prop_feedback_general[i].prop_sub_feedback_general_id == feedback_general_item.prop_sub_feedback_general_id && feedback_general_item.sync == 1){
+                                  feedback_general_item.sync = 2;
+                                }
 
+                              }
 
                           }
+
 
                         }
 
@@ -1763,7 +1774,7 @@ export default class Sync {
               let properties = JSON.parse(value);
               for(let i =0, l = properties.length; i < l ; i++){
                 if(properties[i].property_id == this.property_id && properties[i].sync == 1){
-                  //console.log('re-check PROPERTY_INFO FAIL');
+                  console.log('re-check PROPERTY_INFO FAIL');
                   allSynced = false;
                 }
               }
@@ -1778,7 +1789,7 @@ export default class Sync {
                 for(let i = 0, l = master_data.length; i < l ; i++){
                   //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
+                    console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -1800,7 +1811,7 @@ export default class Sync {
                   if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
                     //console.log(sub_item_details[i]);
                       if(sub_items[i].sync == 1){
-                        //console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
+                        console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
                         allSynced = false;
                         break mainloop;
                       }
@@ -1820,7 +1831,7 @@ export default class Sync {
                 let general_data = data[this.property_id];
                 for(let i =0, l = general_data.length; i < l ; i++){
                   if(general_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
+                    console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -1838,7 +1849,7 @@ export default class Sync {
                 let meter_data = data[this.property_id];
                 for(let i =0, l = meter_data.length; i < l; i++){
                   if(meter_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_METER_LINK FAIL');
+                    console.log('re-check PROPERTY_METER_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -1858,7 +1869,8 @@ export default class Sync {
                 for(let key in feedback_data){
                     if(feedback_data.hasOwnProperty(key)) {
                         if(feedback_data[key].sync == 1){
-                          //console.log('re-check PROPERTY_FEEDBACK FAIL');
+                          console.log('feedback id ', feedback_data[key]);
+                          console.log('re-check PROPERTY_FEEDBACK FAIL');
                           allSynced = false;
                           break;
                         }
@@ -1879,7 +1891,7 @@ export default class Sync {
                     if(feedback_data.hasOwnProperty(key)) {
 
                       if(feedback_data[key].sync == 1){
-                        //console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
+                        console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
                         allSynced = false;
                         break;
                       }
@@ -1910,7 +1922,7 @@ export default class Sync {
 
                         for(let i =0, l = sub_item_voice.length; i < l; i++){
                           if(sub_item_voice[i].sync == 1){
-                            //console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
+                            console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
                             allSynced = false;
                             break;
                           }
@@ -1932,7 +1944,7 @@ export default class Sync {
                 let signs = data[this.property_id];
 
                 if(signs.sync == 1){
-                  //console.log('re-check SIGNATURES FAIL');
+                  console.log('re-check SIGNATURES FAIL');
                   allSynced = false;
                 }
 
@@ -1962,7 +1974,7 @@ export default class Sync {
                         for(let i =0, l = sub_item_photos.length; i < l; i++){
                           if(sub_item_photos[i].sync == 1){
                             //console.log(sub_item_photos[i]);
-                            //console.log('re-check PHOTOS FAIL');
+                            console.log('re-check PHOTOS FAIL');
                             allSynced = false;
                             break;
                           }
@@ -2301,6 +2313,7 @@ export default class Sync {
         });
 
           let responseJson = await response.json();
+          console.log(endpoint);
           console.log('responseJson');
           console.log(responseJson);
           console.log('--------------------');
