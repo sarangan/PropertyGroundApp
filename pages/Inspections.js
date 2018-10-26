@@ -167,7 +167,7 @@ export default class Inspections extends Component{
           helper.synSrv(this.state.master_properties[i]);
 
           let master_properties = this.state.master_properties;
-          Sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
+          Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
             master_properties[i].total_updated_items = total;
             this.setState({
               master_properties
@@ -181,10 +181,15 @@ export default class Inspections extends Component{
       if(!nosync){
         KeepAwake.deactivate();
         //console.log('clearing interval');
-        clearInterval(this._interval); //TODO
+        //clearInterval(this._interval); //TODO
       }
       else{
         KeepAwake.activate();
+
+        this._interval = setInterval(() => { //TODO
+          this.checkSynced();
+        }, 3000);
+
       }
 
   }
@@ -194,18 +199,68 @@ export default class Inspections extends Component{
 
     let nosync = false;
 
-    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
-      if(this.state.master_properties[i].sync == 2 ){
-        nosync = true;
-        helper.checkSynSrv( i , this.state.master_properties);
-      }
-    }
+      AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
 
-    if(!nosync){
-      //console.log('clearing interval');
-      clearInterval(this._interval); //TODO
-    }
+        let master_properties = JSON.parse(result) || [];
+
+        //console.log(master_properties);
+
+        this.setState({
+          master_properties: master_properties,
+        }, ()=>{
+
+
+          for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+            if(this.state.master_properties[i].sync == 2 ){
+              nosync = true;
+              //helper.checkSynSrv( i , this.state.master_properties);
+
+              let master_properties = this.state.master_properties;
+              Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+                master_properties[i].total_items = total;
+                this.setState({
+                  master_properties
+                });
+              });
+
+              Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+
+                console.log("i am getting total numbers : " , total);
+
+                master_properties[i].total_updated_items = total;
+                this.setState({
+                  master_properties
+                });
+              });
+
+
+            }
+
+          }
+
+          if(!nosync){
+            KeepAwake.deactivate();
+            //console.log('clearing interval');
+            clearInterval(this._interval); //TODO
+          }
+          else{
+            KeepAwake.activate();
+          }
+
+
+
+        });
+
+
+    }); // end of astore
+
+
+
+
+
+
 
   }
 
@@ -281,13 +336,14 @@ export default class Inspections extends Component{
 
                 }
                 console.log("going to start process");
-                console.log(nosync);
+                //console.log(nosync);
 
                 if(nosync){
                   KeepAwake.activate();
-                  this._interval = setInterval(() => { //TODO
-                    this.checkSync();
-                  }, 30000);
+                  this.checkSync();
+                  // this._interval = setInterval(() => { //TODO
+                  //   this.checkSync();
+                  // }, 30000);
 
                 }
 
@@ -421,10 +477,12 @@ export default class Inspections extends Component{
       else{
         // lets add some rooms first
 
-        this.props.navigator.showModal({
+        this.props.navigator.push({
             screen: "PropertyGround.AddRoomList",
             title: 'Add room list',
-            animationType: 'slide-up',
+            //animationType: 'slide-up',
+            animated: true,
+            //animationType: 'fade',
             navigatorStyle:{
               navBarTextColor: 'white',
               navBarButtonColor: 'white',
@@ -535,7 +593,7 @@ export default class Inspections extends Component{
 
     }
 
-    console.log(sync);
+    //console.log(sync);
 
     return sync;
 
@@ -589,11 +647,91 @@ export default class Inspections extends Component{
 
   }
 
+  //open delete
+  openDelete = (property) => {
+    //console.log(property);
+
+    if( this.findSyncStatus(property.property_id) == 2){
+      //cannot delete still syncing
+
+      Alert.alert(
+          'Delete Property',
+          'You cannot delete this property while syncing!',
+          [
+            {text: 'OK', onPress: () => {console.log('OK Pressed');} },
+          ],
+          { cancelable: false }
+      );
+
+    }
+    else{
+
+
+      Alert.alert(
+          'Delete Property',
+          'Do you want to delete this property?',
+          [
+            {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+            {text: 'OK', onPress: () => { this.deleteProperty(property.property_id); } },
+          ],
+          { cancelable: false }
+      );
+
+    }
+
+  }
+
+
+  //delete property
+  deleteProperty = (property_id) =>{
+
+
+    let master_properties = this.state.master_properties;
+    let properties = this.state.properties;
+
+
+
+    for(let i =0, l = master_properties.length; i < l ; i++){
+
+      if(property_id == master_properties[i].property_id ){
+
+        master_properties.splice(i,1);
+
+        AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(master_properties) , () => {
+
+          for(let j = 0, l = properties.length; j < l ; j++){
+
+            if(property_id == properties[j].property_id ){
+
+                properties.splice(j,1);
+
+                AsyncStorage.setItem(TableKeys.PROPERTY_INFO, JSON.stringify(properties) , () => {
+
+                  this.getProperties();
+
+                });
+                break;
+
+
+            }
+          }
+
+
+        });
+        break;
+
+
+      }
+
+    }
+
+  }
+
 
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)}>
+    <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)} onLongPress={()=>this.openDelete(item)}>
 
           <View style={styles.rowWrapper}>
 

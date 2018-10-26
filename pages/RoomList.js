@@ -58,12 +58,13 @@ export default class RoomList extends Component{
        id: 'refresh'
      }
    ],
-  //  leftButtons: [
-  //    {
-  //      title: 'Cancel',
-  //      id: 'cancel'
-  //    }
-  //  ],
+   leftButtons: [
+     {
+       //title: 'Back',
+       icon: require('../images/back-arrow.png'),
+       id: 'cancel'
+     }
+   ],
 
  };
 
@@ -101,6 +102,27 @@ export default class RoomList extends Component{
       if (event.id == 'refresh') {
 
         this.getData();
+
+      }
+      else if(event.id == 'cancel'){
+
+        this.props.navigator.resetTo({
+          screen: 'PropertyGround.Inspections',
+          title: 'Inspections',
+          animated: true,
+          animationType: 'fade',
+          navigatorStyle:{
+            navBarTextColor: 'white',
+            navBarButtonColor: 'white',
+            statusBarTextColorScheme: 'light',
+            navBarBackgroundColor: '#00BDDB',
+            navBarBlur: false,
+            screenBackgroundColor: '#FFFFFF',
+            navBarTransparent: false,
+          },
+          passProps: {
+          },
+        });
 
       }
 
