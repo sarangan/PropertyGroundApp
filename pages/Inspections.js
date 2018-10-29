@@ -18,6 +18,8 @@ import {
 } from 'react-native';
 
 import KeepAwake from 'react-native-keep-awake';
+import Swipeout from 'react-native-swipeout';
+var RNFS = require('react-native-fs');
 
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
@@ -66,6 +68,8 @@ export default class Inspections extends Component{
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
+
+
   }
 
 
@@ -689,11 +693,9 @@ export default class Inspections extends Component{
     let master_properties = this.state.master_properties;
     let properties = this.state.properties;
 
-
-
     for(let i =0, l = master_properties.length; i < l ; i++){
 
-      if(property_id == master_properties[i].property_id ){
+      if(property_id == master_properties[i].property_id  ){
 
         master_properties.splice(i,1);
 
@@ -705,9 +707,11 @@ export default class Inspections extends Component{
 
                 properties.splice(j,1);
 
+
                 AsyncStorage.setItem(TableKeys.PROPERTY_INFO, JSON.stringify(properties) , () => {
 
                   this.getProperties();
+                  this.clearStore(property_id);
 
                 });
                 break;
@@ -720,7 +724,6 @@ export default class Inspections extends Component{
         });
         break;
 
-
       }
 
     }
@@ -728,8 +731,154 @@ export default class Inspections extends Component{
   }
 
 
+  //delete other items
+  clearStore = (property_id) =>{
+
+    //photos delete
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      let property_photos = photos[property_id];
+
+      for(let master_photo in property_photos){
+
+        for(let item_photo in property_photos[master_photo] ){
+
+          for(let i =0, l = property_photos[master_photo][item_photo].length; i < l ; i++ ){
+
+            if(property_photos[master_photo][item_photo][i].img_url){
+              this.deleteImageFile(property_photos[master_photo][item_photo][i].img_url);
+            }
+
+          }
+
+        }
+
+      }
+
+      delete photos[property_id];
+
+      AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(photos), () => {
+        console.log('saved photos');
+        console.log(photos);
+      });
+
+    });
+
+    //sign delete
+    AsyncStorage.getItem(TableKeys.SIGNATURES, (err, result) => {
+      let signatures = JSON.parse(result) || {};
+
+      delete signatures[property_id];
+
+      AsyncStorage.setItem(TableKeys.SIGNATURES, JSON.stringify(signatures), () => {
+        console.log('saved sign');
+      });
+
+    });
+
+
+    //meter delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+
+      let property_meter_link = JSON.parse(result) || {};
+      delete property_meter_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_METER_LINK, JSON.stringify(property_meter_link), () => {
+        console.log('saved meters');
+      });
+
+    });
+
+    //general con delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
+
+      let property_general_condition_link = JSON.parse(result) || {};
+      delete property_general_condition_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, JSON.stringify(property_general_condition_link), () => {
+        console.log('saved property general');
+      });
+
+    });
+
+    //master item delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, result) => {
+      let property_masteritem_link = JSON.parse(result) || {};
+
+      for(let i = 0, l = property_masteritem_link[property_id].length; i < l; i++){
+        this.deleteSubItem(property_masteritem_link[property_id].prop_master_id);
+      }
+
+      delete property_masteritem_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_MASTERITEM_LINK, JSON.stringify(property_masteritem_link), () => {
+        console.log('saved master');
+      });
+
+    });
+
+
+  }
+
+  //delete sub items
+  deleteSubItem(prop_master_id){
+
+    AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
+      let property_subitem_link = JSON.parse(result) || {};
+
+      delete property_subitem_link[prop_master_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(property_subitem_link), () => {
+        console.log('property sub table stored');
+      });
+
+
+    });
+
+  }
+
+  // delete images
+  deleteImageFile(filename) {
+
+    const filepath = RNFS.DocumentDirectoryPath + '/' + filename;
+
+    RNFS.exists(filepath)
+    .then( (result) => {
+        console.log("file exists: ", result);
+
+        if(result){
+          return RNFS.unlink(filepath)
+            .then(() => {
+              console.log('FILE DELETED');
+            })
+            // `unlink` will throw an error, if the item to unlink does not exist
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
+
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }
+
+
 
   _renderItem = ({item}) => (
+
+
+    <Swipeout right= {
+      [{
+        text: 'Delete',
+        backgroundColor: 'red',
+        underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+        onPress: () => { this.openDelete(item) }
+      }]
+     }
+            autoClose = 'true'
+            backgroundColor= 'transparent'>
 
     <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)} onLongPress={()=>this.openDelete(item)}>
 
@@ -785,6 +934,8 @@ export default class Inspections extends Component{
           </View>
 
     </TouchableHighlight>
+
+    </Swipeout>
   );
 
   render(){

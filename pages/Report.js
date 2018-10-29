@@ -881,7 +881,7 @@ export default class Report extends Component{
             )}
 
             >
-            <View style={{ alignItems: 'flex-start', flex: 1 }}>
+            <View style={{ flex: 1 }}>
 
 
               {this.renderList()}

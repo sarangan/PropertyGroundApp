@@ -699,7 +699,7 @@ export default class NewProperty extends Component{
 
     return(
       <View style={styles.fill}>
-
+        
         <ScrollView>
           <Text style={styles.divTxt}>Property details</Text>
 

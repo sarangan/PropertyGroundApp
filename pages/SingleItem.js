@@ -219,6 +219,24 @@ export default class SingleItem extends Component{
 
   }
 
+  handledeselect =(item)=>{
+
+    let items = this.state.coditions;
+    for(let i=0, l = items.length; i < l; i++){
+        items[i].selected = false;
+        if(items[i].text == item.text ){
+          items[i].selected = false;
+          this.setState({
+            option: ''
+          });
+        }
+    }
+    this.setState({
+      coditions: items
+    });
+
+  }
+
   handleSwitchChange =(value)=>{
     console.log(value);
 
@@ -613,7 +631,7 @@ export default class SingleItem extends Component{
             {
               this.state.coditions.map((con,i)=>{
                 return (
-                    <TouchableHighlight underlayColor="transparent" onPress={()=>this.handleCondition(con)} key={i+1}
+                    <TouchableHighlight underlayColor="transparent" onPress={()=>this.handleCondition(con)} onLongPress={()=>this.handledeselect(con)} key={i+1}
                       style={{padding: 7, borderBottomColor: '#9AD8DA', borderBottomWidth: (con.selected? 5: 0), backgroundColor: (con.selected)?'#EBF7F9':'#ffffff' }}>
                       <View style={styles.conditionImgWrapper}>
                         <Image source={con.url} style={styles.condition_img}/>
