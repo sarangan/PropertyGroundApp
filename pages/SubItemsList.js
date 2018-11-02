@@ -319,6 +319,24 @@ export default class SubItemsList extends Component{
           parent_id: this.state.prop_master_id,
           type : 'SUB', //SUB ITEM METER GENERAL,
         },
+        navigatorStyle : {
+      	  navBarTextColor: 'white',
+      	  navBarButtonColor: 'white',
+          navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+          screenBackgroundColor: '#FFFFFF',
+
+          navBarTranslucent: false,
+          navBarTransparent: false,
+          drawUnderNavBar: false,
+          navBarBlur: false,
+          navBarHidden: false,
+
+          orientation: 'portrait',
+          statusBarTextColorScheme: 'light',
+          statusBarTextColorSchemeSingleScreen: 'light',
+          statusBarHideWithNavBar: false,
+          statusBarHidden: false,
+        }
       });
     }
 

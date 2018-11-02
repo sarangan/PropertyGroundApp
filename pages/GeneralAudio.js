@@ -19,7 +19,8 @@ import {
   AsyncStorage,
   Switch,
   Slider,
-  Button
+  Button,
+  Platform
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -68,7 +69,8 @@ export default class GeneralAudio extends Component{
       error: null,
       audios: [],
       filename : helper.generateUid() + '.mp4',
-      audioPath : ''
+      audioPath : '',
+      platform: 'ios'
     };
 
   }
@@ -101,6 +103,9 @@ export default class GeneralAudio extends Component{
 
    componentDidMount(){
       this.getDetails(); //get all the related audios
+      this.setState({
+        platform: Platform.OS
+      });
    }
 
    //get the whichever item details

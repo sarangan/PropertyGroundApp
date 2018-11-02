@@ -18,7 +18,8 @@ import {
   AsyncStorage,
   FlatList,
   Switch,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -71,6 +72,7 @@ export default class SingleItem extends Component{
       isCamera: false,
       canSelect: false,
       selected: [],
+      platform: 'ios'
     };
 
     //this.closeCamera = this.closeCamera.bind(this);
@@ -99,6 +101,10 @@ export default class SingleItem extends Component{
 
     this.getDetails();
     MessageBarManager.registerMessageBar(this.refs.alert);
+
+    this.setState({
+      platform: Platform.OS
+    });
 
   }
 
@@ -573,10 +579,21 @@ export default class SingleItem extends Component{
   renderEmptyData = () =>{
     return(
       <View style={{ flex: 1, width: SCREENWIDTH,  alignContent:'center', alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }} >
-        <Image style={{ width: 80, height: 80, marginTop: SCREENHEIGHT / 3 }} source={require('../images/nodata.png')} />
+        <Image style={{ width: 80, height: 80, ...Platform.select({
+          android: {
+            marginTop: 60,
+            marginBottom: 60
+          },
+          ios:{
+            marginTop: SCREENHEIGHT / 3
+          }
+        })
+         }} source={require('../images/nodata.png')} />
       </View>
     );
   }
+
+
 
   _renderItem = ({item}) => (
 
@@ -584,7 +601,7 @@ export default class SingleItem extends Component{
       onLongPress={()=>this.makeItSelect(item)}>
         <View style={styles.rowContainer}>
            <Simage
-            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
+            source={ this.state.platform == 'ios' ?  RNFS.DocumentDirectoryPath + '/' + item.img_url :  item.img_url }
             style={styles.gridImg}
           >
             {this.getSelectImage(item)}
@@ -617,98 +634,200 @@ export default class SingleItem extends Component{
           );
   }
 
+  renderIos = () =>{
+    return(
+      <KeyboardAvoidingView behavior="position">
+
+      <ScrollView>
+        <Text style={styles.divTxt}>Condition</Text>
+
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingTop: 15, paddingBottom: 15}}>
+          {
+            this.state.coditions.map((con,i)=>{
+              return (
+                  <TouchableHighlight underlayColor="transparent" onPress={()=>this.handleCondition(con)} onLongPress={()=>this.handledeselect(con)} key={i+1}
+                    style={{padding: 7, borderBottomColor: '#9AD8DA', borderBottomWidth: (con.selected? 5: 0), backgroundColor: (con.selected)?'#EBF7F9':'#ffffff' }}>
+                    <View style={styles.conditionImgWrapper}>
+                      <Image source={con.url} style={styles.condition_img}/>
+                      <Text style={{color: '#475566', fontWeight: '700', }}>{con.text}</Text>
+                    </View>
+                  </TouchableHighlight>
+                )
+            })
+
+          }
+
+        </View>
+
+        <Text style={styles.divTxt}>Need maintenance?</Text>
+
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
+            <Text style={{color: '#A9ACBC'}}>Need maintenance</Text>
+          <Switch
+            onValueChange={(value) => this.handleSwitchChange(value)}
+            value={this.state.description } />
+        </View>
+
+        <Text style={styles.divTxt}>Comment</Text>
+
+        <TextInput
+          style={[styles.txtInput, {height: 100}]}
+          onChangeText={(text) => this.handleTextChange(text) }
+          placeholder="Any comments?"
+          placeholderTextColor="#A9ACBC"
+          multiline = {true}
+          numberOfLines = {7}
+          value={this.state.comment}
+          underlineColorAndroid='transparent'
+        />
+
+        <View style={styles.photoDivTxt}>
+          <Text style={styles.photoTxt}>Photos</Text>
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.getPhotosFromStore()} >
+            <Image style={{width: 20, height: 20, resizeMode: 'contain', paddingLeft: 10, paddingRight: 10}} source={require('../images/reload.png')} />
+          </TouchableHighlight>
+
+          {!this.state.canSelect &&
+            <Text style={styles.photoTxt} onPress={()=>this.selectImage()}>Select</Text>
+          }
+          {this.state.canSelect &&
+            <Text style={styles.photoTxt} onPress={()=>this.cancelSelect()}>Cancel</Text>
+          }
+          {this.state.canSelect &&
+            <TouchableHighlight onPress={()=>this.deletePhoto()} underlayColor="transparent">
+            <Image style={{width: 20, height: 20, resizeMode: 'contain'}} source={require('../images/delete.png')} />
+            </TouchableHighlight>
+          }
+
+
+        </View>
+
+        {this.getPhotos()}
+
+      </ScrollView>
+
+
+      {this.state.loading &&
+        <View style={styles.overlayLoading}>
+          <ActivityIndicator animating  size='large' />
+        </View>
+      }
+
+      <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
+        <Image
+          source={require('../images/gen_camera.png')}
+          style = {styles.genIcons}
+        />
+      </TouchableHighlight>
+
+      <MessageBarAlert ref='alert' />
+
+      </KeyboardAvoidingView>
+    );
+  }
+
+  renderAndroid = () =>{
+    return(
+      <View>
+
+      <ScrollView>
+        <Text style={styles.divTxt}>Condition</Text>
+
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingTop: 15, paddingBottom: 15}}>
+          {
+            this.state.coditions.map((con,i)=>{
+              return (
+                  <TouchableHighlight underlayColor="transparent" onPress={()=>this.handleCondition(con)} onLongPress={()=>this.handledeselect(con)} key={i+1}
+                    style={{padding: 7, borderBottomColor: '#9AD8DA', borderBottomWidth: (con.selected? 5: 0), backgroundColor: (con.selected)?'#EBF7F9':'#ffffff' }}>
+                    <View style={styles.conditionImgWrapper}>
+                      <Image source={con.url} style={styles.condition_img}/>
+                      <Text style={{color: '#475566', fontWeight: '700', }}>{con.text}</Text>
+                    </View>
+                  </TouchableHighlight>
+                )
+            })
+
+          }
+
+        </View>
+
+        <Text style={styles.divTxt}>Need maintenance?</Text>
+
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
+            <Text style={{color: '#A9ACBC'}}>Need maintenance</Text>
+          <Switch
+            onValueChange={(value) => this.handleSwitchChange(value)}
+            value={this.state.description } />
+        </View>
+
+        <Text style={styles.divTxt}>Comment</Text>
+
+        <TextInput
+          style={[styles.txtInput, {height: 100}]}
+          onChangeText={(text) => this.handleTextChange(text) }
+          placeholder="Any comments?"
+          placeholderTextColor="#A9ACBC"
+          multiline = {true}
+          numberOfLines = {7}
+          value={this.state.comment}
+          underlineColorAndroid='transparent'
+        />
+
+        <View style={styles.photoDivTxt}>
+          <Text style={styles.photoTxt}>Photos</Text>
+          <TouchableHighlight underlayColor="transparent" onPress={()=>this.getPhotosFromStore()} >
+            <Image style={{width: 20, height: 20, resizeMode: 'contain', paddingLeft: 10, paddingRight: 10}} source={require('../images/reload.png')} />
+          </TouchableHighlight>
+
+          {!this.state.canSelect &&
+            <Text style={styles.photoTxt} onPress={()=>this.selectImage()}>Select</Text>
+          }
+          {this.state.canSelect &&
+            <Text style={styles.photoTxt} onPress={()=>this.cancelSelect()}>Cancel</Text>
+          }
+          {this.state.canSelect &&
+            <TouchableHighlight onPress={()=>this.deletePhoto()} underlayColor="transparent">
+            <Image style={{width: 20, height: 20, resizeMode: 'contain'}} source={require('../images/delete.png')} />
+            </TouchableHighlight>
+          }
+
+
+        </View>
+
+        {this.getPhotos()}
+
+      </ScrollView>
+
+
+      {this.state.loading &&
+        <View style={styles.overlayLoading}>
+          <ActivityIndicator animating  size='large' />
+        </View>
+      }
+
+      <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
+        <Image
+          source={require('../images/gen_camera.png')}
+          style = {styles.genIcons}
+        />
+      </TouchableHighlight>
+
+      <MessageBarAlert ref='alert' />
+
+      </View>
+    );
+  }
+
   renderFormx = () =>{
     return(
 
       <View style={styles.fill}>
-
-        <KeyboardAvoidingView behavior="position">
-
-        <ScrollView>
-          <Text style={styles.divTxt}>Condition</Text>
-
-          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingTop: 15, paddingBottom: 15}}>
-            {
-              this.state.coditions.map((con,i)=>{
-                return (
-                    <TouchableHighlight underlayColor="transparent" onPress={()=>this.handleCondition(con)} onLongPress={()=>this.handledeselect(con)} key={i+1}
-                      style={{padding: 7, borderBottomColor: '#9AD8DA', borderBottomWidth: (con.selected? 5: 0), backgroundColor: (con.selected)?'#EBF7F9':'#ffffff' }}>
-                      <View style={styles.conditionImgWrapper}>
-                        <Image source={con.url} style={styles.condition_img}/>
-                        <Text style={{color: '#475566', fontWeight: '700', }}>{con.text}</Text>
-                      </View>
-                    </TouchableHighlight>
-                  )
-              })
-
-            }
-
-          </View>
-
-          <Text style={styles.divTxt}>Need maintenance?</Text>
-
-          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
-              <Text style={{color: '#A9ACBC'}}>Need maintenance</Text>
-            <Switch
-              onValueChange={(value) => this.handleSwitchChange(value)}
-              value={this.state.description } />
-          </View>
-
-          <Text style={styles.divTxt}>Comment</Text>
-
-          <TextInput
-            style={[styles.txtInput, {height: 100}]}
-            onChangeText={(text) => this.handleTextChange(text) }
-            placeholder="Any comments?"
-            placeholderTextColor="#A9ACBC"
-            multiline = {true}
-            numberOfLines = {7}
-            value={this.state.comment}
-            underlineColorAndroid='transparent'
-          />
-
-          <View style={styles.photoDivTxt}>
-            <Text style={styles.photoTxt}>Photos</Text>
-            <TouchableHighlight underlayColor="transparent" onPress={()=>this.getPhotosFromStore()} >
-              <Image style={{width: 20, height: 20, resizeMode: 'contain', paddingLeft: 10, paddingRight: 10}} source={require('../images/reload.png')} />
-            </TouchableHighlight>
-
-            {!this.state.canSelect &&
-              <Text style={styles.photoTxt} onPress={()=>this.selectImage()}>Select</Text>
-            }
-            {this.state.canSelect &&
-              <Text style={styles.photoTxt} onPress={()=>this.cancelSelect()}>Cancel</Text>
-            }
-            {this.state.canSelect &&
-              <TouchableHighlight onPress={()=>this.deletePhoto()} underlayColor="transparent">
-              <Image style={{width: 20, height: 20, resizeMode: 'contain'}} source={require('../images/delete.png')} />
-              </TouchableHighlight>
-            }
-
-
-          </View>
-
-          {this.getPhotos()}
-
-        </ScrollView>
-
-
-        {this.state.loading &&
-          <View style={styles.overlayLoading}>
-            <ActivityIndicator animating  size='large' />
-          </View>
-        }
-
-        <TouchableHighlight style={styles.roundBox} underlayColor="transparent" onPress={()=>this.openCamera()}>
-          <Image
-            source={require('../images/gen_camera.png')}
-            style = {styles.genIcons}
-          />
-        </TouchableHighlight>
-
-        <MessageBarAlert ref='alert' />
-
-        </KeyboardAvoidingView>
+          {this.state.platform == 'ios' &&
+            this.renderIos()
+          }
+          {this.state.platform == 'android' &&
+            this.renderAndroid()
+          }
       </View>
 
     );
@@ -847,6 +966,13 @@ const styles = StyleSheet.create({
    //flexWrap: 'wrap',
    alignContent: 'flex-start',
    alignSelf: 'flex-start',
+   ...Platform.select({
+     android: {
+       paddingBottom: 60
+     },
+   }),
+
+
   },
   rowContainer: {
      justifyContent: 'center',

@@ -17,7 +17,8 @@ import {
   ScrollView,
   Animated,
   Easing,
-  AsyncStorage
+  AsyncStorage,
+  Platform
 } from 'react-native';
 
 import { RNCamera } from 'react-native-camera';
@@ -48,7 +49,8 @@ export default class PGCamera extends Component{
       startCapture: false,
       lastestPhotos: [],
       showPhotos: 5,
-      quality: 'LOW'
+      quality: 'LOW',
+      platform: 'ios'
     };
 
   }
@@ -66,6 +68,10 @@ export default class PGCamera extends Component{
         });
       }
 
+    });
+
+    this.setState({
+      platform: Platform.OS
     });
 
   }
@@ -101,6 +107,28 @@ export default class PGCamera extends Component{
 
   }
 
+  addStatePhoto = (filename) =>{
+
+    // moved to document dir
+    this.setState({
+      imagePath: filename, //data.uri,
+      spinValue: new Animated.Value(0),
+      startCapture: false
+    }, ()=>{
+      // call the method TODO
+
+      this.props.capture(this.state.imagePath);
+
+      let lastestPhotos = this.state.lastestPhotos;
+      lastestPhotos.push(this.state.imagePath);
+      this.setState({
+        lastestPhotos
+      });
+
+    });
+
+  }
+
 
   snapPhoto = async function(){
 
@@ -116,34 +144,26 @@ export default class PGCamera extends Component{
 
       let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
 
-      RNFS.moveFile(data.uri ,  docPath).then(()=>{
+      if(this.state.platform == 'android'){
 
-          // moved to document dir
-          this.setState({
-            imagePath: filename, //data.uri,
-            spinValue: new Animated.Value(0),
-            startCapture: false
-          }, ()=>{
-            // call the method TODO
+        console.log(data.uri);
+        this.addStatePhoto(data.uri);
 
+      }
+      else{
 
+        RNFS.moveFile(data.uri ,  docPath).then(()=>{
 
-            this.props.capture(this.state.imagePath);
+          this.addStatePhoto(filename);
 
-            let lastestPhotos = this.state.lastestPhotos;
-            lastestPhotos.push(this.state.imagePath);
-            this.setState({
-              lastestPhotos
-            });
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
 
-          });
+      }
 
 
-
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
 
 
 
@@ -242,17 +262,35 @@ export default class PGCamera extends Component{
 
           let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
 
-          RNFS.copyFile(img.path ,  docPath).then(()=>{
+          if(this.state.platform == 'android'){
 
-            //this.props.capture(img.path);
-            this.props.capture(filename);
+            this.props.capture(img.path);
             let lastestPhotos = this.state.lastestPhotos;
-            lastestPhotos.push(filename);
+            lastestPhotos.push(img.path);
             this.setState({
               lastestPhotos
             });
 
-          });
+          }
+          else{
+
+            RNFS.copyFile(img.path ,  docPath).then(()=>{
+
+              //this.props.capture(img.path);
+              this.props.capture(filename);
+              let lastestPhotos = this.state.lastestPhotos;
+              lastestPhotos.push(filename);
+              this.setState({
+                lastestPhotos
+              });
+
+            });
+
+          }
+
+
+
+
 
         });
       }

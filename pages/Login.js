@@ -19,7 +19,8 @@ import {
   ScrollView,
   Alert,
   Linking,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -41,8 +42,17 @@ export default class Login extends Component{
       username: '',
       password: '',
       isLogin: false,
-      isSending: false
+      isSending: false,
+      platform: 'ios'
     };
+
+  }
+
+  componentDidMount() {
+
+     this.setState({
+       platform: Platform.OS
+     });
 
   }
 
@@ -285,53 +295,124 @@ export default class Login extends Component{
 
   }
 
-  render(){
+  renderIos = () =>{
+
     return(
       <KeyboardAvoidingView
       behavior="position">
-      <ScrollView>
-      <View style={styles.fill}>
+          <ScrollView>
+          <View style={styles.fill}>
 
-        <Image source={require('../images/pg_logo.png')} style={styles.pg_logo}/>
-        <Text style={styles.inventoryTxt}>INVENTORY</Text>
-        <Text style={styles.helpTxt}>PropertyGround Login</Text>
-        <TextInput
-          style={styles.txtInput}
-          onChangeText={(text) => this.setState({username:text})}
-          placeholder="Enter your email"
-          placeholderTextColor="#757575"
-          clearButtonMode="while-editing"
-          keyboardType="email-address"
-          underlineColorAndroid='transparent'
-        />
-        <TextInput
-          style={styles.txtInput}
-          onChangeText={(text) => this.setState({password:text})}
-          placeholder="Enter password"
-          placeholderTextColor="#757575"
-          clearButtonMode="while-editing"
-          secureTextEntry= {true}
-          underlineColorAndroid='transparent'
-        />
-        <TouchableHighlight  underlayColor='transparent' style={styles.loginWrapper} onPress={this.doLogin}>
-          <Text style={styles.loginBtn}>Login</Text>
-        </TouchableHighlight>
+            <Image source={require('../images/pg_logo.png')} style={styles.pg_logo}/>
+            <Text style={styles.inventoryTxt}>INVENTORY</Text>
+            <Text style={styles.helpTxt}>PropertyGround Login</Text>
+            <TextInput
+              style={styles.txtInput}
+              onChangeText={(text) => this.setState({username:text})}
+              placeholder="Enter your email"
+              placeholderTextColor="#757575"
+              clearButtonMode="while-editing"
+              keyboardType="email-address"
+              underlineColorAndroid='transparent'
+            />
+            <TextInput
+              style={styles.txtInput}
+              onChangeText={(text) => this.setState({password:text})}
+              placeholder="Enter password"
+              placeholderTextColor="#757575"
+              clearButtonMode="while-editing"
+              secureTextEntry= {true}
+              underlineColorAndroid='transparent'
+            />
+            <TouchableHighlight  underlayColor='transparent' style={styles.loginWrapper} onPress={this.doLogin}>
+              <Text style={styles.loginBtn}>Login</Text>
+            </TouchableHighlight>
 
-        {this.state.isSending &&
-          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: SCREENWIDTH, margin: 10 }} >
-            <ActivityIndicator animating  size='small' />
+            {this.state.isSending &&
+              <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: SCREENWIDTH, margin: 10 }} >
+                <ActivityIndicator animating  size='small' />
+              </View>
+            }
+
+
+            <View style={styles.otherActionsBtnWrapper}>
+              <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('SIGNUP') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
+              <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('FORGOTPASSWORD') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
+            </View>
+
           </View>
+          </ScrollView>
+      </KeyboardAvoidingView>
+    );
+
+  }
+
+
+  renderAndroid = () =>{
+
+    return(
+          <ScrollView>
+          <View style={styles.fill}>
+            <Image source={require('../images/pg_logo.png')} style={styles.pg_logo}/>
+            <Text style={styles.inventoryTxt}>INVENTORY</Text>
+            <Text style={styles.helpTxt}>PropertyGround Login</Text>
+            <TextInput
+              style={styles.txtInput}
+              onChangeText={(text) => this.setState({username:text})}
+              placeholder="Enter your email"
+              placeholderTextColor="#757575"
+              clearButtonMode="while-editing"
+              keyboardType="email-address"
+              underlineColorAndroid='transparent'
+            />
+            <TextInput
+              style={styles.txtInput}
+              onChangeText={(text) => this.setState({password:text})}
+              placeholder="Enter password"
+              placeholderTextColor="#757575"
+              clearButtonMode="while-editing"
+              secureTextEntry= {true}
+              underlineColorAndroid='transparent'
+            />
+            <TouchableHighlight  underlayColor='transparent' style={styles.loginWrapper} onPress={this.doLogin}>
+              <Text style={styles.loginBtn}>Login</Text>
+            </TouchableHighlight>
+
+            {this.state.isSending &&
+              <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: SCREENWIDTH, margin: 10 }} >
+                <ActivityIndicator animating  size='small' />
+              </View>
+            }
+
+
+            <View style={styles.otherActionsBtnWrapper}>
+              <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('SIGNUP') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
+              <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('FORGOTPASSWORD') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
+            </View>
+
+          </View>
+          </ScrollView>
+    );
+
+  }
+
+
+  render(){
+
+
+    return(
+
+      <View>
+        {this.state.platform == 'ios' &&
+          this.renderIos()
+        }
+        {this.state.platform == 'android' &&
+          this.renderAndroid()
         }
 
-
-        <View style={styles.otherActionsBtnWrapper}>
-          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('SIGNUP') }><Text style={styles.otherActionsBtn}>Sign up</Text></TouchableHighlight>
-          <TouchableHighlight  underlayColor='transparent' onPress={()=>this.openPgWeb('FORGOTPASSWORD') }><Text style={styles.otherActionsBtn}>Forgot password</Text></TouchableHighlight>
-        </View>
-
       </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+
     );
   }
 }

@@ -1,8 +1,7 @@
 /**
- * Sanppar React Native App
- * https://sph.com.sg
+ * PropertyGround React Native App
  * @sara
- * Inspections page
+ * Add ri page
  */
 import React, {Component} from 'react';
 import {
@@ -88,14 +87,23 @@ export default class AddRoomList extends Component{
           title: 'Inspections',
           animated: true,
           animationType: 'fade',
-          navigatorStyle:{
-            navBarTextColor: 'white',
-            navBarButtonColor: 'white',
-            statusBarTextColorScheme: 'light',
-            navBarBackgroundColor: '#00BDDB',
-            navBarBlur: false,
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
             screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
             navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
           },
           passProps: {
           },
@@ -284,6 +292,24 @@ export default class AddRoomList extends Component{
                       sync: sync,
                       locked: lock
                     },
+                    navigatorStyle : {
+                  	  navBarTextColor: 'white',
+                  	  navBarButtonColor: 'white',
+                      navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+                      screenBackgroundColor: '#FFFFFF',
+
+                      navBarTranslucent: false,
+                      navBarTransparent: false,
+                      drawUnderNavBar: false,
+                      navBarBlur: false,
+                      navBarHidden: false,
+
+                      orientation: 'portrait',
+                      statusBarTextColorScheme: 'light',
+                      statusBarTextColorSchemeSingleScreen: 'light',
+                      statusBarHideWithNavBar: false,
+                      statusBarHidden: false,
+                    }
                   });
 
 

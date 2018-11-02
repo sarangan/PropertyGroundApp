@@ -108,7 +108,25 @@ export default class Inspections extends Component{
       animated: true,
       //animationType: 'fade',
        backButtonTitle: "Back",
-      passProps: {}
+      passProps: {},
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      }
     });
   }
 
@@ -577,6 +595,24 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          }
         });
 
       }
@@ -596,6 +632,24 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          }
         });
 
 
@@ -609,14 +663,23 @@ export default class Inspections extends Component{
             //animationType: 'slide-up',
             animated: true,
             //animationType: 'fade',
-            navigatorStyle:{
-              navBarTextColor: 'white',
-              navBarButtonColor: 'white',
-              statusBarTextColorScheme: 'light',
-              navBarBackgroundColor: '#00BDDB',
-              navBarBlur: false,
+            navigatorStyle : {
+          	  navBarTextColor: 'white',
+          	  navBarButtonColor: 'white',
+              navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
               screenBackgroundColor: '#FFFFFF',
+
+              navBarTranslucent: false,
               navBarTransparent: false,
+              drawUnderNavBar: false,
+              navBarBlur: false,
+              navBarHidden: false,
+
+              orientation: 'portrait',
+              statusBarTextColorScheme: 'light',
+              statusBarTextColorSchemeSingleScreen: 'light',
+              statusBarHideWithNavBar: false,
+              statusBarHidden: false,
             },
             passProps: {
               property_id: item.property_id
