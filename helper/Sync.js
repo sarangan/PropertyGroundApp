@@ -54,7 +54,7 @@ export default class Sync {
 
         this.postData(formData, 'syncdata').then( response =>{
 
-          //console.log('junk json uploaded');
+          console.log('junk json uploaded');
 
        });
 
@@ -89,6 +89,8 @@ export default class Sync {
                   formData.append("data", JSON.stringify(dummy_properties) );
                   formData.append("table", TableKeys.PROPERTY_INFO);
 
+                  //this.update_property_info( i, properties, 4 ); // 4 means currently updating
+
                   this.postData(formData).then( response =>{
 
                     //console.log('Ending PROPERTY_INFO');
@@ -96,7 +98,7 @@ export default class Sync {
                     if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
 
                       // we got status 1, update the storage
-                      this.update_property_info( i, properties );
+                      this.update_property_info( i, properties, 2 );
 
                       if(image_url){
                         let formDataUpload = new FormData();
@@ -160,6 +162,7 @@ export default class Sync {
                            formData.append("mb_createdAt", sub_item_voice[i].mb_createdAt);
                            formData.append('voice', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_voice[i].file_name , type: 'video/mp4', name: 'voice.mp4'});
 
+                          // this.update_voice_item_link( i, sub_key, master_key, data, 4 );
 
                            this.postData(formData, 'uploadvoice').then( response =>{
 
@@ -167,7 +170,7 @@ export default class Sync {
 
                              if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                                 // we got status 1, update the storage
-                                this.update_voice_item_link( i, sub_key, master_key, data );
+                                this.update_voice_item_link( i, sub_key, master_key, data, 2 );
 
                              }
 
@@ -208,13 +211,15 @@ export default class Sync {
                  formData.append("data", JSON.stringify(signs));
                  formData.append("table", TableKeys.SIGNATURES);
 
+                 //this.update_signs( data, 4 );
+
                  this.postData(formData).then( response =>{
 
                    //console.log('Ending SIGNATURES');
 
                    if(response.hasOwnProperty('status') && response.status == 1 ){ // 1 and 0
                       // we got status 1, update the storage
-                      this.update_signs( data );
+                      this.update_signs( data, 2 );
                     }
 
                  });
@@ -275,6 +280,7 @@ export default class Sync {
                          formData.append("mb_createdAt", sub_item_photos[i].mb_createdAt );
                          formData.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + sub_item_photos[i].img_url , type: 'image/jpg', name: 'image.jpg'});
 
+                         //this.update_photos( i, sub_key, master_key, data, 4 );
 
                          this.postData(formData, 'uploadfile').then( response =>{
 
@@ -284,7 +290,7 @@ export default class Sync {
 
                            if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
                              // we got status 1, update the storage
-                             this.update_photos( i, sub_key, master_key, data );
+                             this.update_photos( i, sub_key, master_key, data, 2 );
                           }
 
                         });
@@ -526,7 +532,7 @@ export default class Sync {
 
     properties[index].sync = 3;
     //console.log('update PROPERTY');
-  //  console.log('Sync finished PROPERTY');
+   //  console.log('Sync finished PROPERTY');
     //console.log(properties[index]);
 
     await AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(properties) ); //TODO
@@ -911,7 +917,7 @@ export default class Sync {
               let properties = JSON.parse(value);
               for(let i =0, l = properties.length; i < l ; i++){
                 if(properties[i].property_id == this.property_id && properties[i].sync == 1){
-                  //console.log('re-check PROPERTY_INFO FAIL');
+                  console.log('re-check PROPERTY_INFO FAIL');
                   allSynced = false;
                 }
               }
@@ -926,7 +932,7 @@ export default class Sync {
                 for(let i = 0, l = master_data.length; i < l ; i++){
                   //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
+                    console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -948,7 +954,7 @@ export default class Sync {
                   if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
                     //console.log(sub_item_details[i]);
                       if(sub_items[i].sync == 1){
-                        //console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
+                        console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
                         allSynced = false;
                         break mainloop;
                       }
@@ -968,7 +974,7 @@ export default class Sync {
                 let general_data = data[this.property_id];
                 for(let i =0, l = general_data.length; i < l ; i++){
                   if(general_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
+                    console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -986,7 +992,7 @@ export default class Sync {
                 let meter_data = data[this.property_id];
                 for(let i =0, l = meter_data.length; i < l; i++){
                   if(meter_data[i].sync == 1){
-                    //console.log('re-check PROPERTY_METER_LINK FAIL');
+                    console.log('re-check PROPERTY_METER_LINK FAIL');
                     allSynced = false;
                     break;
                   }
@@ -1007,7 +1013,7 @@ export default class Sync {
                     if(feedback_data.hasOwnProperty(key)) {
                         if(feedback_data[key].sync == 1){
                           //console.log('feedback id ', feedback_data[key]);
-                          //console.log('re-check PROPERTY_FEEDBACK FAIL');
+                          console.log('re-check PROPERTY_FEEDBACK FAIL');
                           allSynced = false;
                           break;
                         }
@@ -1028,7 +1034,7 @@ export default class Sync {
                     if(feedback_data.hasOwnProperty(key)) {
 
                       if(feedback_data[key].sync == 1){
-                        //console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
+                        console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
                         allSynced = false;
                         break;
                       }
@@ -1059,7 +1065,7 @@ export default class Sync {
 
                         for(let i =0, l = sub_item_voice.length; i < l; i++){
                           if(sub_item_voice[i].sync == 1){
-                            //console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
+                            console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
                             allSynced = false;
                             break;
                           }
@@ -1081,7 +1087,7 @@ export default class Sync {
                 let signs = data[this.property_id];
 
                 if(signs.sync == 1){
-                  //console.log('re-check SIGNATURES FAIL');
+                  console.log('re-check SIGNATURES FAIL');
                   allSynced = false;
                 }
 
@@ -1111,7 +1117,7 @@ export default class Sync {
                         for(let i =0, l = sub_item_photos.length; i < l; i++){
                           if(sub_item_photos[i].sync == 1){
                             //console.log(sub_item_photos[i]);
-                            //console.log('re-check PHOTOS FAIL');
+                            console.log('re-check PHOTOS FAIL');
                             allSynced = false;
                             break;
                           }
@@ -1151,6 +1157,9 @@ export default class Sync {
 
               this.postData(formData, 'finishSync').then( response =>{
 
+                console.log('finsihed sync console man');
+                console.log(response);
+
                 if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
 
                   __properties[__index].sync = 3;
@@ -1182,9 +1191,9 @@ export default class Sync {
 
 
   //update proeprty info
-  async update_property_info(index, properties){
+  async update_property_info(index, properties, sync = 2){
 
-    properties[index].sync = 2;
+    properties[index].sync = sync;
     //console.log('update PROPERTY_INFO');
     //console.log(properties[index]);
 
@@ -1359,13 +1368,13 @@ export default class Sync {
   }
 
   //update voice item details
-  async update_voice_item_link( index, sub_key, master_key, data ){
+  async update_voice_item_link( index, sub_key, master_key, data, sync = 2 ){
 
     let property_voice = data[this.property_id];
     let master_item_voice =  property_voice[master_key];
     let sub_item_voice =  master_item_voice[sub_key];
 
-    sub_item_voice[index].sync = 2;
+    sub_item_voice[index].sync = sync;
 
     //console.log('updated PROPERTY_SUB_VOICE_GENERAL');
     //console.log(sub_item_voice[index]);
@@ -1375,10 +1384,10 @@ export default class Sync {
   }
 
   //update signs details
-  async update_signs(data){
+  async update_signs(data, sync = 2){
 
     let sign = data[this.property_id];
-    sign.sync = 2;
+    sign.sync = sync;
 
     //console.log('updated SIGNATURES');
 
@@ -1390,14 +1399,14 @@ export default class Sync {
 
 
   //update photos details this.update_photos( i, sub_key, master_key, data );
-  async update_photos(index, sub_key, master_key, data){
+  async update_photos(index, sub_key, master_key, data, sync = 2){
 
 
     let property_photos = data[this.property_id];
     let master_item_photos =  property_photos[master_key];
     let sub_item_photos =  master_item_photos[sub_key];
 
-    sub_item_photos[index].sync = 2;
+    sub_item_photos[index].sync = sync;
 
     //console.log('updated storage PHOTOS');
 
@@ -1452,7 +1461,7 @@ export default class Sync {
           let responseJson = await response.json();
           //console.log(endpoint);
            console.log('responseJson');
-           console.log(responseJson);
+           //console.log(responseJson);
            console.log('--------------------');
 
 
