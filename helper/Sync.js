@@ -1364,6 +1364,8 @@ export default class Sync {
 
         console.log('I AM GOING TO FINSIH THIS MAN');
         console.log(allSynced);
+        console.log(__properties[__index].sync);
+        console.log('ssssssss');
 
         if(allSynced){
 
@@ -1381,6 +1383,9 @@ export default class Sync {
 
               this.postData(formData, 'finishSync').then( response =>{
 
+                console.log('man man');
+                console.log(response);
+
                 if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
 
                   __properties[__index].sync = 3;
@@ -1388,6 +1393,12 @@ export default class Sync {
                     SyncActions.syncFinished(this.property_id);
                   });
 
+                }
+                else if(!response && allSynced ){
+                  __properties[__index].sync = 3;
+                  AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+                    SyncActions.syncFinished(this.property_id);
+                  });
                 }
 
               });
