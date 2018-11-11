@@ -21,7 +21,8 @@ import {
   Animated,
   Easing,
   Alert,
-  ScrollView
+  ScrollView,
+  Platform
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -33,6 +34,8 @@ import helper from '../helper/helper';
 import NumberControl from '../components/NumberControl';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import Prompt from 'react-native-prompt';
+import KeepAwake from 'react-native-keep-awake';
+
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 var RNFS = require('react-native-fs');
@@ -56,12 +59,13 @@ export default class RoomList extends Component{
        id: 'refresh'
      }
    ],
-  //  leftButtons: [
-  //    {
-  //      title: 'Cancel',
-  //      id: 'cancel'
-  //    }
-  //  ],
+   leftButtons: [
+     {
+       //title: 'Back',
+       icon: require('../images/back-arrow.png'),
+       id: 'cancel'
+     }
+   ],
 
  };
 
@@ -101,6 +105,36 @@ export default class RoomList extends Component{
         this.getData();
 
       }
+      else if(event.id == 'cancel'){
+
+        this.props.navigator.resetTo({
+          screen: 'PropertyGround.Inspections',
+          title: 'Inspections',
+          animated: true,
+          animationType: 'fade',
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          },
+          passProps: {
+          },
+        });
+
+      }
 
     }
   }
@@ -126,7 +160,25 @@ export default class RoomList extends Component{
       animated: true,
       //animationType: 'fade',
       backButtonTitle: "Back",
-      passProps: {property_id: this.state.property_id}
+      passProps: {property_id: this.state.property_id},
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      }
     });
   }
 
@@ -157,6 +209,14 @@ export default class RoomList extends Component{
 
       for(let i =0, l = master_properties.length; i < l ; i++){
         if(this.state.property_id == master_properties[i].property_id ){
+
+          if( master_properties[i].sync == 2){
+            KeepAwake.activate();
+          }
+          else{
+            KeepAwake.deactivate();
+          }
+
           this.setState({
             master_property: master_properties[i],
           });
@@ -194,6 +254,8 @@ export default class RoomList extends Component{
 
   //set the sync flag
   syncProperty = () =>{
+
+    KeepAwake.activate();
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
       console.log('get property details');
@@ -381,6 +443,24 @@ export default class RoomList extends Component{
         sync: this.props.sync,
         locked: this.props.locked
       },
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      }
     });
 
   }
@@ -699,6 +779,24 @@ export default class RoomList extends Component{
           property_id: this.state.property_id,
           property: this.state.property
         },
+        navigatorStyle : {
+      	  navBarTextColor: 'white',
+      	  navBarButtonColor: 'white',
+          navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+          screenBackgroundColor: '#FFFFFF',
+
+          navBarTranslucent: false,
+          navBarTransparent: false,
+          drawUnderNavBar: false,
+          navBarBlur: false,
+          navBarHidden: false,
+
+          orientation: 'portrait',
+          statusBarTextColorScheme: 'light',
+          statusBarTextColorSchemeSingleScreen: 'light',
+          statusBarHideWithNavBar: false,
+          statusBarHidden: false,
+        }
       });
 
     }
@@ -713,6 +811,24 @@ export default class RoomList extends Component{
         passProps: {
           property_id: this.state.property_id,
         },
+        navigatorStyle : {
+      	  navBarTextColor: 'white',
+      	  navBarButtonColor: 'white',
+          navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+          screenBackgroundColor: '#FFFFFF',
+
+          navBarTranslucent: false,
+          navBarTransparent: false,
+          drawUnderNavBar: false,
+          navBarBlur: false,
+          navBarHidden: false,
+
+          orientation: 'portrait',
+          statusBarTextColorScheme: 'light',
+          statusBarTextColorSchemeSingleScreen: 'light',
+          statusBarHideWithNavBar: false,
+          statusBarHidden: false,
+        }
       });
 
     }
@@ -729,6 +845,24 @@ export default class RoomList extends Component{
           master_id: item.prop_master_id,
           prop_master_name: item.name,
         },
+        navigatorStyle : {
+      	  navBarTextColor: 'white',
+      	  navBarButtonColor: 'white',
+          navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+          screenBackgroundColor: '#FFFFFF',
+
+          navBarTranslucent: false,
+          navBarTransparent: false,
+          drawUnderNavBar: false,
+          navBarBlur: false,
+          navBarHidden: false,
+
+          orientation: 'portrait',
+          statusBarTextColorScheme: 'light',
+          statusBarTextColorSchemeSingleScreen: 'light',
+          statusBarHideWithNavBar: false,
+          statusBarHidden: false,
+        }
       });
 
     }
@@ -746,6 +880,24 @@ export default class RoomList extends Component{
           parent_id: item.prop_master_id,
           type : 'ITEM', //SUB ITEM METER GENERAL,
         },
+        navigatorStyle : {
+      	  navBarTextColor: 'white',
+      	  navBarButtonColor: 'white',
+          navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+          screenBackgroundColor: '#FFFFFF',
+
+          navBarTranslucent: false,
+          navBarTransparent: false,
+          drawUnderNavBar: false,
+          navBarBlur: false,
+          navBarHidden: false,
+
+          orientation: 'portrait',
+          statusBarTextColorScheme: 'light',
+          statusBarTextColorSchemeSingleScreen: 'light',
+          statusBarHideWithNavBar: false,
+          statusBarHidden: false,
+        }
       });
 
     }
@@ -854,6 +1006,24 @@ export default class RoomList extends Component{
         property_id: this.state.property_id,
         prop_master_id: room_item.prop_master_id
       },
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      }
     });
   }
 
@@ -942,6 +1112,24 @@ export default class RoomList extends Component{
         property_id: this.state.property_id,
         type: sig
       },
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      }
     });
   }
 
@@ -1207,6 +1395,11 @@ const styles = StyleSheet.create({
     flex: 1,
     //justifyContent: 'center',
     flexDirection: 'column',
+    ...Platform.select({
+      android: {
+        paddingBottom: 60
+      },
+    }),
     //width: SCREENWIDTH
   },
   rowWrapper:{

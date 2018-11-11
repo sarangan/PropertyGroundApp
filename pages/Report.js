@@ -35,6 +35,8 @@ import Prompt from 'react-native-prompt';
 import SyncImg from '../components/SyncImg';
 import SingleReportItem from '../components/SingleReportItem';
 import SubItemsReportList from '../components/SubItemsReportList';
+import KeepAwake from 'react-native-keep-awake';
+
 var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
@@ -82,6 +84,14 @@ export default class Report extends Component{
     if(this.state.property_id){
       this.getData();
       this.getConditionsList();
+
+      if(this.state.sync == 2){
+        KeepAwake.activate();
+      }
+      else{
+        KeepAwake.deactivate();
+      }
+
     }
 
   }
@@ -178,6 +188,14 @@ export default class Report extends Component{
       return 0;
     }
 
+
+    if(sync == 2){
+      KeepAwake.activate();
+    }
+    else{
+      KeepAwake.deactivate();
+    }
+
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
       console.log('get property details');
       let properties = JSON.parse(result) || [];
@@ -189,6 +207,8 @@ export default class Report extends Component{
           let data_property = properties[i];
           data_property.sync =  sync; // 1 is is not yet sync  2 is sync start  3 is sync finished
           data_property.locked = this.state.locked == 1 ? 0 : 1 ; // 1 is locked  0 not locked
+
+
 
           properties[i] = data_property;
 
@@ -861,7 +881,7 @@ export default class Report extends Component{
             )}
 
             >
-            <View style={{ alignItems: 'flex-start', flex: 1 }}>
+            <View style={{ flex: 1 }}>
 
 
               {this.renderList()}

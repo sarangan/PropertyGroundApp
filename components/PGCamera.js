@@ -17,12 +17,15 @@ import {
   ScrollView,
   Animated,
   Easing,
+  AsyncStorage,
+  Platform
 } from 'react-native';
 
 import { RNCamera } from 'react-native-camera';
 
 import ImagePicker from 'react-native-image-crop-picker';
 import helper from '../helper/helper';
+import AppKeys from '../keys/appKeys';
 var RNFS = require('react-native-fs');
 
 const SCREENWIDTH = Dimensions.get('window').width;
@@ -45,8 +48,84 @@ export default class PGCamera extends Component{
       spinValue: new Animated.Value(0),
       startCapture: false,
       lastestPhotos: [],
-      showPhotos: 5
+      showPhotos: 5,
+      quality: 'LOW',
+      platform: 'ios'
     };
+
+  }
+
+  componentDidMount(){
+
+    AsyncStorage.getItem( AppKeys.CAMERA_SETTINGS, (err, result) => {
+      console.log(result);
+
+      result  = JSON.parse(result);
+
+      if(result !=null){
+        this.setState({
+          quality: result
+        });
+      }
+
+    });
+
+    this.setState({
+      platform: Platform.OS
+    });
+
+  }
+
+
+  getCameraQty = () =>{
+
+    let qty = 0.2;
+
+    switch (this.state.quality) {
+      case "HIGH":{
+        qty = 1;
+        break;
+      }
+      case "MEDIUM":{
+        qty = 0.5;
+        break;
+      }
+      case "LOW":{
+        qty = 0.2;
+        break;
+      }
+      default:{
+        qty = 0.5;
+        break;
+      }
+
+    }
+
+    console.log("quality ", qty );
+
+    return qty;
+
+  }
+
+  addStatePhoto = (filename) =>{
+
+    // moved to document dir
+    this.setState({
+      imagePath: filename, //data.uri,
+      spinValue: new Animated.Value(0),
+      startCapture: false
+    }, ()=>{
+      // call the method TODO
+
+      this.props.capture(this.state.imagePath);
+
+      let lastestPhotos = this.state.lastestPhotos;
+      lastestPhotos.push(this.state.imagePath);
+      this.setState({
+        lastestPhotos
+      });
+
+    });
 
   }
 
@@ -54,7 +133,7 @@ export default class PGCamera extends Component{
   snapPhoto = async function(){
 
     if(this.camera){
-      const options = {quality: 0.5 };
+      const options = {quality: this.getCameraQty() };
       const data = await this.camera.takePictureAsync(options);
       //console.log(RNFS.DocumentDirectoryPath);
       console.log(data);
@@ -65,34 +144,26 @@ export default class PGCamera extends Component{
 
       let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
 
-      RNFS.moveFile(data.uri ,  docPath).then(()=>{
+      if(this.state.platform == 'android'){
 
-          // moved to document dir
-          this.setState({
-            imagePath: filename, //data.uri,
-            spinValue: new Animated.Value(0),
-            startCapture: false
-          }, ()=>{
-            // call the method TODO
+        console.log(data.uri);
+        this.addStatePhoto(data.uri);
 
+      }
+      else{
 
+        RNFS.moveFile(data.uri ,  docPath).then(()=>{
 
-            this.props.capture(this.state.imagePath);
+          this.addStatePhoto(filename);
 
-            let lastestPhotos = this.state.lastestPhotos;
-            lastestPhotos.push(this.state.imagePath);
-            this.setState({
-              lastestPhotos
-            });
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
 
-          });
+      }
 
 
-
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
 
 
 
@@ -191,17 +262,35 @@ export default class PGCamera extends Component{
 
           let docPath = RNFS.DocumentDirectoryPath + '/' + filename;
 
-          RNFS.copyFile(img.path ,  docPath).then(()=>{
+          if(this.state.platform == 'android'){
 
-            //this.props.capture(img.path);
-            this.props.capture(filename);
+            this.props.capture(img.path);
             let lastestPhotos = this.state.lastestPhotos;
-            lastestPhotos.push(filename);
+            lastestPhotos.push(img.path);
             this.setState({
               lastestPhotos
             });
 
-          });
+          }
+          else{
+
+            RNFS.copyFile(img.path ,  docPath).then(()=>{
+
+              //this.props.capture(img.path);
+              this.props.capture(filename);
+              let lastestPhotos = this.state.lastestPhotos;
+              lastestPhotos.push(filename);
+              this.setState({
+                lastestPhotos
+              });
+
+            });
+
+          }
+
+
+
+
 
         });
       }

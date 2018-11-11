@@ -12,7 +12,8 @@ import {
   View,
   Dimensions,
   TextInput,
-  TouchableHighlight
+  TouchableHighlight,
+  Platform
 } from 'react-native';
 
 var SCREENWIDTH = Dimensions.get('window').width;
@@ -64,6 +65,7 @@ export default class NumberControl extends Component {
           placeholder="0"
           placeholderTextColor="#A9ACBC"
           ref={component => this._textInput = component}
+          underlineColorAndroid='transparent'
         />
         <TouchableHighlight underlayColor='#63afcb' onPress={()=>this.addNumber(1)} style={[styles.box, {marginLeft: 2,} ] }><Text style={styles.btnTxt}>+</Text></TouchableHighlight>
       </View>
@@ -93,6 +95,11 @@ const styles = StyleSheet.create({
   inNum:{
     height: 32,
     width: 32,
+    ...Platform.select({
+      android: {
+        paddingTop: 3
+      },
+    }),
     borderTopColor: '#e1e1e1',
     borderBottomColor: '#e1e1e1',
     borderLeftColor: '#e1e1e1',

@@ -18,7 +18,8 @@ import {
   AsyncStorage,
   FlatList,
   Switch,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -73,6 +74,7 @@ export default class MeterItem extends Component{
       isCamera: false,
       canSelect: false,
       selected: [],
+      platform: 'ios'
     };
 
   }
@@ -96,6 +98,9 @@ export default class MeterItem extends Component{
   componentDidMount(){
     this.getDetails();
     MessageBarManager.registerMessageBar(this.refs.alert);
+    this.setState({
+      platform: Platform.OS
+    });
 
   }
 
@@ -527,7 +532,16 @@ export default class MeterItem extends Component{
   renderEmptyData = () =>{
     return(
       <View style={{ flex: 1, width: SCREENWIDTH,  alignContent:'center', alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }} >
-        <Image style={{ width: 80, height: 80, marginTop: SCREENHEIGHT / 3 }} source={require('../images/nodata.png')} />
+        <Image style={{ width: 80, height: 80, ...Platform.select({
+          android: {
+            marginTop: 60,
+            marginBottom: 60
+          },
+          ios:{
+            marginTop: SCREENHEIGHT / 3
+          }
+        })
+      }} source={require('../images/nodata.png')} />
       </View>
     );
   }
@@ -538,7 +552,7 @@ export default class MeterItem extends Component{
       onLongPress={()=>this.makeItSelect(item)}>
         <View style={styles.rowContainer}>
            <Simage
-            source={RNFS.DocumentDirectoryPath + '/' + item.img_url}
+            source={ this.state.platform == 'ios' ?  RNFS.DocumentDirectoryPath + '/' + item.img_url :  item.img_url }
             style={styles.gridImg}
           >
             {this.getSelectImage(item)}

@@ -13,7 +13,8 @@ import {
   Animated,
   Picker,
   Dimensions,
-  TouchableHighlight
+  TouchableHighlight,
+  Keyboard
 } from 'react-native';
 
 var SCREENWIDTH = Dimensions.get('window').width;
@@ -27,15 +28,35 @@ export default class FilterPicker extends Component {
     this.state = {
       offSet: new Animated.Value(SCREENWIDTH),
     }
+  }
 
+  componentWillMount(){
+    Keyboard.dismiss();
   }
 
   componentDidMount(){
+
+    this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
+    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
+
      Animated.timing(this.state.offSet, {
         duration: 300,
         toValue: 0
-      }).start()
+      }).start();
   }
+
+  componentWillUnmount(){
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  }
+
+  _keyboardDidShow = () => {
+    this.closeModal();
+  }
+
+  _keyboardDidHide() {
+ }
+
 
   closeModal = () => {
     console.log('closing');

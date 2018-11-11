@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
   Text,
+  Button,
   Dimensions,
   TouchableHighlight,
   Image,
@@ -18,6 +19,8 @@ import {
 
 import helper from '../helper/helper';
 import AppKeys from '../keys/appKeys';
+
+import FilterPicker from "../components/FilterPicker";
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
@@ -30,7 +33,11 @@ export default class Settings extends Component{
     super(props);
 
     this.state = {
-      use_data : false
+      qualites : [ "HIGH", "MEDIUM", "LOW"],
+      use_data : false,
+      open_modal: false,
+      default_quality: 'LOW',
+      quality: 'LOW',
     };
 
   }
@@ -50,9 +57,26 @@ export default class Settings extends Component{
 
     });
 
+    AsyncStorage.getItem( AppKeys.CAMERA_SETTINGS, (err, result) => {
+      console.log(result);
+
+      result  = JSON.parse(result);
+
+      if(result !=null){
+        this.setState({
+          quality: result,
+          default_quality: result,
+        });
+      }
+
+    });
+
   }
 
   componentWillUnmount () {
+
+    AsyncStorage.setItem(AppKeys.CAMERA_SETTINGS, JSON.stringify( this.state.quality.toUpperCase() ), () => {
+    });
 
   }
 
@@ -73,13 +97,52 @@ export default class Settings extends Component{
     helper.syncTemplate();
   }
 
+  //close tag modal
+  closeReportTypeModal = () =>{
+
+    this.setState({ open_modal: false }, ()=>{
+
+    });
+  }
+
+  //cancel tag modal
+  cancelReportTypeModal = () =>{
+
+    this.setState({
+      open_modal: false,
+      quality: '',
+      default_quality: 'LOW'
+    });
+
+  }
+
+  //change spinner
+  changeReportType = (item, index) =>{
+
+    console.log(item);
+    if(item){
+      this.setState({
+          default_quality: item,
+          quality: item
+      });
+    }
+
+  }
+
+
   render(){
     return(
       <View style={styles.fill}>
 
       <Text style={styles.divTxt}>General</Text>
 
-      <Text style={{ padding: 10, backgroundColor: '#ffffff', }} onPress={()=>this.fetchOnlineSettings()}>Fetch Online Perferences</Text>
+      <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
+          <Button
+                onPress={()=>this.fetchOnlineSettings()}
+                title="Fetch Online Perferences"
+                color="#005792"
+          />
+      </View>
 
       <Text style={styles.divTxt}>Network Settings</Text>
 
@@ -89,6 +152,30 @@ export default class Settings extends Component{
           onValueChange={(value) => this.handleSwitchChange(value)}
           value={this.state.use_data} />
       </View>
+
+
+        <Text style={styles.divTxt}>{"Camera Quality - " + this.state.quality }</Text>
+
+        <View style={{flex: 0, flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <Button
+                  onPress={()=> {this.setState({ open_modal: true }); } }
+                  title={"Change quality"}
+                  color="#005792"
+            />
+        </View>
+
+
+        { this.state.open_modal &&
+          <View style={styles.modalWrapper}>
+            <FilterPicker
+              closeModal={this.closeReportTypeModal}
+              cancelModal={this.cancelReportTypeModal}
+              changeValue={this.changeReportType}
+              current_value={this.state.quality}
+              data ={this.state.qualites}
+            />
+          </View>
+        }
 
 
 
@@ -125,6 +212,17 @@ const styles = StyleSheet.create({
     justifyContent:'space-between',
     alignItems: 'center',
     padding: 10
-  }
+  },
+  modalWrapper:{
+    flex: 1,
+    flexDirection: 'row',
+    //width: SCREENWIDTH,
+    backgroundColor: '#FCFCFD',
+    padding: 0,
+    margin: 0,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+  },
 
 });

@@ -14,10 +14,16 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   Image,
-  Alert
+  Alert,
+  NetInfo
 } from 'react-native';
 
 import KeepAwake from 'react-native-keep-awake';
+import Swipeout from 'react-native-swipeout';
+import BackgroundTimer from 'react-native-background-timer';
+var RNFS = require('react-native-fs');
+// import { Observable, interval } from 'rxjs';
+// import { take, takeUntil } from 'rxjs/operators';
 
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
@@ -53,6 +59,7 @@ export default class Inspections extends Component{
 
  };
 
+
   constructor(props){
     super(props);
     homeNavigator = this.props.navigator;
@@ -62,10 +69,13 @@ export default class Inspections extends Component{
       properties : [],
       master_properties: [],
       loading: false,
-      refreshing: false
+      refreshing: false,
+      sync: {}
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
+
+
   }
 
 
@@ -100,7 +110,26 @@ export default class Inspections extends Component{
       animated: true,
       //animationType: 'fade',
        backButtonTitle: "Back",
-      passProps: {}
+      passProps: {},
+      navigatorStyle : {
+    	  navBarTextColor: 'white',
+    	  navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      },
+
     });
   }
 
@@ -136,6 +165,8 @@ export default class Inspections extends Component{
     // });
 
     this.getProperties();
+
+
   }
 
   showGuide = () =>{
@@ -164,28 +195,108 @@ export default class Inspections extends Component{
 
         if(this.state.master_properties[i].sync == 2 ){
           nosync = true;
-          helper.synSrv(this.state.master_properties[i]);
+          //helper.synSrv(this.state.master_properties[i]);
+
+          this.syncAgain(this.state.master_properties[i]);
 
           let master_properties = this.state.master_properties;
-          Sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
-            master_properties[i].total_updated_items = total;
+          Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+            master_properties[i].total_items = total;
             this.setState({
               master_properties
             });
           });
 
+          // this.state.sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+          //
+          //   console.log("i am getting non etotal numbers : " , total);
+          //
+          //   master_properties[i].total_updated_items = total;
+          //   this.setState({
+          //     master_properties
+          //   });
+          // });
+
+
         }
 
       }
 
+
+
       if(!nosync){
         KeepAwake.deactivate();
         //console.log('clearing interval');
-        clearInterval(this._interval); //TODO
+        //clearInterval(this._interval); //TODO
       }
       else{
         KeepAwake.activate();
+
+        BackgroundTimer.runBackgroundTimer(() => {
+          this.checkSynced();
+        },
+        9000);
+
+
       }
+
+  }
+
+
+  syncAgain = (property) =>{
+
+
+      handleFirstConnectivityChange = (connectionInfo) => {
+          console.log('First change, type: ' + connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType);
+
+          AsyncStorage.getItem( AppKeys.NET_SETTINGS, (err, result) => {
+            console.log(result);
+
+            let use_data = !!JSON.parse(result) || false;
+
+            console.log('use data !!!', use_data);
+
+            if(connectionInfo.type.toLowerCase() ==  'wifi' || use_data === true){
+              // okay to sync
+
+              if(this.state.sync.hasOwnProperty(property.property_id)){
+
+                this.state.sync[property.property_id].syncCheck(property.property_id);
+
+              }
+              else{
+
+                let sync = this.state.sync;
+                sync[property.property_id] = new Sync(property);
+                this.setState({
+                  sync
+                }, ()=>{
+
+                  this.state.sync[property.property_id].syncCheck(property.property_id);
+
+                });
+
+              }
+
+
+
+            }
+
+            NetInfo.removeEventListener(
+              'connectionChange',
+              handleFirstConnectivityChange
+            );
+
+
+          });
+
+    }
+
+    NetInfo.addEventListener(
+      'connectionChange',
+      handleFirstConnectivityChange
+    );
+
 
   }
 
@@ -194,18 +305,65 @@ export default class Inspections extends Component{
 
     let nosync = false;
 
-    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+      console.log('getting items');
+      AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
 
-      if(this.state.master_properties[i].sync == 2 ){
-        nosync = true;
-        helper.checkSynSrv( i , this.state.master_properties);
-      }
-    }
+        let master_properties = JSON.parse(result) || [];
 
-    if(!nosync){
-      //console.log('clearing interval');
-      clearInterval(this._interval); //TODO
-    }
+        //console.log(master_properties);
+        for(let i =0, l = master_properties.length; i < l ; i++){
+
+          if(master_properties[i].sync == 2 ){
+            nosync = true;
+            //helper.synSrv(this.state.master_properties[i]);
+            this.syncAgain(master_properties[i]);
+
+            Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+              master_properties[i].total_items = total;
+              this.setState({
+                master_properties
+              });
+            });
+
+            Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+
+              console.log("i am getting total numbers : " , total);
+
+              master_properties[i].total_updated_items = total;
+              this.setState({
+                master_properties: master_properties
+              });
+            });
+
+
+          }
+
+        }
+
+
+        //Inspections.nosync = nosync
+
+        console.log('nosync ', nosync);
+
+        if(nosync){
+          BackgroundTimer.stopBackgroundTimer();
+          this.forceUpdate();
+          //this.getProperties(true);
+          //clearInterval(this._interval); //TODO
+          KeepAwake.deactivate();
+          console.log('clearing interval chcked');
+
+        }
+        else{
+
+          KeepAwake.activate();
+
+        }
+
+
+    }); // end of astore
+
+
 
   }
 
@@ -213,18 +371,20 @@ export default class Inspections extends Component{
 
   //get synced status
   getSyncStatus(){
-
+    BackgroundTimer.stopBackgroundTimer();
    let property_id = SyncStore.getSyncedProperty();
-
-   console.log('synced finihsed from ui thread');
+   console.log('synced finihsed from ui thread XXXX working');
    console.log(property_id);
    this.getProperties(true);
+   this.forceUpdate();
    //clearInterval(this._interval);
 
  }
 
 
   getProperties =(nosync = false)=>{
+
+    BackgroundTimer.stopBackgroundTimer();
 
     AsyncStorage.getItem(AppKeys.LOGINKEY, (err, result) => {
       console.log('get login details');
@@ -245,6 +405,8 @@ export default class Inspections extends Component{
           this.setState({
             loading: true
           });
+
+
           AsyncStorage.getItem(TableKeys.PROPERTY_INFO, (err, result) => {
 
             let properties_info = JSON.parse(result) || [];
@@ -281,13 +443,17 @@ export default class Inspections extends Component{
 
                 }
                 console.log("going to start process");
-                console.log(nosync);
+                //console.log(nosync);
 
                 if(nosync){
                   KeepAwake.activate();
-                  this._interval = setInterval(() => { //TODO
-                    this.checkSync();
-                  }, 30000);
+
+                  this.checkSync();
+                  // this._interval = setInterval(() => { //TODO
+                  //   this.checkSync();
+                  // }, 30000);
+
+
 
                 }
 
@@ -395,6 +561,24 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          }
         });
 
       }
@@ -414,6 +598,24 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          }
         });
 
 
@@ -421,18 +623,29 @@ export default class Inspections extends Component{
       else{
         // lets add some rooms first
 
-        this.props.navigator.showModal({
+        this.props.navigator.push({
             screen: "PropertyGround.AddRoomList",
             title: 'Add room list',
-            animationType: 'slide-up',
-            navigatorStyle:{
-              navBarTextColor: 'white',
-              navBarButtonColor: 'white',
-              statusBarTextColorScheme: 'light',
-              navBarBackgroundColor: '#00BDDB',
-              navBarBlur: false,
+            //animationType: 'slide-up',
+            animated: true,
+            //animationType: 'fade',
+            navigatorStyle : {
+          	  navBarTextColor: 'white',
+          	  navBarButtonColor: 'white',
+              navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
               screenBackgroundColor: '#FFFFFF',
+
+              navBarTranslucent: false,
               navBarTransparent: false,
+              drawUnderNavBar: false,
+              navBarBlur: false,
+              navBarHidden: false,
+
+              orientation: 'portrait',
+              statusBarTextColorScheme: 'light',
+              statusBarTextColorSchemeSingleScreen: 'light',
+              statusBarHideWithNavBar: false,
+              statusBarHidden: false,
             },
             passProps: {
               property_id: item.property_id
@@ -535,7 +748,7 @@ export default class Inspections extends Component{
 
     }
 
-    console.log(sync);
+    //console.log(sync);
 
     return sync;
 
@@ -589,11 +802,236 @@ export default class Inspections extends Component{
 
   }
 
+  //open delete
+  openDelete = (property) => {
+    //console.log(property);
+
+    if( this.findSyncStatus(property.property_id) == 2){
+      //cannot delete still syncing
+
+      Alert.alert(
+          'Delete Property',
+          'You cannot delete this property while syncing!',
+          [
+            {text: 'OK', onPress: () => {console.log('OK Pressed');} },
+          ],
+          { cancelable: false }
+      );
+
+    }
+    else{
+
+
+      Alert.alert(
+          'Delete Property',
+          'Do you want to delete this property?',
+          [
+            {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+            {text: 'OK', onPress: () => { this.deleteProperty(property.property_id); } },
+          ],
+          { cancelable: false }
+      );
+
+    }
+
+  }
+
+
+  //delete property
+  deleteProperty = (property_id) =>{
+
+
+    let master_properties = this.state.master_properties;
+    let properties = this.state.properties;
+
+    for(let i =0, l = master_properties.length; i < l ; i++){
+
+      if(property_id == master_properties[i].property_id  ){
+
+        master_properties.splice(i,1);
+
+        AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(master_properties) , () => {
+
+          for(let j = 0, l = properties.length; j < l ; j++){
+
+            if(property_id == properties[j].property_id ){
+
+                properties.splice(j,1);
+
+
+                AsyncStorage.setItem(TableKeys.PROPERTY_INFO, JSON.stringify(properties) , () => {
+
+                  this.getProperties();
+                  this.clearStore(property_id);
+
+                });
+                break;
+
+
+            }
+          }
+
+
+        });
+        break;
+
+      }
+
+    }
+
+  }
+
+
+  //delete other items
+  clearStore = (property_id) =>{
+
+    //photos delete
+    AsyncStorage.getItem(TableKeys.PHOTOS, (err, result) => {
+      let photos = JSON.parse(result) || {};
+
+      let property_photos = photos[property_id];
+
+      for(let master_photo in property_photos){
+
+        for(let item_photo in property_photos[master_photo] ){
+
+          for(let i =0, l = property_photos[master_photo][item_photo].length; i < l ; i++ ){
+
+            if(property_photos[master_photo][item_photo][i].img_url){
+              this.deleteImageFile(property_photos[master_photo][item_photo][i].img_url);
+            }
+
+          }
+
+        }
+
+      }
+
+      delete photos[property_id];
+
+      AsyncStorage.setItem(TableKeys.PHOTOS, JSON.stringify(photos), () => {
+        console.log('saved photos');
+        console.log(photos);
+      });
+
+    });
+
+    //sign delete
+    AsyncStorage.getItem(TableKeys.SIGNATURES, (err, result) => {
+      let signatures = JSON.parse(result) || {};
+
+      delete signatures[property_id];
+
+      AsyncStorage.setItem(TableKeys.SIGNATURES, JSON.stringify(signatures), () => {
+        console.log('saved sign');
+      });
+
+    });
+
+
+    //meter delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_METER_LINK, (err, result) => {
+
+      let property_meter_link = JSON.parse(result) || {};
+      delete property_meter_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_METER_LINK, JSON.stringify(property_meter_link), () => {
+        console.log('saved meters');
+      });
+
+    });
+
+    //general con delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, (err, result) => {
+
+      let property_general_condition_link = JSON.parse(result) || {};
+      delete property_general_condition_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_GENERAL_CONDITION_LINK, JSON.stringify(property_general_condition_link), () => {
+        console.log('saved property general');
+      });
+
+    });
+
+    //master item delete
+    AsyncStorage.getItem(TableKeys.PROPERTY_MASTERITEM_LINK, (err, result) => {
+      let property_masteritem_link = JSON.parse(result) || {};
+
+      for(let i = 0, l = property_masteritem_link[property_id].length; i < l; i++){
+        this.deleteSubItem(property_masteritem_link[property_id].prop_master_id);
+      }
+
+      delete property_masteritem_link[property_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_MASTERITEM_LINK, JSON.stringify(property_masteritem_link), () => {
+        console.log('saved master');
+      });
+
+    });
+
+
+  }
+
+  //delete sub items
+  deleteSubItem(prop_master_id){
+
+    AsyncStorage.getItem(TableKeys.PROPERTY_SUBITEM_LINK, (err, result) => {
+      let property_subitem_link = JSON.parse(result) || {};
+
+      delete property_subitem_link[prop_master_id];
+
+      AsyncStorage.setItem(TableKeys.PROPERTY_SUBITEM_LINK, JSON.stringify(property_subitem_link), () => {
+        console.log('property sub table stored');
+      });
+
+
+    });
+
+  }
+
+  // delete images
+  deleteImageFile(filename) {
+
+    const filepath = RNFS.DocumentDirectoryPath + '/' + filename;
+
+    RNFS.exists(filepath)
+    .then( (result) => {
+        console.log("file exists: ", result);
+
+        if(result){
+          return RNFS.unlink(filepath)
+            .then(() => {
+              console.log('FILE DELETED');
+            })
+            // `unlink` will throw an error, if the item to unlink does not exist
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
+
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }
+
 
 
   _renderItem = ({item}) => (
 
-    <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)}>
+
+    <Swipeout right= {
+      [{
+        text: 'Delete',
+        backgroundColor: 'red',
+        underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+        onPress: () => { this.openDelete(item) }
+      }]
+     }
+            autoClose = 'true'
+            backgroundColor= 'transparent'>
+
+    <TouchableHighlight underlayColor='transparent' aspectRatio={1} onPress={()=>this.handlePropOpen(item)} onLongPress={()=>this.openDelete(item)}>
 
           <View style={styles.rowWrapper}>
 
@@ -647,6 +1085,8 @@ export default class Inspections extends Component{
           </View>
 
     </TouchableHighlight>
+
+    </Swipeout>
   );
 
   render(){

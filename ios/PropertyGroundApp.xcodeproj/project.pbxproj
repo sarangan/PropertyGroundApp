@@ -37,6 +37,7 @@
 		2D02E4C91E0B4AEC006451C7 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3EA31DF850E9000B6D8A /* libReact.a */; };
 		2DCD954D1E0B4F2C00145EB5 /* PropertyGroundAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* PropertyGroundAppTests.m */; };
 		3FE6FD1503C04167936FC17D /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B86B9A6DB874CC8A704715A /* libRNImagePicker.a */; };
+		534369D41150406EBD3E4BA2 /* libRNBackgroundTimer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F3E276D29774F23A0C9891F /* libRNBackgroundTimer.a */; };
 		5622733A1FA2C17D0042C49C /* QBImagePicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 562273121FA2BF950042C49C /* QBImagePicker.framework */; };
 		5622733B1FA2C17D0042C49C /* QBImagePicker.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 562273121FA2BF950042C49C /* QBImagePicker.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5622733E1FA2C2440042C49C /* RSKImageCropper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5622733D1FA2C2440042C49C /* RSKImageCropper.framework */; };
@@ -213,6 +214,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = 3D3CD9181DE5FBD800167DC4;
 			remoteInfo = "jschelpers-tvOS";
+		};
+		561C6E172191687800E7A347 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AF1A9AEC5A994C8AA752B8A5 /* RNBackgroundTimer.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNBackgroundTimer;
+		};
+		561C6E192191687800E7A347 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AF1A9AEC5A994C8AA752B8A5 /* RNBackgroundTimer.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 641926921ECB4257009CF731;
+			remoteInfo = "RNBackgroundTimer-tvOS";
 		};
 		5645BF8C1F96F85E006D5120 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -438,6 +453,7 @@
 		2BBA5441183846E5B05A8FBE /* libReactNativeNavigation.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeNavigation.a; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* PropertyGroundApp-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PropertyGroundApp-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* PropertyGroundApp-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PropertyGroundApp-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F3E276D29774F23A0C9891F /* libRNBackgroundTimer.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBackgroundTimer.a; sourceTree = "<group>"; };
 		485587E160AB43809D7FDBE0 /* libRNSound.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNSound.a; sourceTree = "<group>"; };
 		4A48EE32B33E4FAA9B2DC8EE /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		4E676AE225C1490F9A5F9DC0 /* libRNFS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFS.a; sourceTree = "<group>"; };
@@ -456,6 +472,7 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		AAA610D96A8D413A8A6523AC /* RNCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
+		AF1A9AEC5A994C8AA752B8A5 /* RNBackgroundTimer.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundTimer.xcodeproj; path = "../node_modules/react-native-background-timer/ios/RNBackgroundTimer.xcodeproj"; sourceTree = "<group>"; };
 		C095D97F202AFC8C00333183 /* RNAudio.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNAudio.xcodeproj; path = "../node_modules/react-native-audio-player-recorder/ios/RNAudio.xcodeproj"; sourceTree = "<group>"; };
 		C0FABBC66F1046D6979E1DA2 /* ReactNativeNavigation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeNavigation.xcodeproj; path = "../node_modules/react-native-navigation/ios/ReactNativeNavigation.xcodeproj"; sourceTree = "<group>"; };
 		D1F172A238DD4AFBBEFD2451 /* libimageCropPicker.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libimageCropPicker.a; sourceTree = "<group>"; };
@@ -501,6 +518,7 @@
 				138E8990A31543D5A5203A7D /* libRNFS.a in Frameworks */,
 				CD76CC620F174370906D676C /* libRCTOrientation.a in Frameworks */,
 				121311D774564E19AB283D32 /* libKCKeepAwake.a in Frameworks */,
+				534369D41150406EBD3E4BA2 /* libRNBackgroundTimer.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -643,6 +661,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		561C6E132191687800E7A347 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				561C6E182191687800E7A347 /* libRNBackgroundTimer.a */,
+				561C6E1A2191687800E7A347 /* libRNBackgroundTimer.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		5645BF891F96F85E006D5120 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -680,6 +707,7 @@
 				5B6B92B3AB5E4E718CB71F56 /* libRNCamera.a */,
 				76B3B0A46E5D42278D322186 /* libRCTOrientation.a */,
 				DC0A790EF8EE41BEB3B9FDA5 /* libKCKeepAwake.a */,
+				2F3E276D29774F23A0C9891F /* libRNBackgroundTimer.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -751,6 +779,7 @@
 				4A48EE32B33E4FAA9B2DC8EE /* RCTOrientation.xcodeproj */,
 				AAA610D96A8D413A8A6523AC /* RNCamera.xcodeproj */,
 				57AB2C72B1A54D9D9BFDD3EC /* KCKeepAwake.xcodeproj */,
+				AF1A9AEC5A994C8AA752B8A5 /* RNBackgroundTimer.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1047,6 +1076,10 @@
 					ProjectRef = C095D97F202AFC8C00333183 /* RNAudio.xcodeproj */;
 				},
 				{
+					ProductGroup = 561C6E132191687800E7A347 /* Products */;
+					ProjectRef = AF1A9AEC5A994C8AA752B8A5 /* RNBackgroundTimer.xcodeproj */;
+				},
+				{
 					ProductGroup = C0AF46DE208ECB8200230718 /* Products */;
 					ProjectRef = AAA610D96A8D413A8A6523AC /* RNCamera.xcodeproj */;
 				},
@@ -1215,6 +1248,20 @@
 			fileType = archive.ar;
 			path = libjschelpers.a;
 			remoteRef = 3DAD3EAE1DF850E9000B6D8A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		561C6E182191687800E7A347 /* libRNBackgroundTimer.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBackgroundTimer.a;
+			remoteRef = 561C6E172191687800E7A347 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		561C6E1A2191687800E7A347 /* libRNBackgroundTimer.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBackgroundTimer.a;
+			remoteRef = 561C6E192191687800E7A347 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		5645BF8D1F96F85E006D5120 /* libimageCropPicker.a */ = {
@@ -1552,12 +1599,14 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = PropertyGroundAppTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1589,12 +1638,14 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = PropertyGroundAppTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1630,6 +1681,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = PropertyGroundApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1668,6 +1720,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = PropertyGroundApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1711,11 +1764,13 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = "PropertyGroundApp-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1758,11 +1813,13 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-keep-awake/ios",
+					"$(SRCROOT)/../node_modules/react-native-background-timer/ios",
 				);
 				INFOPLIST_FILE = "PropertyGroundApp-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1793,6 +1850,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.PropertyGroundApp-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1817,6 +1875,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.PropertyGroundApp-tvOSTests";

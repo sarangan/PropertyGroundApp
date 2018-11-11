@@ -1,8 +1,7 @@
 /**
- * Sanppar React Native App
- * https://sph.com.sg
+ * PropertyGround React Native App
  * @sara
- * Inspections page
+ * Add ri page
  */
 import React, {Component} from 'react';
 import {
@@ -44,7 +43,8 @@ export default class AddRoomList extends Component{
    ],
    leftButtons: [
      {
-       title: 'Cancel',
+       //title: 'Back',
+       icon: require('../images/back-arrow.png'),
        id: 'cancel'
      }
    ],
@@ -78,9 +78,37 @@ export default class AddRoomList extends Component{
       }
       else if(event.id == 'cancel'){
 
-        this.props.navigator.dismissModal({
-          animationType: 'slide-down'
+        // this.props.navigator.dismissModal({
+        //   animationType: 'slide-down'
+        // });
+
+        this.props.navigator.resetTo({
+          screen: 'PropertyGround.Inspections',
+          title: 'Inspections',
+          animated: true,
+          animationType: 'fade',
+          navigatorStyle : {
+        	  navBarTextColor: 'white',
+        	  navBarButtonColor: 'white',
+            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+            screenBackgroundColor: '#FFFFFF',
+
+            navBarTranslucent: false,
+            navBarTransparent: false,
+            drawUnderNavBar: false,
+            navBarBlur: false,
+            navBarHidden: false,
+
+            orientation: 'portrait',
+            statusBarTextColorScheme: 'light',
+            statusBarTextColorSchemeSingleScreen: 'light',
+            statusBarHideWithNavBar: false,
+            statusBarHidden: false,
+          },
+          passProps: {
+          },
         });
+
 
       }
 
@@ -198,9 +226,103 @@ export default class AddRoomList extends Component{
               //   //animationType: 'slide-horizontal'
               // });
 
+              /*
               this.props.navigator.dismissModal({
                 animationType: 'slide-down'
               });
+              */
+
+              AsyncStorage.getItem(TableKeys.PROPERTY_INFO, (err, result) => {
+
+                let properties_info = JSON.parse(result) || [];
+
+                AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
+
+                  let master_properties = JSON.parse(result) || [];
+
+                  let property = {};
+
+                  for(let i =0, l = properties_info.length; i < l ; i++){
+
+                    if( properties_info[i].property_id == this.state.property_id ){
+
+                      property = properties_info[i];
+                      break;
+
+                    }
+
+                  }
+
+                  let lock = 0;
+                  let sync = 0;
+                  let sync_text = '';
+                  for(let i =0, l = master_properties.length; i < l ; i++){
+
+                    if( master_properties[i].property_id == this.state.property_id ){
+
+                      lock = master_properties[i].locked;
+                      sync = master_properties[i].sync;
+
+                      if(sync == 1){
+                         sync_text = 'Not Sync';
+                      }
+                      else if(sync == 2){
+                        sync_text = 'Syncing';
+                      }
+                      else if(sync == 3){
+                        sync_text = 'Synced';
+                      }
+
+                      break;
+
+                    }
+
+                  }
+
+                  this.props.navigator.push({
+                    screen: 'PropertyGround.RoomList',
+                    title: 'Room list',
+                    animated: true,
+                    animationType: 'fade',
+                    backButtonTitle: "Back",
+                    passProps: {
+                      property_id: this.state.property_id,
+                      property: property,
+                      syncText: sync_text,
+                      sync: sync,
+                      locked: lock
+                    },
+                    navigatorStyle : {
+                  	  navBarTextColor: 'white',
+                  	  navBarButtonColor: 'white',
+                      navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+                      screenBackgroundColor: '#FFFFFF',
+
+                      navBarTranslucent: false,
+                      navBarTransparent: false,
+                      drawUnderNavBar: false,
+                      navBarBlur: false,
+                      navBarHidden: false,
+
+                      orientation: 'portrait',
+                      statusBarTextColorScheme: 'light',
+                      statusBarTextColorSchemeSingleScreen: 'light',
+                      statusBarHideWithNavBar: false,
+                      statusBarHidden: false,
+                    }
+                  });
+
+
+
+
+                });
+
+              });
+
+
+
+
+
 
             }
 

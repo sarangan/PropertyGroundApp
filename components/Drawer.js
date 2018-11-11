@@ -94,6 +94,25 @@ export default class Drawer extends Component {
 
 	takeAction(menu){
 
+		const navigatorStyle = {
+		  navBarTextColor: 'white',
+		  navBarButtonColor: 'white',
+	    navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+	    screenBackgroundColor: '#FFFFFF',
+
+	    navBarTranslucent: false,
+	    navBarTransparent: false,
+	    drawUnderNavBar: false,
+	    navBarBlur: false,
+	    navBarHidden: false,
+
+	    orientation: 'portrait',
+	    statusBarTextColorScheme: 'light',
+	    statusBarTextColorSchemeSingleScreen: 'light',
+	    statusBarHideWithNavBar: false,
+	    statusBarHidden: false,
+	  };
+
 		if(menu.type == "URL" ){
 			this._toggleDrawer();
 			let url = encodeURI(menu.action);
@@ -118,6 +137,7 @@ export default class Drawer extends Component {
 	        animated: true,
 	        //animationType: 'fade',
 	        passProps: { },
+					navigatorStyle
 	      });
 			}
 			else if(menu.action == "HELP"){
@@ -128,6 +148,21 @@ export default class Drawer extends Component {
 	          animationType: 'slide-up',
 	          navigatorStyle:{
 							navBarHidden: true,
+							navBarTextColor: 'white',
+						  navBarButtonColor: 'white',
+					    navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+					    screenBackgroundColor: '#FFFFFF',
+
+					    navBarTranslucent: false,
+					    navBarTransparent: false,
+					    drawUnderNavBar: false,
+					    navBarBlur: false,
+
+					    orientation: 'portrait',
+					    statusBarTextColorScheme: 'light',
+					    statusBarTextColorSchemeSingleScreen: 'light',
+					    statusBarHideWithNavBar: false,
+					    statusBarHidden: false,
 	          },
 	          passProps: {
 	           }
@@ -141,6 +176,7 @@ export default class Drawer extends Component {
 	        animated: true,
 	        //animationType: 'fade',
 	        passProps: { },
+					navigatorStyle
 	      });
 			}
 
@@ -168,6 +204,21 @@ export default class Drawer extends Component {
                       animationType: 'slide-up',
                       navigatorStyle:{
                         navBarHidden: true,
+												navBarTextColor: 'white',
+											  navBarButtonColor: 'white',
+										    navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+										    screenBackgroundColor: '#FFFFFF',
+
+										    navBarTranslucent: false,
+										    navBarTransparent: false,
+										    drawUnderNavBar: false,
+										    navBarBlur: false,
+
+										    orientation: 'portrait',
+										    statusBarTextColorScheme: 'light',
+										    statusBarTextColorSchemeSingleScreen: 'light',
+										    statusBarHideWithNavBar: false,
+										    statusBarHidden: false,
                       },
                       passProps: {
                        }

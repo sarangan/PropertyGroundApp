@@ -437,10 +437,15 @@ export default class NewProperty extends Component{
                                                 // this.postalcode.setNativeProps({text: ''});
                                                 // this.report_date.setNativeProps({text: ''});
 
-                                                this.props.navigator.showModal({
+                                                //this.props.navigator.showModal({
+                                                this.props.navigator.push({
                                                     screen: "PropertyGround.AddRoomList",
                                                     title: 'Add room list',
-                                                    animationType: 'slide-up',
+                                                    //animationType: 'slide-up',
+                                                    animated: true,
+                                                    animationType: 'fade',
+                                                    backButtonTitle: "Back",
+
                                                     navigatorStyle:{
                                                       navBarTextColor: 'white',
                                                       navBarButtonColor: 'white',
@@ -694,7 +699,7 @@ export default class NewProperty extends Component{
 
     return(
       <View style={styles.fill}>
-
+        
         <ScrollView>
           <Text style={styles.divTxt}>Property details</Text>
 
@@ -779,9 +784,9 @@ export default class NewProperty extends Component{
                   marginRight: 25,
                   height: 45,
                   backgroundColor: '#FFFFFF',
-                  fontSize: 15,
+                  //fontSize: 15,
                   borderWidth: 0,
-                  textAlign: 'left',
+                  //textAlign: 'left',
                   alignItems: 'flex-start',
                 }
 

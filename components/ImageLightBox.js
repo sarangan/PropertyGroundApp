@@ -12,7 +12,8 @@ import {
   Dimensions,
   Text,
   TouchableHighlight,
-  AsyncStorage
+  AsyncStorage,
+  Platform
 } from 'react-native';
 
 import TImage from 'react-native-transformable-image';
@@ -35,10 +36,19 @@ export default class ImageLightBox extends Component {
       property_id: this.props.property_id,
       item_id : this.props.item_id,
       parent_id: this.props.parent_id,
-      showDelete: this.props.showDelete
+      showDelete: this.props.showDelete,
+      platform: 'ios'
     };
 
     console.log(JSON.parse(this.props.images));
+  }
+
+  componentWillMount(){
+
+    this.setState({
+      platform: Platform.OS
+    });
+
   }
 
   //close the light box
@@ -106,6 +116,9 @@ export default class ImageLightBox extends Component {
 
   }
 
+
+  
+
   getSlids = () =>{
 
     let slides= [];
@@ -114,12 +127,20 @@ export default class ImageLightBox extends Component {
       let img = this.state.images[i];
       slides.push(
             <View style={styles.container} key={i}>
+            {this.state.platform == 'ios' &&
+                <TImage
+                  source={{  uri: RNFS.DocumentDirectoryPath + '/' + img }}
+                  style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
+                >
+                </TImage>
+            }
+            {this.state.platform == 'android' &&
+                <Image
+                  source={{uri: img }}
+                  style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
+                />
+            }
 
-              <TImage
-                source={{ uri: RNFS.DocumentDirectoryPath + '/' + img}}
-                style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
-              >
-              </TImage>
 
             </View>
         );
