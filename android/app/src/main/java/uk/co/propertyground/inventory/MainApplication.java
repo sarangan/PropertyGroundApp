@@ -93,7 +93,8 @@ public class MainApplication extends NavigationApplication { //Application imple
              //new RCTCameraPackage(),
              new PickerPackage(),
              //new NavigationReactPackage(),
-             new AudioPackage()
+             new AudioPackage(),
+             new BackgroundTimerPackage()
          );
      }
 
