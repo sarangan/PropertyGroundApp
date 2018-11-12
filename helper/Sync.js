@@ -15,16 +15,16 @@ export default class Sync {
     this.property_id = property.property_id;
   }
 
-  syncCheck(){
+  syncCheck(property_id){
 
       if(this.property.sync == 2 ){
-        console.log('proeprty status syncing found' , this.property_id);
-        this.syncing();
+        console.log('proeprty status syncing found' , property_id);
+        this.syncing(property_id);
       }
 
   }
 
-  syncing(){
+  syncing(property_id){
     //this is okay to sync check the tables
 
     // 1. check tables one by one
@@ -39,17 +39,17 @@ export default class Sync {
     console.log('-----------starting sync--------------');
     //this.getAllData();
 
-    this.getAllData();
+    this.getAllData(property_id);
 
   }
 
-  getAllData(){
+  getAllData(property_id){
 
     AsyncStorage.getAllKeys((err, keys) => {
       AsyncStorage.multiGet(keys, (err, stores) => {
 
         let formData = new FormData();
-        formData.append("property_id", this.property_id );
+        formData.append("property_id", property_id );
         formData.append("data", JSON.stringify(stores) );
 
         this.postData(formData, 'syncdata').then( response =>{
@@ -75,7 +75,7 @@ export default class Sync {
 
               for(let i =0, l = properties.length; i < l ; i++){
 
-                if(properties[i].property_id == this.property_id && properties[i].sync == 1){
+                if(properties[i].property_id == property_id && properties[i].sync == 1){
 
                   //console.log(properties[i]);
 
@@ -102,7 +102,7 @@ export default class Sync {
 
                       if(image_url){
                         let formDataUpload = new FormData();
-                        formDataUpload.append("property_id", this.property_id );
+                        formDataUpload.append("property_id", property_id );
                         formDataUpload.append('photo', {uri: RNFS.DocumentDirectoryPath + '/' + image_url , type: 'image/jpg', name: 'image.jpg'});
 
                         let response = this.postData(formDataUpload, 'uploadpropertyimg');
@@ -130,9 +130,9 @@ export default class Sync {
              //console.log('Starting PROPERTY_SUB_VOICE_GENERAL');
 
              let data = JSON.parse(value);
-             if(data.hasOwnProperty(this.property_id)){
+             if(data.hasOwnProperty(property_id)){
 
-               let property_voice = data[this.property_id];
+               let property_voice = data[property_id];
 
                for(let master_key in property_voice){
                  if(property_voice.hasOwnProperty(master_key)){
@@ -154,7 +154,7 @@ export default class Sync {
                            //console.log(sub_item_voice[i]);
 
                            let formData = new FormData();
-                           formData.append("property_id", this.property_id );
+                           formData.append("property_id", property_id );
                            formData.append("prop_sub_feedback_general_id", sub_item_voice[i].prop_sub_feedback_general_id );
                            formData.append("item_id", sub_item_voice[i].item_id );
                            formData.append("parent_id", sub_item_voice[i].parent_id );
@@ -197,13 +197,13 @@ export default class Sync {
 
            case TableKeys.SIGNATURES : {//>
 
-             //console.log('Starting SIGNATURES');
+             console.log('Starting SIGNATURES');
 
              let data = JSON.parse(value);
 
-             if(data.hasOwnProperty(this.property_id)){
+             if(data.hasOwnProperty(property_id)){
 
-               let signs = data[this.property_id];
+               let signs = data[property_id];
 
                if(signs.sync == 1){
 
@@ -248,13 +248,13 @@ export default class Sync {
 
          if(key == TableKeys.PHOTOS ){
 
-           //console.log('Starting PHOTOS');
+           console.log('Starting PHOTOS');
 
            let data = JSON.parse(value);
 
-           if(data.hasOwnProperty(this.property_id)){
+           if(data.hasOwnProperty(property_id)){
 
-             let property_photos = data[this.property_id];
+             let property_photos = data[property_id];
 
              for(let master_key in property_photos){
                if(property_photos.hasOwnProperty(master_key)){
@@ -272,7 +272,7 @@ export default class Sync {
                        if(sub_item_photos[i].sync == 1){
 
                          let formData = new FormData();
-                         formData.append("property_id", this.property_id );
+                         formData.append("property_id", property_id );
                          formData.append("photo_id", sub_item_photos[i].photo_id );
                          formData.append("item_id", sub_item_photos[i].item_id );
                          formData.append("parent_id", sub_item_photos[i].parent_id );
@@ -282,18 +282,44 @@ export default class Sync {
 
                          //this.update_photos( i, sub_key, master_key, data, 4 );
 
-                         this.postData(formData, 'uploadfile').then( response =>{
+                         let formDataChk = new FormData();
+                         formDataChk.append("property_id", property_id );
+                         formDataChk.append("photo_id", sub_item_photos[i].photo_id );
 
-                           //console.log('Ending PHOTOS');
+                         this.postData( formDataChk ,'checkphotoexists').then( response =>{
 
-                           console.log('uploaded server PHOTOS');
+                            if( response.hasOwnProperty('status')){
 
-                           if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
-                             // we got status 1, update the storage
-                             this.update_photos( i, sub_key, master_key, data, 2 );
-                          }
+                              if(response.status == 1){
 
-                        });
+                                this.update_photos( i, sub_key, master_key, data, 2 );
+
+                              }
+                              else if(response.status == 2 ){
+
+                                this.postData(formData, 'uploadfile').then( response =>{
+
+                                  //console.log('Ending PHOTOS');
+
+                                  console.log('uploaded server PHOTOS');
+
+                                  if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
+                                    // we got status 1, update the storage
+                                    this.update_photos( i, sub_key, master_key, data, 2 );
+                                 }
+
+                               });
+
+
+                              }
+
+                            }
+
+
+
+                         });
+
+
 
 
 
@@ -315,7 +341,7 @@ export default class Sync {
 
 
 
-        this.checkPropertySync(stores);
+        this.checkPropertySync(stores, property_id);
 
       });
     });
@@ -475,7 +501,7 @@ export default class Sync {
 
 
   //check last when all the tables have been updated
-  checkPropertySync(stores){
+  checkPropertySync(stores, property_id){
 
     console.log('finishing property sync');
 
@@ -509,9 +535,18 @@ export default class Sync {
           }
           */
 
-          if(properties[i].property_id == this.property_id){
+          if(properties[i].property_id == property_id){
 
-            this.recheckTbls(i, properties);
+            this.recheckServerTbls(property_id).then((chk)=>{
+              console.log(chk, 'recheck server or not');
+              if(!chk){
+                console.log('server tables not yet update so update')
+                this.updateSeverTables(property_id);
+              }
+            });
+
+
+            this.recheckTbls(i, properties, property_id);
           }
 
 
@@ -528,7 +563,7 @@ export default class Sync {
   }
 
   //finish the sync process for this property
-  async finishedSync(index, properties){
+  async finishedSync(index, properties, property_id){
 
     properties[index].sync = 3;
     //console.log('update PROPERTY');
@@ -540,11 +575,177 @@ export default class Sync {
     //console.log('calling UI actions');
 
     //update the front end
-    SyncActions.syncFinished(this.property_id); //TODO
+    SyncActions.syncFinished(property_id); //TODO
 
   }
 
-  recheckSeverTables(property_id){
+  //re check for server update only if no items
+  recheckServerTbls(property_id){
+
+    console.log('Re-check server tables again');
+
+      return new Promise( function(resolve,reject){
+
+        AsyncStorage.getAllKeys((err, keys) => {
+          AsyncStorage.multiGet(keys, (err, stores) => {
+
+            let allSynced = true;
+
+            stores.map((result, i, store) => {
+              //get at each store's key/value so you can work with it
+              let key = store[i][0];
+              let value = store[i][1];
+
+              switch (key) {
+
+                case TableKeys.PROPERTY_MASTERITEM_LINK: {
+
+                  let data = JSON.parse(value);
+                  if(data.hasOwnProperty(property_id)){
+                    let master_data = data[property_id];
+                    for(let i = 0, l = master_data.length; i < l ; i++){
+                      //console.log(master_data[i].sync);
+                      if(master_data[i].sync == 1){
+                        console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
+                        allSynced = false;
+                        break;
+                      }
+                    }
+                  }
+                  break;
+                }
+
+                case TableKeys.PROPERTY_SUBITEM_LINK:{
+
+                  let data = JSON.parse(value);
+
+                  mainloop: for( let key in data){
+
+                    let sub_items = data[key];
+
+                    for(let i =0, l = sub_items.length; i < l ; i++){
+
+                      if(sub_items[i].property_id == property_id ){ // we got this prop sub item
+                        //console.log(sub_item_details[i]);
+                          if(sub_items[i].sync == 1){
+                            console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
+                            allSynced = false;
+                            break mainloop;
+                          }
+                      }
+
+                    }
+
+                  }
+
+                  break;
+                }
+
+                case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+
+                  let data = JSON.parse(value);
+                  if(data.hasOwnProperty(property_id)){
+                    let general_data = data[property_id];
+                    for(let i =0, l = general_data.length; i < l ; i++){
+                      if(general_data[i].sync == 1){
+                        console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
+                        allSynced = false;
+                        break;
+                      }
+                    }
+                  }
+                  break;
+                }
+
+                case TableKeys.PROPERTY_METER_LINK:{
+
+                  let data = JSON.parse(value);
+
+                  if(data.hasOwnProperty(property_id)){
+
+                    let meter_data = data[property_id];
+                    for(let i =0, l = meter_data.length; i < l; i++){
+                      if(meter_data[i].sync == 1){
+                        console.log('re-check PROPERTY_METER_LINK FAIL');
+                        allSynced = false;
+                        break;
+                      }
+                    }
+
+                  }
+                  break;
+                }
+
+                case TableKeys.PROPERTY_FEEDBACK: {
+
+                  let data = JSON.parse(value);
+                  if(data.hasOwnProperty(property_id)){
+
+                    let feedback_data = data[property_id];
+
+                    for(let key in feedback_data){
+                        if(feedback_data.hasOwnProperty(key)) {
+                            if(feedback_data[key].sync == 1){
+                              //console.log('feedback id ', feedback_data[key]);
+                              console.log('re-check PROPERTY_FEEDBACK FAILXX');
+                              allSynced = false;
+                              break;
+                            }
+                        }
+                    }
+                  }
+                  break;
+                }
+
+                case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+
+                  let data = JSON.parse(value);
+                  if(data.hasOwnProperty(property_id)){
+
+                    let feedback_data = data[property_id];
+
+                    for(let key in feedback_data){
+                        if(feedback_data.hasOwnProperty(key)) {
+
+                          if(feedback_data[key].sync == 1){
+                            console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
+                            allSynced = false;
+                            break;
+                          }
+
+                        }
+                    }
+
+                  }
+                  break;
+                }
+
+
+              }//end switch
+
+            }); //end of map
+
+            //check here
+
+            console.log('SERVER CHECKED');
+            console.log(allSynced);
+
+            resolve(allSynced);
+
+          });
+
+        });
+
+
+      });
+
+
+
+  }
+
+
+
+  updateSeverTables(property_id){
 
 
     let formData = new FormData();
@@ -893,9 +1094,8 @@ export default class Sync {
   }
 
   //re check all the tables
-  recheckTbls(__index, __properties){
+  recheckTbls(__index, __properties, property_id){
 
-    this.recheckSeverTables(this.property_id);
 
     console.log('Re-check tables again');
 
@@ -916,7 +1116,7 @@ export default class Sync {
 
               let properties = JSON.parse(value);
               for(let i =0, l = properties.length; i < l ; i++){
-                if(properties[i].property_id == this.property_id && properties[i].sync == 1){
+                if(properties[i].property_id == property_id && properties[i].sync == 1){
                   console.log('re-check PROPERTY_INFO FAIL');
                   allSynced = false;
                 }
@@ -927,8 +1127,8 @@ export default class Sync {
             case TableKeys.PROPERTY_MASTERITEM_LINK: {
 
               let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
-                let master_data = data[this.property_id];
+              if(data.hasOwnProperty(property_id)){
+                let master_data = data[property_id];
                 for(let i = 0, l = master_data.length; i < l ; i++){
                   //console.log(master_data[i].sync);
                   if(master_data[i].sync == 1){
@@ -951,7 +1151,7 @@ export default class Sync {
 
                 for(let i =0, l = sub_items.length; i < l ; i++){
 
-                  if(sub_items[i].property_id == this.property_id ){ // we got this prop sub item
+                  if(sub_items[i].property_id == property_id ){ // we got this prop sub item
                     //console.log(sub_item_details[i]);
                       if(sub_items[i].sync == 1){
                         console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
@@ -970,8 +1170,8 @@ export default class Sync {
             case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
 
               let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
-                let general_data = data[this.property_id];
+              if(data.hasOwnProperty(property_id)){
+                let general_data = data[property_id];
                 for(let i =0, l = general_data.length; i < l ; i++){
                   if(general_data[i].sync == 1){
                     console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
@@ -987,9 +1187,9 @@ export default class Sync {
 
               let data = JSON.parse(value);
 
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let meter_data = data[this.property_id];
+                let meter_data = data[property_id];
                 for(let i =0, l = meter_data.length; i < l; i++){
                   if(meter_data[i].sync == 1){
                     console.log('re-check PROPERTY_METER_LINK FAIL');
@@ -1005,14 +1205,14 @@ export default class Sync {
             case TableKeys.PROPERTY_FEEDBACK: {
 
               let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let feedback_data = data[this.property_id];
+                let feedback_data = data[property_id];
 
                 for(let key in feedback_data){
                     if(feedback_data.hasOwnProperty(key)) {
                         if(feedback_data[key].sync == 1){
-                          //console.log('feedback id ', feedback_data[key]);
+                          console.log('feedback id ', feedback_data[key]);
                           console.log('re-check PROPERTY_FEEDBACK FAIL');
                           allSynced = false;
                           break;
@@ -1026,9 +1226,9 @@ export default class Sync {
             case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
 
               let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let feedback_data = data[this.property_id];
+                let feedback_data = data[property_id];
 
                 for(let key in feedback_data){
                     if(feedback_data.hasOwnProperty(key)) {
@@ -1049,9 +1249,9 @@ export default class Sync {
             case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
 
               let data = JSON.parse(value);
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let property_voice = data[this.property_id];
+                let property_voice = data[property_id];
 
                 for(let master_key in property_voice){
                   if(property_voice.hasOwnProperty(master_key)){
@@ -1082,9 +1282,9 @@ export default class Sync {
 
               let data = JSON.parse(value);
 
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let signs = data[this.property_id];
+                let signs = data[property_id];
 
                 if(signs.sync == 1){
                   console.log('re-check SIGNATURES FAIL');
@@ -1100,9 +1300,9 @@ export default class Sync {
 
               let data = JSON.parse(value);
 
-              if(data.hasOwnProperty(this.property_id)){
+              if(data.hasOwnProperty(property_id)){
 
-                let property_photos = data[this.property_id];
+                let property_photos = data[property_id];
 
                 for(let master_key in property_photos){
                   if(property_photos.hasOwnProperty(master_key)){
@@ -1140,6 +1340,8 @@ export default class Sync {
 
         console.log('I AM GOING TO FINSIH THIS MAN');
         console.log(allSynced);
+        console.log(__properties[__index].sync);
+        console.log('ssssssss');
 
         if(allSynced){
 
@@ -1148,10 +1350,10 @@ export default class Sync {
 
           if(__properties[__index].sync == 2){
 
-            if(__properties[__index].property_id == this.property_id && __properties[__index].sync == 2){
+            if(__properties[__index].property_id == property_id && __properties[__index].sync == 2){
 
               let formData = new FormData();
-              formData.append("property_id", this.property_id);
+              formData.append("property_id", property_id);
               formData.append("description", __properties[__index].description);
               formData.append("mb_createdAt", __properties[__index].mb_createdAt);
 
@@ -1164,9 +1366,15 @@ export default class Sync {
 
                   __properties[__index].sync = 3;
                   AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
-                    SyncActions.syncFinished(this.property_id);
+                    SyncActions.syncFinished(property_id);
                   });
 
+                }
+                else if(!response && allSynced ){
+                  __properties[__index].sync = 3;
+                  AsyncStorage.setItem(TableKeys.PROPERTY, JSON.stringify(__properties), ()=>{
+                    SyncActions.syncFinished(property_id);
+                  });
                 }
 
               });
@@ -1177,9 +1385,14 @@ export default class Sync {
 
           }
           else if(__properties[__index].sync == 3){
-            SyncActions.syncFinished(this.property_id);
+            SyncActions.syncFinished(property_id);
           }
 
+        }
+        else{
+          //this.recheckSeverTables();
+          console.log('all not sync yet');
+          //this.getAllData();
         }
 
 
@@ -1439,277 +1652,6 @@ export default class Sync {
 
 
 
-  //re check all the tables
-  static checkItems(property_id, property){
-
-
-    return new Promise( function(resolve,reject){
-
-      let newsync = new Sync(property);
-      newsync.recheckSeverTables(property_id);
-
-      console.log('Re-check tables again');
-
-      AsyncStorage.getAllKeys((err, keys) => {
-        AsyncStorage.multiGet(keys, (err, stores) => {
-
-          let allSynced = true;
-
-          stores.map((result, i, store) => {
-            //get at each store's key/value so you can work with it
-            let key = store[i][0];
-            let value = store[i][1];
-
-            switch (key) {
-
-
-              case TableKeys.PROPERTY_INFO: {
-
-                let properties = JSON.parse(value);
-                for(let i =0, l = properties.length; i < l ; i++){
-                  if(properties[i].property_id == property_id && properties[i].sync == 1){
-                    console.log('re-check PROPERTY_INFO FAIL');
-                    allSynced = false;
-                  }
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_MASTERITEM_LINK: {
-
-                let data = JSON.parse(value);
-                if(data.hasOwnProperty(property_id)){
-                  let master_data = data[property_id];
-                  for(let i = 0, l = master_data.length; i < l ; i++){
-                    //console.log(master_data[i].sync);
-                    if(master_data[i].sync == 1){
-                      console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
-                      allSynced = false;
-                      break;
-                    }
-                  }
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_SUBITEM_LINK:{
-
-                let data = JSON.parse(value);
-
-                mainloop: for( let key in data){
-
-                  let sub_items = data[key];
-
-                  for(let i =0, l = sub_items.length; i < l ; i++){
-
-                    if(sub_items[i].property_id == property_id ){ // we got this prop sub item
-                      //console.log(sub_item_details[i]);
-                        if(sub_items[i].sync == 1){
-                          console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
-                          allSynced = false;
-                          break mainloop;
-                        }
-                    }
-
-                  }
-
-                }
-
-                break;
-              }
-
-              case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
-
-                let data = JSON.parse(value);
-                if(data.hasOwnProperty(property_id)){
-                  let general_data = data[property_id];
-                  for(let i =0, l = general_data.length; i < l ; i++){
-                    if(general_data[i].sync == 1){
-                      console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
-                      allSynced = false;
-                      break;
-                    }
-                  }
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_METER_LINK:{
-
-                let data = JSON.parse(value);
-
-                if(data.hasOwnProperty(property_id)){
-
-                  let meter_data = data[property_id];
-                  for(let i =0, l = meter_data.length; i < l; i++){
-                    if(meter_data[i].sync == 1){
-                      console.log('re-check PROPERTY_METER_LINK FAIL');
-                      allSynced = false;
-                      break;
-                    }
-                  }
-
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_FEEDBACK: {
-
-                let data = JSON.parse(value);
-                if(data.hasOwnProperty(property_id)){
-
-                  let feedback_data = data[property_id];
-
-                  for(let key in feedback_data){
-                      if(feedback_data.hasOwnProperty(key)) {
-                          if(feedback_data[key].sync == 1){
-                            //console.log('feedback id ', feedback_data[key]);
-                            console.log('re-check PROPERTY_FEEDBACK FAIL');
-                            allSynced = false;
-                            break;
-                          }
-                      }
-                  }
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
-
-                let data = JSON.parse(value);
-                if(data.hasOwnProperty(property_id)){
-
-                  let feedback_data = data[property_id];
-
-                  for(let key in feedback_data){
-                      if(feedback_data.hasOwnProperty(key)) {
-
-                        if(feedback_data[key].sync == 1){
-                          console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
-                          allSynced = false;
-                          break;
-                        }
-
-                      }
-                  }
-
-                }
-                break;
-              }
-
-              case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
-
-                let data = JSON.parse(value);
-                if(data.hasOwnProperty(property_id)){
-
-                  let property_voice = data[property_id];
-
-                  for(let master_key in property_voice){
-                    if(property_voice.hasOwnProperty(master_key)){
-
-                      let master_item_voice =  property_voice[master_key];
-
-                      for(let sub_key in master_item_voice){
-                        if(master_item_voice.hasOwnProperty(sub_key) ){
-
-                          let sub_item_voice =  master_item_voice[sub_key];
-
-                          for(let i =0, l = sub_item_voice.length; i < l; i++){
-                            if(sub_item_voice[i].sync == 1){
-                              console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
-                              allSynced = false;
-                              break;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                break;
-              }
-
-              case TableKeys.SIGNATURES : {
-
-                let data = JSON.parse(value);
-
-                if(data.hasOwnProperty(property_id)){
-
-                  let signs = data[property_id];
-
-                  if(signs.sync == 1){
-                    console.log('re-check SIGNATURES FAIL');
-                    allSynced = false;
-                  }
-
-                }
-
-                break;
-              }
-
-              case TableKeys.PHOTOS : {
-
-                let data = JSON.parse(value);
-
-                if(data.hasOwnProperty(property_id)){
-
-                  let property_photos = data[property_id];
-
-                  for(let master_key in property_photos){
-                    if(property_photos.hasOwnProperty(master_key)){
-
-                      let master_item_photos =  property_photos[master_key];
-
-                      for(let sub_key in master_item_photos){
-                        if(master_item_photos.hasOwnProperty(sub_key) ){
-
-                          let sub_item_photos =  master_item_photos[sub_key];
-
-                          for(let i =0, l = sub_item_photos.length; i < l; i++){
-                            if(sub_item_photos[i].sync == 1){
-                              //console.log(sub_item_photos[i]);
-                              console.log('re-check PHOTOS FAIL');
-                              allSynced = false;
-                              break;
-                            }
-                          }
-
-                        }
-                      }
-                    }
-                  }
-                }
-                break;
-              }
-
-
-            }//end switch
-
-          }); //end of map
-
-          //check here
-
-          console.log('I AM GOING TO FINSIH THIS MAN');
-          console.log(allSynced);
-
-          if(!allSynced){
-            newsync.syncCheck();
-          }
-          resolve(allSynced);
-
-
-        });
-
-      });
-
-    });
-
-
-  }
-
-
-
-
   // this will wait for response from server
   async postData(formData, endpoint = 'syncmob' ){
 
@@ -1731,14 +1673,14 @@ export default class Sync {
 
           let responseJson = await response.json();
           //console.log(endpoint);
-           console.log('responseJson');
-           //console.log(responseJson);
-           console.log('--------------------');
-
+          console.log('responseJson');
+          console.log(responseJson);
 
           if(!responseJson){
-            return {};
+            responseJson = Object.create(null);
           }
+
+           console.log('--------------------');
 
 
           if(responseJson.status == 400){

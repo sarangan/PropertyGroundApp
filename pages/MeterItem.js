@@ -538,7 +538,8 @@ export default class MeterItem extends Component{
             marginBottom: 60
           },
           ios:{
-            marginTop: SCREENHEIGHT / 3
+            marginTop: 80,
+            marginBottom: 100
           }
         })
       }} source={require('../images/nodata.png')} />

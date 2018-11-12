@@ -14,13 +14,16 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   Image,
-  Alert
+  Alert,
+  NetInfo
 } from 'react-native';
 
 import KeepAwake from 'react-native-keep-awake';
 import Swipeout from 'react-native-swipeout';
 import BackgroundTimer from 'react-native-background-timer';
 var RNFS = require('react-native-fs');
+// import { Observable, interval } from 'rxjs';
+// import { take, takeUntil } from 'rxjs/operators';
 
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
@@ -67,7 +70,7 @@ export default class Inspections extends Component{
       master_properties: [],
       loading: false,
       refreshing: false,
-      sync_count: 0,
+      sync: {},
       nav_style : {
         navBarTextColor: 'white',
         navBarButtonColor: 'white',
@@ -86,10 +89,10 @@ export default class Inspections extends Component{
         statusBarHideWithNavBar: false,
         statusBarHidden: false,
       },
-
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
+
 
   }
 
@@ -127,6 +130,7 @@ export default class Inspections extends Component{
        backButtonTitle: "Back",
       passProps: {},
       navigatorStyle : this.state.nav_style
+
     });
   }
 
@@ -163,6 +167,7 @@ export default class Inspections extends Component{
 
     this.getProperties();
 
+
   }
 
   showGuide = () =>{
@@ -179,93 +184,208 @@ export default class Inspections extends Component{
   }
 
   //checking sync
-checkSync = () =>{
-
-    let nosync = false;
+  checkSync = () =>{
 
 
-    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+      let nosync = false;
 
+      for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
-      // console.log(this.state.master_properties[i].property_id);
-      // console.log(this.state.master_properties[i].sync);
+        // console.log(this.state.master_properties[i].property_id);
+        // console.log(this.state.master_properties[i].sync);
 
+        if(this.state.master_properties[i].sync == 2 ){
+          nosync = true;
+          //helper.synSrv(this.state.master_properties[i]);
 
-      if(this.state.master_properties[i].sync == 2 ){
-        nosync = true;
-        helper.synSrv(this.state.master_properties[i]);
+          this.syncAgain(this.state.master_properties[i]);
 
-
-        let master_properties = this.state.master_properties;
-        Sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
-          master_properties[i].total_updated_items = total;
-          this.setState({
-            master_properties
+          let master_properties = this.state.master_properties;
+          Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+            master_properties[i].total_items = total;
+            this.setState({
+              master_properties
+            });
           });
-        });
 
+          // this.state.sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+          //
+          //   console.log("i am getting non etotal numbers : " , total);
+          //
+          //   master_properties[i].total_updated_items = total;
+          //   this.setState({
+          //     master_properties
+          //   });
+          // });
+
+
+        }
 
       }
 
 
-    }
+
+      if(!nosync){
+        KeepAwake.deactivate();
+        //console.log('clearing interval');
+        //clearInterval(this._interval); //TODO
+      }
+      else{
+        KeepAwake.activate();
+
+        BackgroundTimer.runBackgroundTimer(() => {
+          this.checkSynced();
+        },
+        9000);
 
 
-    if(!nosync){
-      KeepAwake.deactivate();
-      //console.log('clearing interval');
-      clearInterval(this._interval); //TODO
-    }
-    else{
-      KeepAwake.activate();
-    }
+      }
 
-
-}
-
-checkSynced = () =>{
-
-
-  let nosync = false;
-
-
-  for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-
-
-    if(this.state.master_properties[i].sync == 2 ){
-      nosync = true;
-      helper.checkSynSrv( i , this.state.master_properties);
-    }
   }
 
 
-  if(!nosync){
-    //console.log('clearing interval');
-    clearInterval(this._interval); //TODO
+  syncAgain = (property) =>{
+
+
+      handleFirstConnectivityChange = (connectionInfo) => {
+          console.log('First change, type: ' + connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType);
+
+          AsyncStorage.getItem( AppKeys.NET_SETTINGS, (err, result) => {
+            console.log(result);
+
+            let use_data = !!JSON.parse(result) || false;
+
+            console.log('use data !!!', use_data);
+
+            if(connectionInfo.type.toLowerCase() ==  'wifi' || use_data === true){
+              // okay to sync
+
+              if(this.state.sync.hasOwnProperty(property.property_id)){
+
+                this.state.sync[property.property_id].syncCheck(property.property_id);
+
+              }
+              else{
+
+                let sync = this.state.sync;
+                sync[property.property_id] = new Sync(property);
+                this.setState({
+                  sync
+                }, ()=>{
+
+                  this.state.sync[property.property_id].syncCheck(property.property_id);
+
+                });
+
+              }
+
+
+
+            }
+
+            NetInfo.removeEventListener(
+              'connectionChange',
+              handleFirstConnectivityChange
+            );
+
+
+          });
+
+    }
+
+    NetInfo.addEventListener(
+      'connectionChange',
+      handleFirstConnectivityChange
+    );
+
+
   }
 
 
-}
+  checkSynced = () =>{
 
+    let nosync = false;
+
+      console.log('getting items');
+      AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
+
+        let master_properties = JSON.parse(result) || [];
+
+        //console.log(master_properties);
+        for(let i =0, l = master_properties.length; i < l ; i++){
+
+          if(master_properties[i].sync == 2 ){
+            nosync = true;
+            //helper.synSrv(this.state.master_properties[i]);
+            this.syncAgain(master_properties[i]);
+
+            Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+              master_properties[i].total_items = total;
+              this.setState({
+                master_properties
+              });
+            });
+
+            Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+
+              console.log("i am getting total numbers : " , total);
+
+              master_properties[i].total_updated_items = total;
+              this.setState({
+                master_properties: master_properties
+              });
+            });
+
+
+          }
+
+        }
+
+
+        //Inspections.nosync = nosync
+
+        console.log('nosync ', nosync);
+
+        if(nosync){
+          BackgroundTimer.stopBackgroundTimer();
+          this.forceUpdate();
+          //this.getProperties(true);
+          //clearInterval(this._interval); //TODO
+          KeepAwake.deactivate();
+          console.log('clearing interval chcked');
+
+        }
+        else{
+
+          KeepAwake.activate();
+
+        }
+
+
+    }); // end of astore
+
+
+
+  }
 
 
 
   //get synced status
   getSyncStatus(){
-
+    BackgroundTimer.stopBackgroundTimer();
    let property_id = SyncStore.getSyncedProperty();
-
    console.log('synced finihsed from ui thread XXXX working');
    console.log(property_id);
-
-   clearInterval(this._interval);
    this.getProperties(true);
+   this.forceUpdate();
+   //clearInterval(this._interval);
 
-   KeepAwake.deactivate();
  }
 
 
   getProperties =(nosync = false)=>{
+
+    BackgroundTimer.stopBackgroundTimer();
 
     AsyncStorage.getItem(AppKeys.LOGINKEY, (err, result) => {
       console.log('get login details');
@@ -329,9 +449,12 @@ checkSynced = () =>{
                 if(nosync){
                   KeepAwake.activate();
 
-                  this._interval = setInterval(() => { //TODO
-                     this.checkSync();
-                   }, 30000);
+                  this.checkSync();
+                  // this._interval = setInterval(() => { //TODO
+                  //   this.checkSync();
+                  // }, 30000);
+
+
 
                 }
 
