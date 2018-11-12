@@ -459,8 +459,8 @@ export default class Sync {
 
           console.log('Non UPDATED NUMERS ', total_data);
 
-          const syn = new Sync(property);
-          syn.checkPropertySync(stores);
+          // const syn = new Sync(property);
+          // syn.checkPropertySync(stores);
 
           resolve(total_data);
 
@@ -544,11 +544,11 @@ export default class Sync {
 
   }
 
-  recheckSeverTables(){
+  recheckSeverTables(property_id){
 
 
     let formData = new FormData();
-    formData.append("property_id", this.property_id );
+    formData.append("property_id", property_id );
 
       this.postData(formData, 'checksyncdata').then( (response) =>{
 
@@ -576,8 +576,8 @@ export default class Sync {
 
                        prop_master_items = JSON.parse(prop_master_items) || {};
 
-                       if(prop_master_items.hasOwnProperty(this.property_id) ){
-                         let master_items = prop_master_items[this.property_id] || [];
+                       if(prop_master_items.hasOwnProperty(property_id) ){
+                         let master_items = prop_master_items[property_id] || [];
 
                          for(let i = 0 , l = master_server_data.length; i < l ; i++ ){
 
@@ -628,7 +628,7 @@ export default class Sync {
 
                          for(let i=0, l = sub_items_temp.length; i < l; i++){
 
-                           if( sub_items_temp[i].property_id == this.property_id){
+                           if( sub_items_temp[i].property_id == property_id){
 
                              let sub_items_server_data = data[key];
                              if(sub_items_server_data && Array.isArray(sub_items_server_data) ){
@@ -682,9 +682,9 @@ export default class Sync {
 
                       property_general_condition_link = JSON.parse(property_general_condition_link) || {};
 
-                      if(property_general_condition_link.hasOwnProperty(this.property_id) ){
+                      if(property_general_condition_link.hasOwnProperty(property_id) ){
 
-                        let gen_list = property_general_condition_link[this.property_id];
+                        let gen_list = property_general_condition_link[property_id];
 
                         for(let i = 0 , l = server_prop_general_condition.length; i < l ; i++ ){
 
@@ -730,9 +730,9 @@ export default class Sync {
 
                       property_meter_link = JSON.parse(property_meter_link) || {};
 
-                      if(property_meter_link.hasOwnProperty(this.property_id) ){
+                      if(property_meter_link.hasOwnProperty(property_id) ){
 
-                        let meterlist = property_meter_link[this.property_id] || [];
+                        let meterlist = property_meter_link[property_id] || [];
 
                         for(let i = 0 , l = server_prop_meter_link.length; i < l ; i++ ){
 
@@ -778,8 +778,8 @@ export default class Sync {
 
                       property_subitem_feedback = JSON.parse(property_subitem_feedback) || {};
 
-                      if (property_subitem_feedback.hasOwnProperty(this.property_id) ){
-                        let feedbacks =  property_subitem_feedback[this.property_id] || {};
+                      if (property_subitem_feedback.hasOwnProperty(property_id) ){
+                        let feedbacks =  property_subitem_feedback[property_id] || {};
 
 
                         for(let i = 0, l = server_prop_feedback.length; i < l ; i++ ){
@@ -832,9 +832,9 @@ export default class Sync {
 
                       property_sub_feedback_general = JSON.parse(property_sub_feedback_general) || {};
 
-                      if(property_sub_feedback_general.hasOwnProperty(this.property_id) ){
+                      if(property_sub_feedback_general.hasOwnProperty(property_id) ){
 
-                        let feedbacks_general = property_sub_feedback_general[this.property_id] || {};
+                        let feedbacks_general = property_sub_feedback_general[property_id] || {};
 
                         for(let i = 0, l = server_prop_feedback_general.length; i < l ; i++ ){
 
@@ -895,7 +895,7 @@ export default class Sync {
   //re check all the tables
   recheckTbls(__index, __properties){
 
-    this.recheckSeverTables();
+    this.recheckSeverTables(this.property_id);
 
     console.log('Re-check tables again');
 
@@ -1436,6 +1436,277 @@ export default class Sync {
     });
 
   }
+
+
+
+  //re check all the tables
+  static checkItems(property_id, property){
+
+
+    return new Promise( function(resolve,reject){
+
+      let newsync = new Sync(property);
+      newsync.recheckSeverTables(property_id);
+
+      console.log('Re-check tables again');
+
+      AsyncStorage.getAllKeys((err, keys) => {
+        AsyncStorage.multiGet(keys, (err, stores) => {
+
+          let allSynced = true;
+
+          stores.map((result, i, store) => {
+            //get at each store's key/value so you can work with it
+            let key = store[i][0];
+            let value = store[i][1];
+
+            switch (key) {
+
+
+              case TableKeys.PROPERTY_INFO: {
+
+                let properties = JSON.parse(value);
+                for(let i =0, l = properties.length; i < l ; i++){
+                  if(properties[i].property_id == property_id && properties[i].sync == 1){
+                    console.log('re-check PROPERTY_INFO FAIL');
+                    allSynced = false;
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_MASTERITEM_LINK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let master_data = data[property_id];
+                  for(let i = 0, l = master_data.length; i < l ; i++){
+                    //console.log(master_data[i].sync);
+                    if(master_data[i].sync == 1){
+                      console.log('re-check PROPERTY_MASTERITEM_LINK FAIL');
+                      allSynced = false;
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUBITEM_LINK:{
+
+                let data = JSON.parse(value);
+
+                mainloop: for( let key in data){
+
+                  let sub_items = data[key];
+
+                  for(let i =0, l = sub_items.length; i < l ; i++){
+
+                    if(sub_items[i].property_id == property_id ){ // we got this prop sub item
+                      //console.log(sub_item_details[i]);
+                        if(sub_items[i].sync == 1){
+                          console.log('re-check PROPERTY_SUBITEM_LINK FAIL');
+                          allSynced = false;
+                          break mainloop;
+                        }
+                    }
+
+                  }
+
+                }
+
+                break;
+              }
+
+              case TableKeys.PROPERTY_GENERAL_CONDITION_LINK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+                  let general_data = data[property_id];
+                  for(let i =0, l = general_data.length; i < l ; i++){
+                    if(general_data[i].sync == 1){
+                      console.log('re-check PROPERTY_GENERAL_CONDITION_LINK FAIL');
+                      allSynced = false;
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_METER_LINK:{
+
+                let data = JSON.parse(value);
+
+                if(data.hasOwnProperty(property_id)){
+
+                  let meter_data = data[property_id];
+                  for(let i =0, l = meter_data.length; i < l; i++){
+                    if(meter_data[i].sync == 1){
+                      console.log('re-check PROPERTY_METER_LINK FAIL');
+                      allSynced = false;
+                      break;
+                    }
+                  }
+
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_FEEDBACK: {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+                          if(feedback_data[key].sync == 1){
+                            //console.log('feedback id ', feedback_data[key]);
+                            console.log('re-check PROPERTY_FEEDBACK FAIL');
+                            allSynced = false;
+                            break;
+                          }
+                      }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUB_FEEDBACK_GENERAL : {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let feedback_data = data[property_id];
+
+                  for(let key in feedback_data){
+                      if(feedback_data.hasOwnProperty(key)) {
+
+                        if(feedback_data[key].sync == 1){
+                          console.log('re-check PROPERTY_SUB_FEEDBACK_GENERAL FAIL');
+                          allSynced = false;
+                          break;
+                        }
+
+                      }
+                  }
+
+                }
+                break;
+              }
+
+              case TableKeys.PROPERTY_SUB_VOICE_GENERAL : {
+
+                let data = JSON.parse(value);
+                if(data.hasOwnProperty(property_id)){
+
+                  let property_voice = data[property_id];
+
+                  for(let master_key in property_voice){
+                    if(property_voice.hasOwnProperty(master_key)){
+
+                      let master_item_voice =  property_voice[master_key];
+
+                      for(let sub_key in master_item_voice){
+                        if(master_item_voice.hasOwnProperty(sub_key) ){
+
+                          let sub_item_voice =  master_item_voice[sub_key];
+
+                          for(let i =0, l = sub_item_voice.length; i < l; i++){
+                            if(sub_item_voice[i].sync == 1){
+                              console.log('re-check PROPERTY_SUB_VOICE_GENERAL FAIL');
+                              allSynced = false;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                break;
+              }
+
+              case TableKeys.SIGNATURES : {
+
+                let data = JSON.parse(value);
+
+                if(data.hasOwnProperty(property_id)){
+
+                  let signs = data[property_id];
+
+                  if(signs.sync == 1){
+                    console.log('re-check SIGNATURES FAIL');
+                    allSynced = false;
+                  }
+
+                }
+
+                break;
+              }
+
+              case TableKeys.PHOTOS : {
+
+                let data = JSON.parse(value);
+
+                if(data.hasOwnProperty(property_id)){
+
+                  let property_photos = data[property_id];
+
+                  for(let master_key in property_photos){
+                    if(property_photos.hasOwnProperty(master_key)){
+
+                      let master_item_photos =  property_photos[master_key];
+
+                      for(let sub_key in master_item_photos){
+                        if(master_item_photos.hasOwnProperty(sub_key) ){
+
+                          let sub_item_photos =  master_item_photos[sub_key];
+
+                          for(let i =0, l = sub_item_photos.length; i < l; i++){
+                            if(sub_item_photos[i].sync == 1){
+                              //console.log(sub_item_photos[i]);
+                              console.log('re-check PHOTOS FAIL');
+                              allSynced = false;
+                              break;
+                            }
+                          }
+
+                        }
+                      }
+                    }
+                  }
+                }
+                break;
+              }
+
+
+            }//end switch
+
+          }); //end of map
+
+          //check here
+
+          console.log('I AM GOING TO FINSIH THIS MAN');
+          console.log(allSynced);
+
+          if(!allSynced){
+            newsync.syncCheck();
+          }
+          resolve(allSynced);
+
+
+        });
+
+      });
+
+    });
+
+
+  }
+
 
 
 

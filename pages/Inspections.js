@@ -19,9 +19,8 @@ import {
 
 import KeepAwake from 'react-native-keep-awake';
 import Swipeout from 'react-native-swipeout';
+import BackgroundTimer from 'react-native-background-timer';
 var RNFS = require('react-native-fs');
-// import { Observable, interval } from 'rxjs';
-// import { take, takeUntil } from 'rxjs/operators';
 
 import TableKeys from '../keys/tableKeys';
 import AppKeys from '../keys/appKeys';
@@ -69,10 +68,28 @@ export default class Inspections extends Component{
       loading: false,
       refreshing: false,
       sync_count: 0,
+      nav_style : {
+        navBarTextColor: 'white',
+        navBarButtonColor: 'white',
+        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
+        screenBackgroundColor: '#FFFFFF',
+
+        navBarTranslucent: false,
+        navBarTransparent: false,
+        drawUnderNavBar: false,
+        navBarBlur: false,
+        navBarHidden: false,
+
+        orientation: 'portrait',
+        statusBarTextColorScheme: 'light',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        statusBarHideWithNavBar: false,
+        statusBarHidden: false,
+      },
+
     };
 
     this.getSyncStatus = this.getSyncStatus.bind(this);
-
 
   }
 
@@ -109,24 +126,7 @@ export default class Inspections extends Component{
       //animationType: 'fade',
        backButtonTitle: "Back",
       passProps: {},
-      navigatorStyle : {
-    	  navBarTextColor: 'white',
-    	  navBarButtonColor: 'white',
-        navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
-        screenBackgroundColor: '#FFFFFF',
-
-        navBarTranslucent: false,
-        navBarTransparent: false,
-        drawUnderNavBar: false,
-        navBarBlur: false,
-        navBarHidden: false,
-
-        orientation: 'portrait',
-        statusBarTextColorScheme: 'light',
-        statusBarTextColorSchemeSingleScreen: 'light',
-        statusBarHideWithNavBar: false,
-        statusBarHidden: false,
-      }
+      navigatorStyle : this.state.nav_style
     });
   }
 
@@ -163,9 +163,6 @@ export default class Inspections extends Component{
 
     this.getProperties();
 
-
-
-
   }
 
   showGuide = () =>{
@@ -182,228 +179,74 @@ export default class Inspections extends Component{
   }
 
   //checking sync
-  checkSync = () =>{
-
-
-      let nosync = false;
-
-      for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-
-        // console.log(this.state.master_properties[i].property_id);
-        // console.log(this.state.master_properties[i].sync);
-
-        if(this.state.master_properties[i].sync == 2 ){
-          nosync = true;
-          helper.synSrv(this.state.master_properties[i]);
-
-          let master_properties = this.state.master_properties;
-          Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
-            master_properties[i].total_items = total;
-            this.setState({
-              master_properties
-            });
-          });
-
-          Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
-
-            console.log("i am getting non etotal numbers : " , total);
-
-            master_properties[i].total_updated_items = total;
-            this.setState({
-              master_properties
-            });
-          });
-
-          Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
-
-            console.log("i am getting total numbers : " , total);
-
-            master_properties[i].total_updated_items = total;
-            this.setState({
-              master_properties
-            });
-          });
-
-        }
-
-      }
-
-
-
-      if(!nosync){
-        KeepAwake.deactivate();
-        //console.log('clearing interval');
-        clearInterval(this._interval); //TODO
-      }
-      else{
-        KeepAwake.activate();
-
-        // this._interval = setInterval(() => { //TODO
-        //   this.checkSynced();
-        // }, 3000);
-
-        // const $inputStream = interval(3000).pipe(takeUntil(Inspections.nosync == true));
-        // $inputStream.subscribe(
-        //               v =>{
-        //                       console.log(v);
-        //                       this.checkSynced();
-        //               },
-        //               err =>{
-        //                       console.log(err);
-        //               },
-        //               complete =>{
-        //                       console.log("completed");
-        //               }
-        //   );
-
-
-      }
-
-  }
-
-
-  syncAgain = () =>{
-
-      let nosync = false;
-
-      AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
-
-        let master_properties = JSON.parse(result) || [];
-
-        this.setState({
-          master_properties: master_properties,
-        }, ()=>{
-
-          for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-
-            // console.log(this.state.master_properties[i].property_id);
-            // console.log(this.state.master_properties[i].sync);
-
-            if(this.state.master_properties[i].sync == 2 ){
-              nosync = true;
-              helper.synSrv(this.state.master_properties[i]);
-
-              let master_properties = this.state.master_properties;
-              Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
-                master_properties[i].total_updated_items = total;
-                this.setState({
-                  master_properties
-                });
-              });
-
-            }
-
-          }
-
-          if(!nosync){
-            KeepAwake.deactivate();
-            //console.log('clearing interval');
-            clearInterval(this._interval); //TODO
-          }
-          else{
-            KeepAwake.activate();
-          }
-
-
-
-        });
-
-
-      });
-
-
-
-  }
-
-
-  checkSynced = () =>{
+checkSync = () =>{
 
     let nosync = false;
 
 
-      AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
-
-        let master_properties = JSON.parse(result) || [];
-
-        //console.log(master_properties);
-
-        this.setState({
-          master_properties: master_properties,
-        }, ()=>{
+    for(let i =0, l = this.state.master_properties.length; i < l ; i++){
 
 
-          for(let i =0, l = this.state.master_properties.length; i < l ; i++){
-
-            if(this.state.master_properties[i].sync == 2 ){
-              nosync = true;
-              //helper.checkSynSrv( i , this.state.master_properties);
-
-              let master_properties = this.state.master_properties;
-              // Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
-              //   master_properties[i].total_items = total;
-              //   this.setState({
-              //     master_properties
-              //   });
-              // });
-
-              Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
-
-                console.log("i am getting total numbers : " , total);
-
-                master_properties[i].total_updated_items = total;
-                this.setState({
-                  master_properties
-                });
-              });
+      // console.log(this.state.master_properties[i].property_id);
+      // console.log(this.state.master_properties[i].sync);
 
 
-            }
-
-          }
-
-
-          //Inspections.nosync = nosync
-
-          console.log('nosync ', nosync);
-
-          if(!nosync){
-            clearInterval(this._interval); //TODO
-            KeepAwake.deactivate();
-            console.log('clearing interval chcked');
-
-          }
-          else{
-
-            this.setState((state, props) => ({
-              sync_count: state.sync_count + 1
-            }));
-
-            KeepAwake.activate();
+      if(this.state.master_properties[i].sync == 2 ){
+        nosync = true;
+        helper.synSrv(this.state.master_properties[i]);
 
 
-            if( (this.state.sync_count % 3 == 0) && (this.state.sync_count != 0) ){
-              console.log("I am calling the sync again XXX % 3");
-              this.syncAgain();
-            }
-
-          }
-
-
-
-
-
+        let master_properties = this.state.master_properties;
+        Sync.getNonUpdatedNumbers( master_properties[i].property_id).then( (total)=>{
+          master_properties[i].total_updated_items = total;
+          this.setState({
+            master_properties
+          });
         });
 
 
-    }); // end of astore
+      }
 
 
+    }
 
 
+    if(!nosync){
+      KeepAwake.deactivate();
+      //console.log('clearing interval');
+      clearInterval(this._interval); //TODO
+    }
+    else{
+      KeepAwake.activate();
+    }
 
 
+}
 
+checkSynced = () =>{
+
+
+  let nosync = false;
+
+
+  for(let i =0, l = this.state.master_properties.length; i < l ; i++){
+
+
+    if(this.state.master_properties[i].sync == 2 ){
+      nosync = true;
+      helper.checkSynSrv( i , this.state.master_properties);
+    }
   }
+
+
+  if(!nosync){
+    //console.log('clearing interval');
+    clearInterval(this._interval); //TODO
+  }
+
+
+}
+
 
 
 
@@ -414,9 +257,11 @@ export default class Inspections extends Component{
 
    console.log('synced finihsed from ui thread XXXX working');
    console.log(property_id);
-   this.getProperties(true);
-   clearInterval(this._interval);
 
+   clearInterval(this._interval);
+   this.getProperties(true);
+
+   KeepAwake.deactivate();
  }
 
 
@@ -484,10 +329,9 @@ export default class Inspections extends Component{
                 if(nosync){
                   KeepAwake.activate();
 
-                  //this.checkSync();
                   this._interval = setInterval(() => { //TODO
-                    this.checkSync();
-                  }, 30000);
+                     this.checkSync();
+                   }, 30000);
 
                 }
 
@@ -595,24 +439,7 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
-          navigatorStyle : {
-        	  navBarTextColor: 'white',
-        	  navBarButtonColor: 'white',
-            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
-            screenBackgroundColor: '#FFFFFF',
-
-            navBarTranslucent: false,
-            navBarTransparent: false,
-            drawUnderNavBar: false,
-            navBarBlur: false,
-            navBarHidden: false,
-
-            orientation: 'portrait',
-            statusBarTextColorScheme: 'light',
-            statusBarTextColorSchemeSingleScreen: 'light',
-            statusBarHideWithNavBar: false,
-            statusBarHidden: false,
-          }
+          navigatorStyle : this.state.nav_style
         });
 
       }
@@ -632,24 +459,7 @@ export default class Inspections extends Component{
             sync: this.findSyncStatus(item.property_id),
             locked: this.getLockText(item.property_id)
           },
-          navigatorStyle : {
-        	  navBarTextColor: 'white',
-        	  navBarButtonColor: 'white',
-            navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
-            screenBackgroundColor: '#FFFFFF',
-
-            navBarTranslucent: false,
-            navBarTransparent: false,
-            drawUnderNavBar: false,
-            navBarBlur: false,
-            navBarHidden: false,
-
-            orientation: 'portrait',
-            statusBarTextColorScheme: 'light',
-            statusBarTextColorSchemeSingleScreen: 'light',
-            statusBarHideWithNavBar: false,
-            statusBarHidden: false,
-          }
+          navigatorStyle : this.state.nav_style
         });
 
 
@@ -663,24 +473,7 @@ export default class Inspections extends Component{
             //animationType: 'slide-up',
             animated: true,
             //animationType: 'fade',
-            navigatorStyle : {
-          	  navBarTextColor: 'white',
-          	  navBarButtonColor: 'white',
-              navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
-              screenBackgroundColor: '#FFFFFF',
-
-              navBarTranslucent: false,
-              navBarTransparent: false,
-              drawUnderNavBar: false,
-              navBarBlur: false,
-              navBarHidden: false,
-
-              orientation: 'portrait',
-              statusBarTextColorScheme: 'light',
-              statusBarTextColorSchemeSingleScreen: 'light',
-              statusBarHideWithNavBar: false,
-              statusBarHidden: false,
-            },
+            navigatorStyle : this.state.nav_style,
             passProps: {
               property_id: item.property_id
             },
