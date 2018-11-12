@@ -3,7 +3,6 @@ package uk.co.propertyground.inventory;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.ocetnik.timer.BackgroundTimerPackage;
 import com.corbt.keepawake.KCKeepAwakePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.rnim.rn.audio.ReactNativeAudioPackage;
@@ -38,7 +37,6 @@ public class MainApplication extends NavigationApplication { //Application imple
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
             new MainReactPackage(),
-            new BackgroundTimerPackage(),
             new KCKeepAwakePackage(),
             new RNCameraPackage(),
             new ReactNativeAudioPackage(),

@@ -305,7 +305,13 @@ export default class Sync {
 
                                   if( response.hasOwnProperty('status') && (response.status == 1 || response.status == 400) ){ // 1 and 0
                                     // we got status 1, update the storage
-                                    this.update_photos( i, sub_key, master_key, data, 2 );
+                                    setTimeout(()=>{
+
+                                      this.update_photos( i, sub_key, master_key, data, 2 );
+
+                                     }, 300);
+
+
                                  }
 
                                });

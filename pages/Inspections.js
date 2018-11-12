@@ -20,7 +20,7 @@ import {
 
 import KeepAwake from 'react-native-keep-awake';
 import Swipeout from 'react-native-swipeout';
-import BackgroundTimer from 'react-native-background-timer';
+//import BackgroundTimer from 'react-native-background-timer';
 var RNFS = require('react-native-fs');
 // import { Observable, interval } from 'rxjs';
 // import { take, takeUntil } from 'rxjs/operators';
@@ -60,10 +60,13 @@ export default class Inspections extends Component{
  };
 
 
+
+
   constructor(props){
     super(props);
     homeNavigator = this.props.navigator;
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    this._interval = null;
 
     this.state = {
       properties : [],
@@ -186,6 +189,8 @@ export default class Inspections extends Component{
   //checking sync
   checkSync = () =>{
 
+      console.log('CKED SYN START');
+
 
       let nosync = false;
 
@@ -226,17 +231,22 @@ export default class Inspections extends Component{
 
 
       if(!nosync){
+        //BackgroundTimer.stopBackgroundTimer();
         KeepAwake.deactivate();
         //console.log('clearing interval');
-        //clearInterval(this._interval); //TODO
+        clearInterval(this._interval); //TODO
       }
       else{
         KeepAwake.activate();
 
-        BackgroundTimer.runBackgroundTimer(() => {
-          this.checkSynced();
-        },
-        9000);
+        // BackgroundTimer.runBackgroundTimer(() => {
+        //   this.checkSyncing();
+        // },
+        // 9000);
+
+        this._interval = setInterval(() => { //TODO
+          this.checkSyncing();
+        }, 9000);
 
 
       }
@@ -302,7 +312,7 @@ export default class Inspections extends Component{
   }
 
 
-  checkSynced = () =>{
+  checkSyncing = () =>{
 
     let nosync = false;
 
@@ -311,55 +321,62 @@ export default class Inspections extends Component{
 
         let master_properties = JSON.parse(result) || [];
 
-        //console.log(master_properties);
-        for(let i =0, l = master_properties.length; i < l ; i++){
+        this.setState({
+          master_properties
+        }, ()=>{
 
-          if(master_properties[i].sync == 2 ){
-            nosync = true;
-            //helper.synSrv(this.state.master_properties[i]);
-            this.syncAgain(master_properties[i]);
+          //console.log(master_properties);
+          for(let i =0, l = master_properties.length; i < l ; i++){
 
-            Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
-              master_properties[i].total_items = total;
-              this.setState({
-                master_properties
+            if(master_properties[i].sync == 2 ){
+              nosync = true;
+              //helper.synSrv(this.state.master_properties[i]);
+              this.syncAgain(master_properties[i]);
+
+              Sync.getTotalItems( master_properties[i].property_id).then( (total)=>{
+                master_properties[i].total_items = total;
+                this.setState({
+                  master_properties
+                });
               });
-            });
 
-            Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
+              Sync.getNonUpdatedNumbers( master_properties[i].property_id, master_properties[i]).then( (total)=>{
 
-              console.log("i am getting total numbers : " , total);
+                console.log("i am getting total numbers : " , total);
 
-              master_properties[i].total_updated_items = total;
-              this.setState({
-                master_properties: master_properties
+                master_properties[i].total_updated_items = total;
+                this.setState({
+                  master_properties: master_properties
+                });
               });
-            });
 
+
+            }
 
           }
 
-        }
+          //Inspections.nosync = nosync
+
+          console.log('nosync XXX', nosync);
+
+          if(nosync){
+
+             //BackgroundTimer.stopBackgroundTimer();
+             this.forceUpdate();
+             KeepAwake.deactivate();
+             //this.getProperties(true);
+             clearInterval(this._interval); //TODO
+             console.log('clearing interval chcked');
+
+          }
+          else{
+
+            KeepAwake.activate();
+
+          }
 
 
-        //Inspections.nosync = nosync
-
-        console.log('nosync ', nosync);
-
-        if(nosync){
-          BackgroundTimer.stopBackgroundTimer();
-          this.forceUpdate();
-          //this.getProperties(true);
-          //clearInterval(this._interval); //TODO
-          KeepAwake.deactivate();
-          console.log('clearing interval chcked');
-
-        }
-        else{
-
-          KeepAwake.activate();
-
-        }
+        });
 
 
     }); // end of astore
@@ -372,20 +389,18 @@ export default class Inspections extends Component{
 
   //get synced status
   getSyncStatus(){
-    BackgroundTimer.stopBackgroundTimer();
    let property_id = SyncStore.getSyncedProperty();
    console.log('synced finihsed from ui thread XXXX working');
    console.log(property_id);
    this.getProperties(true);
    this.forceUpdate();
-   //clearInterval(this._interval);
+   //BackgroundTimer.stopBackgroundTimer();
+   clearInterval(this._interval);
 
  }
 
 
   getProperties =(nosync = false)=>{
-
-    BackgroundTimer.stopBackgroundTimer();
 
     AsyncStorage.getItem(AppKeys.LOGINKEY, (err, result) => {
       console.log('get login details');
@@ -453,8 +468,6 @@ export default class Inspections extends Component{
                   // this._interval = setInterval(() => { //TODO
                   //   this.checkSync();
                   // }, 30000);
-
-
 
                 }
 
