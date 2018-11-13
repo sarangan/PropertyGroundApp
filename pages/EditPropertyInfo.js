@@ -16,7 +16,9 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  AsyncStorage
+  AsyncStorage,
+  Platform,
+  Picker
 } from 'react-native';
 
 import TableKeys from '../keys/tableKeys';
@@ -77,7 +79,7 @@ export default class EditPropertyInfo extends Component{
       default_report_type:this.props.property.report_type?this.props.property.report_type:'Report type',
 
       isSending: false,
-
+      platform: 'ios'
     };
 
   }
@@ -99,6 +101,10 @@ export default class EditPropertyInfo extends Component{
 
   componentDidMount(){
     console.log(this.state.property);
+
+    this.setState({
+      platform: Platform.OS
+    });
 
     AsyncStorage.getItem(TableKeys.PROPERTY, (err, result) => {
       console.log('get property details');
@@ -489,12 +495,33 @@ export default class EditPropertyInfo extends Component{
 
           <Text style={styles.divTxt}>Report details</Text>
 
-          <TouchableHighlight underlayColor='transparent' onPress={this.handleOpenReportTypeModal}>
-            <View style={{flex: 1, marginRight: 25, alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'nowrap'}}>
-              <Text style={ [styles.selectTxt, {color: (this.state.changeColor? "#333333" : "#A9ACBC") } ] }>{this.state.default_report_type}</Text>
-              <Image source={require('../images/dropdown.png')} style={styles.dropdown_img}/>
-            </View>
-          </TouchableHighlight>
+          {this.state.platform == 'ios' &&
+
+            <TouchableHighlight underlayColor='transparent' onPress={this.handleOpenReportTypeModal}>
+              <View style={{flex: 1, marginRight: 25, alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'nowrap'}}>
+                <Text style={ [styles.selectTxt, {color: (this.state.changeColor? "#333333" : "#A9ACBC") } ] }>{this.state.default_report_type}</Text>
+                <Image source={require('../images/dropdown.png')} style={styles.dropdown_img}/>
+              </View>
+            </TouchableHighlight>
+        }
+
+        {this.state.platform == 'android' &&
+
+            <Picker selectedValue = {this.state.report_type}
+              onValueChange={(itemValue, itemIndex) => this.changeReportType(itemValue, itemIndex)}
+              style={styles.pickerWrapper}
+              >
+                {this.state.reporttypes.map((item) => (
+                  <Picker.Item
+                    key={item}
+                    value={item}
+                    label={item}
+                  />
+                ))}
+
+             </Picker>
+        }
+
 
           <View style={styles.divider}></View>
 
@@ -669,5 +696,10 @@ const styles = StyleSheet.create({
     zIndex: 10,
     backgroundColor: 'rgba(99,175,203,0.5)'
   },
+  pickerWrapper:{
+    marginLeft: 15,
+    marginRight: 15,
+    fontSize: 15,
+  }
 
 });

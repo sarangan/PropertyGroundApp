@@ -93,7 +93,16 @@ export default class GeneralCondition extends Component{
           animated: true,
           //animationType: 'fade',
           backButtonTitle: "Back",
-          passProps: {property_id: this.state.property_id}
+          passProps: {property_id: this.state.property_id},
+          navigatorStyle:{
+            navBarTextColor: 'white',
+            navBarButtonColor: 'white',
+            statusBarTextColorScheme: 'light',
+            navBarBackgroundColor: '#00BDDB',
+            navBarBlur: false,
+            screenBackgroundColor: '#FFFFFF',
+            navBarTransparent: false,
+          },
         });
 
       }
@@ -256,10 +265,7 @@ export default class GeneralCondition extends Component{
     if(item){
       this.setState({
           current_user_input: item,
-      }, ()=>{
-
       }
-
     );
     }
 
@@ -288,6 +294,18 @@ export default class GeneralCondition extends Component{
         }
 
       }
+
+    });
+
+  }
+
+  android_closeFilter = (prop_general_id) =>{
+
+    this.setState({
+      current_gen_id: prop_general_id
+    }, ()=>{
+
+      this.closeReportTypeModal();
 
     });
 
@@ -360,7 +378,7 @@ export default class GeneralCondition extends Component{
   _renderItem = ({item}) => (
 
     <View>
-        <GenCommentBlock item={item} handleOpenFilterModal={this.openFilterModal} handleAddComment={this.addComment} />
+        <GenCommentBlock item={item} handleOpenFilterModal={this.openFilterModal} handleAddComment={this.addComment} changeValue={this.changeReportType} data={item.options} android_closeFilter={this.android_closeFilter}/>
     </View>
   );
 

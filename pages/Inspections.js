@@ -203,6 +203,8 @@ export default class Inspections extends Component{
           nosync = true;
           //helper.synSrv(this.state.master_properties[i]);
 
+          KeepAwake.activate();
+
           this.syncAgain(this.state.master_properties[i]);
 
           let master_properties = this.state.master_properties;
@@ -232,12 +234,11 @@ export default class Inspections extends Component{
 
       if(!nosync){
         //BackgroundTimer.stopBackgroundTimer();
-        KeepAwake.deactivate();
+        //KeepAwake.deactivate();
         //console.log('clearing interval');
         clearInterval(this._interval); //TODO
       }
       else{
-        KeepAwake.activate();
 
         // BackgroundTimer.runBackgroundTimer(() => {
         //   this.checkSyncing();
@@ -363,16 +364,13 @@ export default class Inspections extends Component{
 
              //BackgroundTimer.stopBackgroundTimer();
              this.forceUpdate();
-             KeepAwake.deactivate();
-             //this.getProperties(true);
-             clearInterval(this._interval); //TODO
+             //KeepAwake.deactivate(); //TODO
+             clearInterval(this._interval);
              console.log('clearing interval chcked');
 
           }
           else{
-
-            KeepAwake.activate();
-
+            //KeepAwake.activate();
           }
 
 

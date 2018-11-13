@@ -13,7 +13,9 @@ import {
   LayoutAnimation,
   TextInput,
   Image,
-  TouchableHighlight
+  TouchableHighlight,
+  Platform,
+  Picker
 } from 'react-native';
 
 var SCREENWIDTH = Dimensions.get('window').width;
@@ -25,13 +27,26 @@ export default class GenCommentBlock extends Component {
   constructor(props){
     super(props);
     this.state = {
-      height: 0
+      height: 0,
+      platform: 'ios'
     }
   }
 
+  convertToArrayData(data){
+
+  let options = this.props.data.split(';');
+  return options;
+}
+
   componentDidMount(){
 
+    this.setState({
+      platform: Platform.OS
+    });
+
   }
+
+
 
   openComment =()=>{
     if(this.state.height == 100){
@@ -51,16 +66,22 @@ export default class GenCommentBlock extends Component {
 
   }
 
+  changeValue = (itemValue, itemIndex, prop_general_id) =>{
+    this.props.changeValue(itemValue, itemIndex);
+    this.props.android_closeFilter(prop_general_id);
+  }
+
+
 
   render() {
 
     return (
       <View style={styles.rowWrapper}>
-        <View  style={styles.listContainer} >
-          <View>
+        <View style={styles.listContainer} >
+          <View style={styles.pickerTextWrapper}>
             <Text style={styles.title}>{this.props.item.item_name}</Text>
 
-            {this.props.item.type == 'ITEM' &&
+            {(this.props.item.type == 'ITEM' && this.state.platform == 'ios') &&
               <TouchableHighlight  underlayColor="transparent" onPress={()=>this.props.handleOpenFilterModal(this.props.item)}>
                 <View style={styles.dropdownWrapper}>
                   <Text style={styles.optionTxt}>{this.props.item.user_input?this.props.item.user_input: 'Please select'}</Text>
@@ -69,7 +90,30 @@ export default class GenCommentBlock extends Component {
               </TouchableHighlight>
             }
 
+
+            {(this.props.item.type == 'ITEM' && this.state.platform == 'android') &&
+              <View style={styles.pickerWrapper}>
+                <Picker selectedValue = {this.props.item.user_input}
+                  onValueChange={(itemValue, itemIndex) => this.changeValue(itemValue, itemIndex, this.props.item.prop_general_id) }
+
+                  >
+                    {this.convertToArrayData(this.props.data).map((item) => (
+                      <Picker.Item
+                        key={item}
+                        value={item}
+                        label={item}
+                      />
+                    ))}
+
+                 </Picker>
+               </View>
+            }
+
+
+
           </View>
+
+
 
             {this.props.item.comment.trim().length == 0 &&
               <TouchableHighlight underlayColor="transparent" onPress={()=>this.openComment()}>
@@ -130,7 +174,13 @@ const styles = StyleSheet.create({
   title:{
     fontSize: 15,
     fontWeight: "600",
-    color: "#475566"
+    color: "#475566",
+    ...Platform.select({
+      android: {
+        flex: 1,
+        alignItems: 'flex-start'
+      },
+    }),
   },
   optionTxt:{
     fontSize: 15,
@@ -179,5 +229,21 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     marginTop: 10,
   },
+  pickerWrapper:{
+    flex: 1,
+    width: SCREENWIDTH - 85,
+    alignSelf: 'stretch',
+  },
+  pickerTextWrapper:{
+    ...Platform.select({
+      android: {
+        width: SCREENWIDTH - 85,
+        flex: 1,
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        flexDirection: 'column'
+      },
+    }),
+  }
 
 });
