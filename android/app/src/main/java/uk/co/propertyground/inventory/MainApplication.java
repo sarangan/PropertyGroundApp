@@ -106,7 +106,7 @@ public class MainApplication extends NavigationApplication { //Application imple
 
     @Override
     public String getJSMainModuleName() {
-        return "index";
+        return "index.android";
     }
 
 }

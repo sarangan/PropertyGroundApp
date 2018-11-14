@@ -63,6 +63,7 @@ Navigation.registerComponent('PropertyGround.Drawer', () => Drawer);
 	  navBarButtonColor: 'white',
     navBarBackgroundColor: '#00BDDB',//'#1F4065',//'#00BDDB',//'#3F88DE',
     screenBackgroundColor: '#FFFFFF',
+    statusBarColor: '#029bb3',
 
     navBarTranslucent: false,
     navBarTransparent: false,

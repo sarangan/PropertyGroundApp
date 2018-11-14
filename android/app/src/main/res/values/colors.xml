@@ -1,3 +1,4 @@
 <resources>
     <color name="pg_color">#ffffff</color>
+    <color name="pg_status_bar">#00BDDB</color>
 </resources>

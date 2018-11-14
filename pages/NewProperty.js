@@ -458,6 +458,7 @@ export default class NewProperty extends Component{
                                                       navBarBlur: false,
                                                       screenBackgroundColor: '#FFFFFF',
                                                       navBarTransparent: false,
+                                                      statusBarColor: '#029bb3',
                                                     },
                                                     passProps: {
                                                       property_id: this.state.property_id

@@ -149,6 +149,7 @@ export default class Login extends Component{
               navBarBlur: false,
               screenBackgroundColor: '#FFFFFF',
               navBarTransparent: false,
+              statusBarColor: '#029bb3',
             },
             passProps: {
              }
@@ -169,6 +170,7 @@ export default class Login extends Component{
               navBarBlur: false,
               screenBackgroundColor: '#FFFFFF',
               navBarTransparent: false,
+              statusBarColor: '#029bb3',
             },
             passProps: {
              }

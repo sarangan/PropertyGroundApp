@@ -102,6 +102,7 @@ export default class GeneralCondition extends Component{
             navBarBlur: false,
             screenBackgroundColor: '#FFFFFF',
             navBarTransparent: false,
+            statusBarColor: '#029bb3',
           },
         });
 
