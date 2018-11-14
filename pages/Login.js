@@ -351,7 +351,7 @@ export default class Login extends Component{
   renderAndroid = () =>{
 
     return(
-          <ScrollView>
+          <ScrollView style={{backgroundColor: '#ffffff'}}>
           <View style={styles.fill}>
             <Image source={require('../images/pg_logo.png')} style={styles.pg_logo}/>
             <Text style={styles.inventoryTxt}>INVENTORY</Text>
@@ -402,7 +402,7 @@ export default class Login extends Component{
 
     return(
 
-      <View>
+      <View style={{flex:1}}>
         {this.state.platform == 'ios' &&
           this.renderIos()
         }
@@ -422,11 +422,11 @@ const styles = StyleSheet.create({
   fill:{
     flex: 1,
     flexDirection: "column",
-    justifyContent: 'flex-start',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     paddingTop: 20,
     paddingBottom: 30,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF'
   },
   txtInput: {
     height: 40,

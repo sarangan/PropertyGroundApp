@@ -13,7 +13,8 @@ import {
 	Linking,
   AsyncStorage,
 	Alert,
-	ScrollView
+	ScrollView,
+	Platform
 } from 'react-native';
 
 import {homeNavigator} from '../pages/Inspections';
@@ -24,7 +25,6 @@ import auth from '../keys/auth';
 
 const SCREENWIDTH = Dimensions.get('window').width;
 const SCREENHEIGHT = Dimensions.get('window').height;
-const VERSION = "1.1";
 
 export default class Drawer extends Component {
 	constructor(props) {
@@ -77,8 +77,23 @@ export default class Drawer extends Component {
         }
 
       ],
+			version: '1.0'
 
     };
+	}
+
+
+	componentDidMount(){
+		if(Platform.OS == 'ios'){
+			this.setState({
+				version: "1.6"
+			});
+		}
+		else{
+			this.setState({
+				version: "1.0"
+			});
+		}
 	}
 
 
@@ -306,7 +321,7 @@ export default class Drawer extends Component {
 
 							<Image style={styles.pgLogo} source={require('../images/pg_logo.png')} />
 							<Text style={styles._version}>
-	              {`Version ${VERSION}`}
+	              {`Version ${this.state.version}`}
 	            </Text>
 
 	          </View>
