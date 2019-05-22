@@ -49,6 +49,13 @@ export default class ImageLightBox extends Component {
       platform: Platform.OS
     });
 
+
+  }
+
+  componentDidMount(){
+    this.setState({
+      platform: Platform.OS
+    });
   }
 
   //close the light box
@@ -117,7 +124,7 @@ export default class ImageLightBox extends Component {
   }
 
 
-  
+
 
   getSlids = () =>{
 
@@ -125,22 +132,17 @@ export default class ImageLightBox extends Component {
 
     for(let i=0, l = this.state.images.length; i < l ; i++){
       let img = this.state.images[i];
+
+      //console.log("image ", img);
+
       slides.push(
             <View style={styles.container} key={i}>
-            {this.state.platform == 'ios' &&
+
                 <TImage
-                  source={{  uri: RNFS.DocumentDirectoryPath + '/' + img }}
-                  style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
+                  source={{uri: RNFS.DocumentDirectoryPath + '/' + img }}
+                  style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100,  }}
                 >
                 </TImage>
-            }
-            {this.state.platform == 'android' &&
-                <Image
-                  source={{uri: img }}
-                  style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, }}
-                />
-            }
-
 
             </View>
         );
@@ -162,6 +164,8 @@ export default class ImageLightBox extends Component {
       directionalOffsetThreshold: 80
     };
 
+    console.log(this.state.images[this.state.index]);
+
     return (
       <View style={ [styles.container, { width: SCREENWIDTH, height: SCREENHEIGHT } ]}>
 
@@ -173,6 +177,8 @@ export default class ImageLightBox extends Component {
               <Image style={styles.actionShareImg} source={require('../images/remove.png')} />
             </TouchableHighlight>
           }
+
+          {this.state.platform == 'ios' &&
 
             <Swiper showsButtons={false} showsPagination={true}
               dot={<View style={{backgroundColor: 'rgba(129,197,211,.2)', width: 5, height: 5, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3}} />}
@@ -192,8 +198,21 @@ export default class ImageLightBox extends Component {
             }}
 
             >
-              {this.getSlids()}
+                {this.getSlids()}
+
             </Swiper>
+
+          }
+
+          {this.state.platform == 'android' &&
+
+              <Image
+                source={{ uri: this.state.images[this.state.index]  }}
+                style={{width:  SCREENWIDTH - 50, height:  SCREENHEIGHT - 100, resizeMode: 'cover'}}
+              />
+
+
+          }
 
 
 

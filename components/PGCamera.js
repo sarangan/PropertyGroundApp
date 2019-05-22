@@ -146,7 +146,7 @@ export default class PGCamera extends Component{
 
       if(this.state.platform == 'android'){
 
-        console.log(data.uri);
+        console.log('android url ', data.uri);
         this.addStatePhoto(data.uri);
 
       }
@@ -400,6 +400,17 @@ export default class PGCamera extends Component{
    return img;
   }
 
+  getCommonImageUrl = (photo) =>{
+
+    if(this.state.platform == 'android'){
+      return photo
+    }
+    else{
+      return (RNFS.DocumentDirectoryPath + '/' + photo );
+    }
+
+  }
+
   //show lastest photos
   getLastestPhotos = () =>{
 
@@ -408,7 +419,7 @@ export default class PGCamera extends Component{
       photos.push(
         <View style={{flex: 0 }} key={index}>
           <TouchableHighlight underlayColor="transparent" onPress={()=>this.openImage(photo, index)}>
-            <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri:  RNFS.DocumentDirectoryPath + '/' + photo }} />
+            <Image style={{width: (SCREENWIDTH - 50)/ this.state.showPhotos, height: 60, resizeMode: 'cover'}} source={{ uri: this.getCommonImageUrl(photo)  }} />
           </TouchableHighlight>
           <TouchableHighlight underlayColor="transparent" onPress={()=>this.deleteImg(index)} style={{flex: 0, position: 'absolute', top: 3, right: 3}}>
             <Image style={{width: 17, height: 17, resizeMode: 'cover'}} source={require('../images/delete_photo.png')} />
